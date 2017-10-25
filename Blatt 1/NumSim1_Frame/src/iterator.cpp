@@ -4,29 +4,34 @@
 Iterator::Iterator() {}
 
 /// Constructs a new Iterator depending on a geometry
-Iterator::Iterator(const Geometry * geom){
-
+Iterator::Iterator(const Geometry *geom){
+	this -> _geom = geom;
+	this -> _value = 0;
+	this -> _valid = true;
 }
 
 /// Constructs a new Iterator on a geometry with a defined starting value
-Iterator::Iterator(const Geometry * geom, const index_t & value) {
-
+Iterator::Iterator(const Geometry * geom, const index_t &value) {
+	this -> _geom = geom;
+	this -> _value = value;
+	this -> _valid = true;
 }
 
 
 /// Returns the current position value
-const index_t & Iterator::Value() const {
-	return 0;
+const index_t &Iterator::Value() const {
+	return _value;
 }
 
 /// Cast operator to convert Iterators to integers
 Iterator::operator const index_t&() const {
-	return 0;
+	return _value;
 }
 
 /// Returns the position coordinates
 multi_index_t Iterator::Pos() const {
-	return multi_index_t();
+	if(_valid) return multi_index_t(0, 0);
+	else return multi_index_t(-1);
 }
 
 
