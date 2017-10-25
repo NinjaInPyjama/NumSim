@@ -30,7 +30,7 @@ void Geometry::Load(const char * file) {
 
 
 /// Returns the number of cells in each dimension
-const multi_index_t &Geometry::Size() const {
+const multi_index_t & Geometry::Size() const {
 	return this -> _size;
 }
 
