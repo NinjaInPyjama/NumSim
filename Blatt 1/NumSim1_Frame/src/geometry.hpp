@@ -16,7 +16,6 @@
  */
 
 #include "typedef.hpp"
-#include "iterator.hpp"
 
 //------------------------------------------------------------------------------
 #ifndef __GEOMETRY_HPP
@@ -50,11 +49,11 @@ public:
   const multi_real_t &Mesh() const;
 
   /// Updates the velocity field u
-  void Update_U(Grid *u) const;
+  //void Update_U(Grid *u) const;
   /// Updates the velocity field v
-  void Update_V(Grid *v) const;
+  //void Update_V(Grid *v) const;
   /// Updates the pressure field p
-  void Update_P(Grid *p) const;
+  //void Update_P(Grid *p) const;
 
 private:
   multi_index_t _size;
