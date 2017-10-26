@@ -15,10 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include "typedef.hpp"
 #include "geometry.hpp"
+#include "iterator.hpp"
+
+using namespace std;
 
 int main(int argc, char **argv) {
-  
-  return 0;
+	const Geometry* geom = new Geometry();
+	Iterator it(geom);
+	cout << "Value of iterator: " << it.Value();
+	
+	int in = 0;
+	cin >> in;
+	return 0;
 }

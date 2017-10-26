@@ -6,10 +6,11 @@
         {
             "taskName": "build",
             "type": "process",
-            "command": "g++",
+            "command": "msbuild",
             "args": [
                 // Ask msbuild to generate full paths for file names.
-                "-g", "main.cpp"
+                "/property:GenerateFullPaths=true",
+                "/t:build"
             ],
             "group": "build",
             "presentation": {

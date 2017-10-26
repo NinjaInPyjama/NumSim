@@ -135,19 +135,19 @@ void BoundaryIterator::SetBoundary(const index_t & boundary) {
 void BoundaryIterator::First() {
 	switch(_boundary) {
 		case 0:
-			_value = geom->Size()[0]*(geom->Size()[1] - 1) + 1;
+			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) + 1;
 			break;
 		case 1:
-			_value = geom->Size()[0]*(geom->Size()[1] - 1) - 1;
+			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) - 1;
 			break;
 		case 2:
-			_value = geom->Size()[0] - 2;
+			_value = _geom->Size()[0] - 2;
 			break;
 		case 3:
-			_value = geom->Size()[0];
+			_value = _geom->Size()[0];
 			break;
 		default:
-			_value = geom->Size()[0]*(geom->Size()[1] - 1);
+			_value = _geom->Size()[0]*(_geom->Size()[1] - 1);
 			break;
 	}
 }
@@ -168,7 +168,7 @@ void BoundaryIterator::Next() {
 			_valid = (_value < _geom->Size()[0] * _geom->Size()[1] - 1) ? true : false;		
 			break;
 		case 1:
-			_value = _value - geom->Size()[0]
+			_value = _value - _geom->Size()[0];
 			_valid = (_value > _geom->Size()[0]) ? true : false;	
 			break;
 		case 2:
@@ -176,7 +176,7 @@ void BoundaryIterator::Next() {
 			_valid = (_value > 0) ? true : false;
 			break;
 		case 3:
-			_value = _value + geom->Size()[0]
+			_value = _value + _geom->Size()[0];
 			_valid = (_value < _geom->Size()[0] * (_geom->Size()[1] - 1)) ? true : false;		
 			break;
 		default:

@@ -44,7 +44,7 @@ const multi_real_t & Geometry::Mesh() const {
 	return _h;
 }
 
-
+/*
 /// Updates the velocity field u
 void Geometry::Update_U(Grid * u) const {
 	BoundaryIterator bit = BoundaryIterator(new Geometry());
@@ -79,3 +79,4 @@ void Geometry::Update_V(Grid * v) const {
 void Geometry::Update_P(Grid * p) const {
 
 }
+*/

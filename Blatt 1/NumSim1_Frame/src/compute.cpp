@@ -7,7 +7,7 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
 
 /// Deletes all grids
 Compute::~Compute() {
-// Hallo
+
 }
 
 
