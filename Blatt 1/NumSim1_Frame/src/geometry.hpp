@@ -16,6 +16,8 @@
  */
 
 #include "typedef.hpp"
+#include "iterator.hpp"
+
 //------------------------------------------------------------------------------
 #ifndef __GEOMETRY_HPP
 #define __GEOMETRY_HPP
