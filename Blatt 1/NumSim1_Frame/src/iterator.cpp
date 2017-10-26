@@ -110,9 +110,8 @@ void InteriorIterator::Next() {
 	// 0 0 0 0 0 0
 
 	_value = ((_value + 2) % _geom->Size()[0] == 0) ? _value + 3 : _value + 1;
-	_valid = _value > _geom->Size()[0] * (_geom->Size()[1] - 1) - 2;
+	_valid = (_value <= _geom->Size()[0] * (_geom->Size()[1] - 1) - 2);
 }
-
 
 //------------------------------------------------------------------------------
 /** Iterator for domain boundary cells.
@@ -134,10 +133,55 @@ void BoundaryIterator::SetBoundary(const index_t & boundary) {
 
 /// Sets the iterator to the first element
 void BoundaryIterator::First() {
-	
+	switch(_boundary) {
+		case 0:
+			_value = geom->Size()[0]*(geom->Size()[1] - 1) + 1;
+			break;
+		case 1:
+			_value = geom->Size()[0]*(geom->Size()[1] - 1) - 1;
+			break;
+		case 2:
+			_value = geom->Size()[0] - 2;
+			break;
+		case 3:
+			_value = geom->Size()[0];
+			break;
+		default:
+			_value = geom->Size()[0]*(geom->Size()[1] - 1);
+			break;
+	}
 }
 
 /// Goes to the next element of the iterator, disables it if position is end
 void BoundaryIterator::Next() {
-
+	// Iterating over inner cells => have to skip a cells when on right border
+	// Inner cells:
+	// 0 0 0 0 0 0
+	// 0 * * * * 0
+	// 0 * * * * 0
+	// 0 * * * * 0
+	// 0 * * * * 0
+	// 0 0 0 0 0 0
+	switch(_boundary) {
+		case 0:
+			_value++;
+			_valid = (_value < _geom->Size()[0] * _geom->Size()[1] - 1) ? true : false;		
+			break;
+		case 1:
+			_value = _value - geom->Size()[0]
+			_valid = (_value > _geom->Size()[0]) ? true : false;	
+			break;
+		case 2:
+			_value--;
+			_valid = (_value > 0) ? true : false;
+			break;
+		case 3:
+			_value = _value + geom->Size()[0]
+			_valid = (_value < _geom->Size()[0] * (_geom->Size()[1] - 1)) ? true : false;		
+			break;
+		default:
+			_value++;
+			_valid = (_value < _geom->Size()[0]* _geom->Size()[1] - 1) ? true : false;	
+			break;
+	}
 }
