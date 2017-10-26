@@ -15,7 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
 #include "typedef.hpp"
+#include "geometry.hpp"
+#include "iterator.hpp"
+
 //------------------------------------------------------------------------------
 #ifndef __GRID_HPP
 #define __GRID_HPP
