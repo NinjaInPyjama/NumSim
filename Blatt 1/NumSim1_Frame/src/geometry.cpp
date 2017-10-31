@@ -81,7 +81,7 @@ void Geometry::Load(const char * file) {
         if (strcmp(name,"pressure") == 0) {
             if (fscanf(handle," %lf\n",&inval_real[0]))
                 _pressure = inval_real[0];
-            continue;<
+            continue;
         }
         //funktioniert nur wenn das break drin ist sonst hängt er sich an der |#- geometry definition in default.geom auf.
         // |#- geometry definition in default.geom wird nicht eingelesen.
@@ -113,31 +113,60 @@ const multi_real_t & Geometry::Mesh() const {
 /// Updates the velocity field u
 void Geometry::Update_U(Grid * u) const {
 	BoundaryIterator bit = BoundaryIterator(new Geometry());
-	bit.SetBoundary(0);
+	
+    bit.SetBoundary(0);
+    // ecke oben links
+    bit.First();
+    u->Cell(bit.Left()) = 2.0 ;//- u->Cell(((bit.First()).Left()).Down())
 	for(bit.First(); bit.Valid(); bit.Next()) {
-		u->Cell(bit) = 1.0;
+		u->Cell(bit) = 2.0 - u->Cell(bit.Down());
 	}
-	for(int i=1; i<4; i++) {
-		bit.SetBoundary(i);
-		for(bit.First(); bit.Valid(); bit.Next()) {
-			u->Cell(bit) = 0.0;
-		}
+	
+    bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit.Left()) = 0.0;
 	}
+	
+	bit.SetBoundary(2);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) =  - u->Cell(bit.Top());
+	}
+	
+	bit.SetBoundary(3);
+    //ecke unten links
+    bit.First();
+    u->Cell(bit.Down()) = 0.0;
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) = 0.0;
+	}
+	
 }
 
 /// Updates the velocity field v
 void Geometry::Update_V(Grid * v) const {
 	BoundaryIterator bit = BoundaryIterator(new Geometry());
-	/*bit.SetBoundary(0);
+	bit.SetBoundary(0);
+    
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit.Down()) = 0.0;
+	}
+	bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit) = - v->Cell(bit.Left());
+	}
+	bit.SetBoundary(2);
+    //untere rechte ecke
+    bit.First();
+    v->Cell(bit.Right()) = 0.0;
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		v->Cell(bit) = 0.0;
 	}
-	*/
-	for(int i=0; i<4; i++) {
-		bit.SetBoundary(i);
-		for(bit.First(); bit.Valid(); bit.Next()) {
-			v->Cell(bit) = 0.0;
-		}
+	bit.SetBoundary(3);
+    //untere linke ecke
+    bit.First();
+    v->Cell(bit.Down()) = 0.0;
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit) = -v->Cell(bit.Right());
 	}
 }
 
