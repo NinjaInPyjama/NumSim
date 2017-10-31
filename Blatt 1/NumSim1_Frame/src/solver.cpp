@@ -1,4 +1,8 @@
 #include "solver.hpp"
+#include "geometry.hpp"
+#include "iterator.hpp"
+#include "grid.hpp"
+#include <math.h>
 
 // Default Constructor
 Solver::Solver() {
@@ -7,7 +11,8 @@ Solver::Solver() {
 
 /// Constructor of the abstract Solver class
 Solver::Solver(const Geometry * geom) {
-
+    
+    
 }
 
 /// Destructor of the Solver Class
@@ -17,22 +22,48 @@ Solver::~Solver() {
 
 /// Returns the residual at [it] for the pressure-Poisson equation
 real_t Solver::localRes(const Iterator & it, const Grid * grid, const Grid * rhs) const {
-	return 0;
+    
+    
+    return grid->dxx(it) + grid->dyy(it) - rhs->Cell(it);
 }
 
 /// Constructs an actual SOR solver
 SOR::SOR(const Geometry * geom, const real_t & omega) {
+    
+    _omega = omega;
+    
+}
 
+/// Constructs an actual SOR solver
+SOR::SOR(const Geometry * geom) {
+    
+    _omega = real_t(2.0/(1.0 + sin(M_PI*geom->Mesh()[0])));
+    
 }
 
 /// Destructor
 SOR::~SOR() {
-
+    
 }
 
 /// Returns the total residual and executes a solver cycle
 // @param grid current pressure values
 // @param rhs right hand side
 real_t SOR::Cycle(Grid * grid, const Grid * rhs) const {
-	return 0;
+	Geometry * geom = new Geometry();
+    InteriorIterator it = InteriorIterator(geom);
+    for(it.First(); it.Valid(); it.Next()){
+        grid->Cell(it) = grid->Cell(it) + _omega*( rhs->Cell(it) -grid->dxx(it) - grid->dyy(it))/(-2.0/(geom->Size()[1]*geom->Size()[1]) - 2.0/(geom->Size()[0]*geom->Size()[0]));
+    }
+    
+    
+    real_t total_res = 0.0;
+    for(it.First(); it.Valid(); it.Next()){
+        total_res += localRes(it,grid,rhs)*localRes(it,grid,rhs);
+    }
+    total_res = total_res/(geom->Size()[0]*geom->Size()[1]);
+    total_res = sqrt(total_res);
+    return total_res;
+    
+    
 }
