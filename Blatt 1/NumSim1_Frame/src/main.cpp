@@ -18,16 +18,33 @@
 #include <iostream>
 #include "typedef.hpp"
 #include "geometry.hpp"
+#include "parameter.hpp"
 #include "iterator.hpp"
+#include <fstream>
 
 using namespace std;
 
 int main(int argc, char **argv) {
 	const Geometry* geom = new Geometry();
 	Iterator it(geom);
-	cout << "Value of iterator: " << it.Value();
+	cout << "Value of iterator: " << it.Value() << endl;
 	
-	int in = 0;
-	cin >> in;
+	//int in = 0;
+	//cin >> in;
+    
+    ifstream fin("default.param");
+    real_t a;
+    string name;
+    string gleich;
+    while (fin >> name >> gleich >> a){
+        cout << name << gleich << a << endl;
+    }
+    
+    const Parameter * param = new Parameter();
+    cout << param->IterMax();
+    
+    cout << geom->Size()[1] << endl;
+    
+    
 	return 0;
 }
