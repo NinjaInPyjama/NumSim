@@ -53,6 +53,8 @@ class SOR : public Solver {
 public:
   /// Constructs an actual SOR solver
   SOR(const Geometry *geom, const real_t &omega);
+  ///war ursprünglich nicht enthalten, macht aber sonst wenig sinn.
+  SOR(const Geometry *geom);
   /// Destructor
   ~SOR();
 
