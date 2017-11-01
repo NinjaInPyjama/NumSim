@@ -1,4 +1,6 @@
 #include "grid.hpp"
+#include <iostream>
+using namespace std;
 
 /// Constructs a grid based on a geometry
 Grid::Grid(const Geometry * geom) {
@@ -24,7 +26,10 @@ Grid::~Grid() {}
 
 ///     Initializes the grid with a value
 void Grid::Initialize(const real_t & value) {
-
+    index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
+    for (index_t i = 0; i < num_cells; i++) {
+		_data[i] = value;
+	}
 }
 
 
@@ -41,7 +46,25 @@ const real_t & Grid::Cell(const Iterator & it) const {
 
 /// Interpolate the value at a arbitrary position
 real_t Grid::Interpolate(const multi_real_t & pos) const {
-	return 0;
+    index_t pos_x = index_t(pos[0] - _offset[0]);
+    //cout << pos_x << endl;
+    index_t pos_y = index_t(pos[1] - _offset[1]);
+    //cout << pos_y << endl;
+    
+    real_t unten_links = _data[pos_x + pos_y*_geom->Size()[0]];
+    //cout << unten_links << endl;
+    real_t unten_rechts = _data[pos_x + 1 + pos_y*_geom->Size()[0]];
+    //cout << unten_rechts << endl;
+    real_t oben_links = _data[pos_x + (pos_y + 1)*_geom->Size()[0]];
+    //cout << oben_links << endl;
+    real_t oben_rechts = _data[pos_x + 1 + (pos_y + 1)*_geom->Size()[0]];
+    //cout << oben_rechts << endl;
+    
+    real_t anteil_x = pos[0] - _offset[0] - real_t(pos_x);
+    //cout << anteil_x << endl;
+    real_t anteil_y = pos[1] - _offset[1] - real_t(pos_y);
+    //cout << anteil_y << endl;
+	return (unten_links*(1.0 - anteil_x) + anteil_x*unten_rechts)*(1.0-anteil_y) + anteil_y*( oben_links*(1.0 - anteil_x) + anteil_x*oben_rechts );
 }
 
 
@@ -101,7 +124,7 @@ real_t Grid::DC_vdv_y(const Iterator & it, const real_t & alpha) const {
 real_t Grid::Max() const {
 	real_t max = _data[0];
 	index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
-	for (int i = 1; i < num_cells; i++) {
+	for (index_t i = 1; i < num_cells; i++) {
 		if(max < _data[i]) max = _data[i];
 	}
 	return max;
@@ -111,7 +134,7 @@ real_t Grid::Max() const {
 real_t Grid::Min() const {
 	real_t min = _data[0];
 	index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
-	for (int i = 1; i < num_cells; i++) {
+	for (index_t i = 1; i < num_cells; i++) {
 		if (min > _data[i]) min = _data[i];
 	}
 	return min;
@@ -119,10 +142,10 @@ real_t Grid::Min() const {
 
 /// Returns the absolute maximal value
 real_t Grid::AbsMax() const {
-	real_t max = std::abs(_data[0]);
+	real_t max = abs(_data[0]);
 	index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
-	for (int i = 1; i < num_cells; i++) {
-		if (max < std::abs(_data[i])) max = std::abs(_data[i]);
+	for (index_t i = 1; i < num_cells; i++) {
+		if (max < abs(_data[i])) max = abs(_data[i]);
 	}
 	return max;
 }
