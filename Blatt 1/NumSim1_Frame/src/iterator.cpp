@@ -30,9 +30,9 @@ Iterator::operator const index_t&() const {
 
 /// Returns the position coordinates
 multi_index_t Iterator::Pos() const {
-	if (_valid) {
-		index_t xPos = (_value % _geom->Size()[0]) + 1; // Getting the xPos by using the modulu operator
-		index_t yPos = (index_t)(_value/ _geom->Size()[0]) + 1; // Getting the yPos by using division and floor operator
+	if (_valid) { ///Habe hier eine + 1 entfernt, da sonst kein (0,0) möglich wäre
+		index_t xPos = (_value % _geom->Size()[0]) ; // Getting the xPos by using the modulu operator
+		index_t yPos = (index_t)(_value/ _geom->Size()[0]) ; // Getting the yPos by using division and floor operator
 		return multi_index_t(xPos, yPos);
 	}
 	else return multi_index_t(-1);
