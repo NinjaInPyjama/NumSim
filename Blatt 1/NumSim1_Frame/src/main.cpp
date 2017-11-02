@@ -16,11 +16,13 @@
  */
 
 #include <iostream>
+#include <fstream>
+#include <string>
+
 #include "typedef.hpp"
 #include "geometry.hpp"
 #include "parameter.hpp"
 #include "iterator.hpp"
-#include <fstream>
 
 using namespace std;
 
