@@ -28,7 +28,7 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     
     real_t _t = 0.0;
 
-    //real_t _dtlimit;
+    real_t _dtlimit = _param->Dt();
 
     real_t _epslimit = _param->Eps();
 
@@ -89,15 +89,32 @@ const Grid * Compute::GetVelocity() {
         
         v_interpol = _v->Interpolate(multi_real_t(real_t(iit.Pos()[0]) + mitte_der_zelle[0] , real_t(iit.Pos()[1]) + mitte_der_zelle[1] ));
         u_interpol = _u->Interpolate(multi_real_t(real_t(iit.Pos()[0]) + mitte_der_zelle[0] , real_t(iit.Pos()[1]) + mitte_der_zelle[1] ));
-        abs_vel->Cell(iit) = v_interpol*v_interpol + u_interpol*u_interpol;
+        abs_vel->Cell(iit) = sqrt(v_interpol*v_interpol + u_interpol*u_interpol);
     }
     return abs_vel;
 }
 
 /// Computes and returns the vorticity
 const Grid * Compute::GetVorticity() {
+        
+    InteriorIterator iit = InteriorIterator(_geom);
     
-	return nullptr;
+    Grid * du_dy = new Grid(_geom);
+    Grid * dv_dx = new Grid(_geom);
+    for(iit.First();iit.Valid();iit.Next()){
+        du_dy->Cell(iit) = _u->dy_central(iit);
+        dv_dx->Cell(iit) = _v->dx_central(iit);
+    }
+    
+    Grid * vorticity = new Grid(_geom);
+    multi_real_t mitte_der_zelle = multi_real_t(0.5, 0.5);
+    for(iit.First();iit.Valid();iit.Next()){
+        
+        vorticity->Cell(iit) = dv_dx->Interpolate(multi_real_t(real_t(iit.Pos()[0]) + mitte_der_zelle[0] , real_t(iit.Pos()[1]) + mitte_der_zelle[1] )) - du_dy->Interpolate(multi_real_t(real_t(iit.Pos()[0]) + mitte_der_zelle[0] , real_t(iit.Pos()[1]) + mitte_der_zelle[1] ));
+        
+    }
+    return vorticity;
+    
 }
 
 /// Computes and returns the stream line values
@@ -136,8 +153,8 @@ void Compute::RHS(const real_t & dt) {
     InteriorIterator iit = InteriorIterator(_geom);
     for(iit.First();iit.Valid();iit.Next()){
         
-        _rhs->Cell(iit) = _p->dxx(iit) + _p->dyy(iit); 
-        //eventuell auch  _rhs->Cell(iit) = (_F->dx_l(iit) + _G->dy_r(iit))/dt ??????
+        //_rhs->Cell(iit) = (_p->dxx(iit) + _p->dyy(iit)); 
+        _rhs->Cell(iit) = (_F->dx_l(iit) + _G->dy_r(iit))/dt ;
         
     }
     

@@ -7,7 +7,7 @@ using namespace std;
 // Driven Cavity parameters; see exercise sheet 1
 Parameter::Parameter() {
     
-     //parameter aus example 1.3 
+    //parameter aus example 1.3 
     // dt, tend geraten
     
     _re = 1000;
@@ -19,7 +19,11 @@ Parameter::Parameter() {
     _tau = 0.5;
     _itermax = 100;
     
+    
+    // eigentlich mit if file exits
     this->Load("default.param");
+    
+    //this->Load("actual.param");
    
     
 }
@@ -87,4 +91,3 @@ const real_t &Parameter::Eps() const{
 const real_t &Parameter::Tau() const{
     return _tau;
 }
-

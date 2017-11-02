@@ -4,8 +4,8 @@ using namespace std;
 
 /// Constructs a grid based on a geometry
 Grid::Grid(const Geometry * geom) {
-	_data = new real_t(geom->Size()[0] * geom->Size()[1]);
-	_offset = 0.0;
+	_data = new real_t[geom->Size()[0] * geom->Size()[1]];
+	_offset = multi_real_t(0.0, 0.0);
 	_geom = geom;
 }
 
@@ -14,7 +14,7 @@ Grid::Grid(const Geometry * geom) {
 // @param offset distance of staggered grid point to cell's anchor point;
 //               (anchor point = lower left corner)
 Grid::Grid(const Geometry * geom, const multi_real_t & offset) {
-	_data = new real_t(geom->Size()[0] * geom->Size()[1]);
+	_data = new real_t[geom->Size()[0] * geom->Size()[1]];
 	_offset = offset;
 	_geom = geom;
 }
@@ -45,13 +45,14 @@ const real_t & Grid::Cell(const Iterator & it) const {
 
 
 /// Interpolate the value at a arbitrary position
+///bilinear interpolation, 
 real_t Grid::Interpolate(const multi_real_t & pos) const {
-    index_t pos_x = index_t(pos[0] - _offset[0]);
+    index_t pos_x = index_t(pos[0] - _offset[0]); //integer value in x direction of lower left corner
     //cout << pos_x << endl;
-    index_t pos_y = index_t(pos[1] - _offset[1]);
+    index_t pos_y = index_t(pos[1] - _offset[1]); //integer value in y direction of lower left corner
     //cout << pos_y << endl;
     
-    real_t unten_links = _data[pos_x + pos_y*_geom->Size()[0]];
+    real_t unten_links = _data[pos_x + pos_y*_geom->Size()[0]]; //value of field in lower left corner
     //cout << unten_links << endl;
     real_t unten_rechts = _data[pos_x + 1 + pos_y*_geom->Size()[0]];
     //cout << unten_rechts << endl;
@@ -60,7 +61,7 @@ real_t Grid::Interpolate(const multi_real_t & pos) const {
     real_t oben_rechts = _data[pos_x + 1 + (pos_y + 1)*_geom->Size()[0]];
     //cout << oben_rechts << endl;
     
-    real_t anteil_x = pos[0] - _offset[0] - real_t(pos_x);
+    real_t anteil_x = pos[0] - _offset[0] - real_t(pos_x); 
     //cout << anteil_x << endl;
     real_t anteil_y = pos[1] - _offset[1] - real_t(pos_y);
     //cout << anteil_y << endl;
@@ -70,7 +71,7 @@ real_t Grid::Interpolate(const multi_real_t & pos) const {
 
 /// Computes the left-sided difference quatient in x-dim at [it]
 real_t Grid::dx_l(const Iterator & it) const {
-	return (Cell(it.Left()) - Cell(it))/_geom->Mesh()[0];
+	return (Cell(it) - Cell(it.Left()))/_geom->Mesh()[0];
 }
 
 /// Computes the right-sided difference quatient in x-dim at [it]
@@ -85,17 +86,27 @@ real_t Grid::dy_l(const Iterator & it) const {
 
 /// Computes the right-sided difference quatient in x-dim at [it]
 real_t Grid::dy_r(const Iterator & it) const {
-	return (Cell(it.Down()) - Cell(it)) / _geom->Mesh()[1];
+	return (Cell(it) - Cell(it.Down())) / _geom->Mesh()[1];
 }
 
 /// Computes the central difference quatient of 2nd order in x-dim at [it]
 real_t Grid::dxx(const Iterator & it) const {
-	return (Cell(it.Right()) - Cell(it.Left())) / (2 * _geom->Mesh()[0]);
+	return ((Cell(it.Right()) -2.0*Cell(it) + Cell(it.Left())) / (_geom->Mesh()[0])) / (_geom->Mesh()[0]) ;
 }
 
 /// Computes the central difference quatient of 2nd order in y-dim at [it]
 real_t Grid::dyy(const Iterator & it) const {
-	return (Cell(it.Down()) - Cell(it.Top())) / (2 * _geom->Mesh()[1]);
+	return ((Cell(it.Top()) -2.0*Cell(it) + Cell(it.Down())) / (_geom->Mesh()[1])) / (_geom->Mesh()[1]);
+}
+
+/// Computes the central difference quatient of 1st order in x-dim at [it]
+real_t Grid::dx_central(const Iterator & it) const {
+	return (Cell(it.Right()) - Cell(it.Left())) / (2.0 * _geom->Mesh()[0]) ;
+}
+
+/// Computes the central difference quatient of 1st order in y-dim at [it]
+real_t Grid::dy_central(const Iterator & it) const {
+	return (Cell(it.Top()) - Cell(it.Down())) / (2.0 * _geom->Mesh()[1]);
 }
 
 
@@ -116,6 +127,28 @@ real_t Grid::DC_udv_x(const Iterator & it, const real_t & alpha, const Grid * u)
 
 /// Computes v*dv/dy with the donor cell method
 real_t Grid::DC_vdv_y(const Iterator & it, const real_t & alpha) const {
+	return 0;
+}
+
+
+
+/// Computes du²/dx with the donor cell method
+real_t Grid::DC_du2_x(const Iterator & it, const real_t & alpha) const {
+	return 0;
+}
+
+/// Computes v*dv/dy with the donor cell method
+real_t Grid::DC_dv2_y(const Iterator & it, const real_t & alpha) const {
+	return 0;
+}
+
+/// Computes v*dv/dy with the donor cell method
+real_t Grid::DC_duv_y(const Iterator & it, const real_t & alpha, const Grid * u) const {
+	return 0;
+}
+
+/// Computes v*dv/dy with the donor cell method
+real_t Grid::DC_duv_x(const Iterator & it, const real_t & alpha, const Grid * v) const {
 	return 0;
 }
 

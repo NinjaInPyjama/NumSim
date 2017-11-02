@@ -114,22 +114,9 @@ const multi_real_t & Geometry::Mesh() const {
 void Geometry::Update_U(Grid * u) const {
 	BoundaryIterator bit = BoundaryIterator(new Geometry());
 	
-    bit.SetBoundary(0);
-    // ecke oben links
-    bit.First();
-    u->Cell(bit.Left()) = 2.0 ;//- u->Cell(((bit.First()).Left()).Down())
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		u->Cell(bit) = 2.0 - u->Cell(bit.Down());
-	}
-	
     bit.SetBoundary(1);
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		u->Cell(bit.Left()) = 0.0;
-	}
-	
-	bit.SetBoundary(2);
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		u->Cell(bit) =  - u->Cell(bit.Top());
 	}
 	
 	bit.SetBoundary(3);
@@ -139,21 +126,31 @@ void Geometry::Update_U(Grid * u) const {
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		u->Cell(bit) = 0.0;
 	}
+    
+    bit.SetBoundary(0);
+    // ecke oben links
+    bit.First();
+    u->Cell(bit.Left()) = 2.0 ;//- u->Cell(((bit.First()).Left()).Down())
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) = 2.0 - u->Cell(bit.Down());
+	}
+	
+	bit.SetBoundary(2);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) =  - u->Cell(bit.Top());
+	}
 	
 }
 
 /// Updates the velocity field v
 void Geometry::Update_V(Grid * v) const {
 	BoundaryIterator bit = BoundaryIterator(new Geometry());
-	bit.SetBoundary(0);
     
+	bit.SetBoundary(0);
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		v->Cell(bit.Down()) = 0.0;
 	}
-	bit.SetBoundary(1);
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		v->Cell(bit) = - v->Cell(bit.Left());
-	}
+	
 	bit.SetBoundary(2);
     //untere rechte ecke
     bit.First();
@@ -161,6 +158,7 @@ void Geometry::Update_V(Grid * v) const {
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		v->Cell(bit) = 0.0;
 	}
+	
 	bit.SetBoundary(3);
     //untere linke ecke
     bit.First();
@@ -168,6 +166,12 @@ void Geometry::Update_V(Grid * v) const {
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		v->Cell(bit) = -v->Cell(bit.Right());
 	}
+	
+	bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit) = - v->Cell(bit.Left());
+	}
+	
 }
 
 /// Updates the pressure field p

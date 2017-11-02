@@ -16,24 +16,30 @@
  */
 
 #include <iostream>
-#include <fstream>
-#include <string>
-
 #include "typedef.hpp"
 #include "geometry.hpp"
 #include "parameter.hpp"
 #include "iterator.hpp"
+#include <fstream>
+#include "grid.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv) {
 	const Geometry* geom = new Geometry();
 	Iterator it(geom);
-	cout << "Value of iterator: " << it.Value() << endl;
+    
+    const multi_real_t offset = multi_real_t(0.0, 0.0);
+    
+    Grid * grd = new Grid(geom,offset);
+    grd->Initialize(1);
+    cout << grd->Interpolate(multi_real_t(2.5, 1.5)) << endl;
+    
+	//cout << "Value of iterator: " << it.Value() << endl;
 	
 	//int in = 0;
 	//cin >> in;
-    
+    /*
     ifstream fin("default.param");
     real_t a;
     string name;
@@ -41,11 +47,13 @@ int main(int argc, char **argv) {
     while (fin >> name >> gleich >> a){
         cout << name << gleich << a << endl;
     }
+    */
+    //const Parameter * param = new Parameter();
+    //cout << param->IterMax();
     
-    const Parameter * param = new Parameter();
-    cout << param->IterMax();
+    //cout << geom->Size()[1] << endl;
     
-    cout << geom->Size()[1] << endl;
+    
     
     
 	return 0;

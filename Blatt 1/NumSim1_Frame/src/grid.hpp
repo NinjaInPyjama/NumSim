@@ -61,6 +61,10 @@ public:
   real_t dxx(const Iterator &it) const;
   /// Computes the central difference quatient of 2nd order in y-dim at [it]
   real_t dyy(const Iterator &it) const;
+  /// Computes the central difference quotient of 1st order in x dim at [it]
+  real_t dx_central(const Iterator & it) const;
+  /// Computes the central difference quotient of 1st order in y dim at [it]
+  real_t dy_central(const Iterator & it) const;
 
   /// Computes u*du/dx with the donor cell method
   real_t DC_udu_x(const Iterator &it, const real_t &alpha) const;
@@ -70,6 +74,15 @@ public:
   real_t DC_udv_x(const Iterator &it, const real_t &alpha, const Grid *u) const;
   /// Computes v*dv/dy with the donor cell method
   real_t DC_vdv_y(const Iterator &it, const real_t &alpha) const;
+  
+  real_t DC_du2_x(const Iterator & it, const real_t & alpha) const;
+  
+  real_t DC_dv2_y(const Iterator & it, const real_t & alpha) const;
+
+  real_t DC_duv_x(const Iterator & it, const real_t & alpha, const Grid *v) const;
+
+  real_t DC_duv_y(const Iterator & it, const real_t & alpha, const Grid *u) const;
+
 
   /// Returns the maximal value of the grid
   real_t Max() const;
