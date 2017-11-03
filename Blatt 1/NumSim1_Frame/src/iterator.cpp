@@ -30,9 +30,9 @@ Iterator::operator const index_t&() const {
 
 /// Returns the position coordinates
 multi_index_t Iterator::Pos() const {
-	if (_valid) {
-		index_t xPos = (_value % _geom->Size()[0]) + 1; // Getting the xPos by using the modulu operator
-		index_t yPos = (index_t)(_value/ _geom->Size()[0]) + 1; // Getting the yPos by using division and floor operator
+	if (_valid) { 
+		index_t xPos = (_value % _geom->Size()[0]) ; // Getting the xPos by using the modulu operator
+		index_t yPos = (index_t)(real_t(_value)/ real_t(_geom->Size()[0])) ; // Getting the yPos by using division and floor operator
 		return multi_index_t(xPos, yPos);
 	}
 	else return multi_index_t(-1);
@@ -72,13 +72,13 @@ Iterator Iterator::Right() const {
 /// Returns an Iterator that is located above this one
 // If we are at the upper domain boundary, the cell sees itself
 Iterator Iterator::Top() const {
-	return (_value < _geom->Size()[0]) ? *this : Iterator(_geom, _value - _geom->Size()[0]);
+	return (_value >= _geom->Size()[0]*(_geom->Size()[1]-1)) ? *this : Iterator(_geom, _value + _geom->Size()[0]);
 }
 
 /// Returns an Iterator that is located below this one
 // If we are at the lower domain boundary, the cell sees itself
 Iterator Iterator::Down() const {
-	return (_value >= _geom->Size()[0]*(_geom->Size()[1]-1)) ? *this : Iterator(_geom, _value + _geom->Size()[0]);
+	return (_value < _geom->Size()[0]) ? *this : Iterator(_geom, _value - _geom->Size()[0]);
 }
 
 
@@ -100,7 +100,7 @@ void InteriorIterator::First() {
 
 /// Goes to the next element of the iterator, disables it if position is end
 void InteriorIterator::Next() {
-	// Iterating over inner cells => have to skip a cells when on right border
+	// Iterating over inner cells => has to skip a cell when on right border
 	// Inner cells:
 	// 0 0 0 0 0 0
 	// 0 * * * * 0
@@ -134,27 +134,27 @@ void BoundaryIterator::SetBoundary(const index_t & boundary) {
 /// Sets the iterator to the first element
 void BoundaryIterator::First() {
 	switch(_boundary) {
-		case 0:
+        case 0: //top boundary
 			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) + 1;
 			break;
-		case 1:
+		case 1: //right boundary
 			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) - 1;
 			break;
-		case 2:
+		case 2: //lower boundary
 			_value = _geom->Size()[0] - 2;
 			break;
-		case 3:
+		case 3: //left boundary
 			_value = _geom->Size()[0];
 			break;
-		default:
-			_value = _geom->Size()[0]*(_geom->Size()[1] - 1);
+		default: //top boundary
+			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) + 1;
 			break;
 	}
 }
 
 /// Goes to the next element of the iterator, disables it if position is end
 void BoundaryIterator::Next() {
-	// Iterating over inner cells => have to skip a cells when on right border
+	// Iterating over boundary cells without corners
 	// Inner cells:
 	// 0 0 0 0 0 0
 	// 0 * * * * 0

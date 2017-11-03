@@ -16,6 +16,7 @@
  */
 
 #include "typedef.hpp"
+#include <cmath>
 //------------------------------------------------------------------------------
 #ifndef __COMPUTE_HPP
 #define __COMPUTE_HPP
