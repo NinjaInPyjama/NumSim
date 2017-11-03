@@ -15,8 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "typedef.hpp"
 #include <cmath>
+
+#include "typedef.hpp"
+#include "grid.hpp"
+#include "iterator.hpp"
+#include "solver.hpp"
+#include "parameter.hpp"
+
 //------------------------------------------------------------------------------
 #ifndef __COMPUTE_HPP
 #define __COMPUTE_HPP

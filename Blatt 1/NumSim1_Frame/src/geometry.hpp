@@ -15,6 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+
+#include "iterator.hpp"
+#include "grid.hpp"
 #include "typedef.hpp"
 
 //------------------------------------------------------------------------------
