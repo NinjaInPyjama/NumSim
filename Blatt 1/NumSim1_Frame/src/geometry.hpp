@@ -15,17 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//------------------------------------------------------------------------------
+#ifndef __GEOMETRY_HPP
+#define __GEOMETRY_HPP
+
+//------------------------------------------------------------------------------
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
 
-#include "iterator.hpp"
-#include "grid.hpp"
 #include "typedef.hpp"
+#include "grid.hpp"
 
-//------------------------------------------------------------------------------
-#ifndef __GEOMETRY_HPP
-#define __GEOMETRY_HPP
 //------------------------------------------------------------------------------
 class Geometry {
 public:

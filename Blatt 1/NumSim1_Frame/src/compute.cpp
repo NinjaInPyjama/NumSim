@@ -66,17 +66,17 @@ const Grid * Compute::GetRHS() const {
 const Grid * Compute::GetVelocity() {
     InteriorIterator iit = InteriorIterator(_geom);
     Grid * abs_vel = new Grid(_geom);
-    multi_real_t cell_center = multi_real_t(0.5, 0.5);
-    real_t v_interpol = 0.0;
-    real_t u_interpol = 0.0;
+	multi_real_t cell_center = multi_real_t(0.5, 0.5);
+	real_t u_ip = 0.0; // storage for interpolated u to center of cells
+	real_t v_ip = 0.0; // storage for interpolated v to center of cells
 
 
     for(iit.First(); iit.Valid(); iit.Next()){
-        // Interpolating the velocities to cell center
+        // Interpolating the velocities to center of cells
         multi_index_t cell_pos = iit.Pos();
-        v_interpol = _v->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
-        u_interpol = _u->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
-        abs_vel->Cell(iit) = sqrt(v_interpol*v_interpol + u_interpol*u_interpol);
+        v_ip = _v->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
+        u_ip = _u->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
+        abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
     return abs_vel;
 }
@@ -84,10 +84,10 @@ const Grid * Compute::GetVelocity() {
 /// Computes and returns the vorticity
 const Grid * Compute::GetVorticity() {
     InteriorIterator iit = InteriorIterator(_geom);
-    Grid * vorticity = new Grid(_geom);
+    Grid * vort = new Grid(_geom);
     multi_real_t cell_center = multi_real_t(0.5, 0.5);
 
-    // Creating grids of derivatives of u and v (for interpolation reasons)
+    // Creating grids of derivatives of u (in y-dim) and v (in x-dim) (for interpolation reasons)
     Grid * du_dy = new Grid(_geom);
     Grid * dv_dx = new Grid(_geom);
     for(iit.First();iit.Valid();iit.Next()){
@@ -98,10 +98,10 @@ const Grid * Compute::GetVorticity() {
     for(iit.First();iit.Valid();iit.Next()){ 
         // Calculating vorticity by dv/dx - du/dy
         multi_index_t cell_pos = iit.Pos();
-        vorticity->Cell(iit) = dv_dx->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]))
+        vort->Cell(iit) = dv_dx->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]))
                                 - du_dy->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1]  + cell_center[1]));
     }
-    return vorticity;
+    return vort;
 }
 
 /// Computes and returns the stream line values
@@ -116,8 +116,11 @@ void Compute::NewVelocities(const real_t & dt) {
     InteriorIterator iit = InteriorIterator(_geom);
     
     for(iit.First();iit.Valid();iit.Next()){
+		// see script, p. 18, formular (3.1)
+		// TODO: mistake?! => u^(n+1) = F^(n) - dt*(dp/dx)^(n+1)
+		// _u->Cell(iit) = _F->Cell(iit) - dt*(_p->dx_r(iit));
         _u->Cell(iit) = _u->Cell(iit) - dt*(_p->dx_r(iit));
-        _v->Cell(iit) = _v->Cell(iit) - dt*(_p->dy_l(iit));   
+        _v->Cell(iit) = _v->Cell(iit) - dt*(_p->dy_r(iit));  
     }
 }
 
@@ -126,15 +129,20 @@ void Compute::MomentumEqu(const real_t & dt) {
     InteriorIterator iit = InteriorIterator(_geom);
 
     for(iit.First();iit.Valid();iit.Next()){
-        _F->Cell(iit) = _u->Cell(iit) + dt*(( _u->dxx(iit) + _u->dyy(iit) )/_param->Re() - _u->DC_udu_x(iit, _param->Alpha()) - _u->DC_vdu_y(iit, _param->Alpha(), _v));
-        _G->Cell(iit) = _v->Cell(iit) + dt*(( _v->dxx(iit) + _v->dyy(iit) )/_param->Re() - _v->DC_vdv_y(iit, _param->Alpha()) - _v->DC_udv_x(iit, _param->Alpha(), _u));
+		// see script, p. 18, formular (3.2)
+		real_t A = ((_u->dxx(iit) + _u->dyy(iit)) / _param->Re() - _u->DC_du2_x(iit, _param->Alpha()) - _u->DC_duv_y(iit, _param->Alpha(), _v));
+		real_t B = ((_v->dxx(iit) + _v->dyy(iit)) / _param->Re() - _v->DC_dv2_y(iit, _param->Alpha()) - _v->DC_duv_x(iit, _param->Alpha(), _u));
+		_F->Cell(iit) = _u->Cell(iit) + dt*A;
+		_G->Cell(iit) = _v->Cell(iit) + dt*B;
     }
 }
 
 /// Compute the RHS of the poisson equation
 void Compute::RHS(const real_t & dt) {
     InteriorIterator iit = InteriorIterator(_geom);
-    for(iit.First();iit.Valid();iit.Next()){ 
-        _rhs->Cell(iit) = (_F->dx_l(iit) + _G->dy_r(iit))/dt ;
+
+    for(iit.First();iit.Valid();iit.Next()){
+		// see script, p. 19, formular (3.3)
+        _rhs->Cell(iit) = (_F->dx_l(iit) + _G->dy_l(iit))/dt;
     }
 }

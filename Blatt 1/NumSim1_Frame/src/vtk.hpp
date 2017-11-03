@@ -15,12 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "typedef.hpp"
-#include "grid.hpp"
-#include <cstdio>
 //------------------------------------------------------------------------------
 #ifndef __VTK_HPP
 #define __VTK_HPP
+
+//------------------------------------------------------------------------------
+#include <cstdio>
+
+#include "typedef.hpp"
+#include "grid.hpp"
 //------------------------------------------------------------------------------
 #if DIM != 2 && DIM != 3
 #error VTK only usable with DIM = {2,3}

@@ -16,8 +16,8 @@
 Geometry::Geometry() {
     _size = multi_index_t(128, 128);
     _length  = multi_real_t (1.0, 1.0);
-    _h  = multi_real_t (_length[0]/_size[0], _length[1]/_size[1]));
-    _velocity = multi_real_t (0.0 , 0.0);
+    _h  = multi_real_t (_length[0]/_size[0], _length[1]/_size[1]);
+    _velocity = multi_real_t (0.0 , 0.0); // TODO: global initial condition vs. boundary condition
     _pressure = 0.0;    
     
     Load("default.geom");
@@ -94,8 +94,9 @@ const multi_real_t & Geometry::Mesh() const {
 
 /// Updates the velocity field u
 void Geometry::Update_U(Grid * u) const {
-	BoundaryIterator bit = BoundaryIterator(new Geometry()); // Mayby u->Geom()?!
+	BoundaryIterator bit = BoundaryIterator(this); // TODO: Mayby u->Geom()?! Would have to be implemented then!
     
+	// see script, p. 17
     // Iteration over right boundary
     bit.SetBoundary(1);
 	for(bit.First(); bit.Valid(); bit.Next()) {
@@ -115,7 +116,7 @@ void Geometry::Update_U(Grid * u) const {
     bit.First(); 
     u->Cell(bit.Left()) = 2.0; // Upper left corner
 	for(bit.First(); bit.Valid(); bit.Next()) {
-		u->Cell(bit) = 2.0 - u->Cell(bit.Down());
+		u->Cell(bit) = 2.0 - u->Cell(bit.Down()); // TODO: use _velocity? (global initial condition vs. boundary condition) (Grid::Initialize(real_t value) already exists!)
 	}
 	
     // Iteration over lower boundary
@@ -128,8 +129,9 @@ void Geometry::Update_U(Grid * u) const {
 
 /// Updates the velocity field v
 void Geometry::Update_V(Grid * v) const {
-	BoundaryIterator bit = BoundaryIterator(new Geometry());
+	BoundaryIterator bit = BoundaryIterator(this);
     
+	// see script, p. 17
     // Iteration over upper boundary
 	bit.SetBoundary(0);
 	for(bit.First(); bit.Valid(); bit.Next()) {
@@ -162,9 +164,9 @@ void Geometry::Update_V(Grid * v) const {
 
 /// Updates the pressure field p
 void Geometry::Update_P(Grid * p) const {
-    BoundaryIterator bit = BoundaryIterator(new Geometry());
+    BoundaryIterator bit = BoundaryIterator(this);
     
-    // degree(p) has to be 0 at all boundary points -> p_{0,i} = p{1,i} ...
+	// see script, p. 20 (p_{0,j} = p{1,j}), ...
     
     // Iteration over upper boundary
     bit.SetBoundary(0);

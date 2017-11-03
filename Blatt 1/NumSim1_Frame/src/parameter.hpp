@@ -15,10 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "typedef.hpp"
 //------------------------------------------------------------------------------
 #ifndef __PARAMETER_HPP
 #define __PARAMETER_HPP
+
+//------------------------------------------------------------------------------
+#include "typedef.hpp"
+
 //------------------------------------------------------------------------------
 class Parameter {
 public:
