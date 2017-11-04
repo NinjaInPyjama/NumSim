@@ -16,45 +16,44 @@
  */
 
 #include <iostream>
+#include <fstream>
+
 #include "typedef.hpp"
 #include "geometry.hpp"
 #include "parameter.hpp"
 #include "iterator.hpp"
-#include <fstream>
 #include "grid.hpp"
+#include "compute.hpp"
+#include "vtk.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv) {
-	const Geometry* geom = new Geometry();
-	Iterator it(geom);
-    
-    const multi_real_t offset = multi_real_t(0.0, 0.0);
-    
-    Grid * grd = new Grid(geom,offset);
-    grd->Initialize(1);
-    cout << grd->Interpolate(multi_real_t(2.5, 1.5)) << endl;
-    
-	//cout << "Value of iterator: " << it.Value() << endl;
-	
-	//int in = 0;
-	//cin >> in;
-    /*
-    ifstream fin("default.param");
-    real_t a;
-    string name;
-    string gleich;
-    while (fin >> name >> gleich >> a){
-        cout << name << gleich << a << endl;
-    }
-    */
-    //const Parameter * param = new Parameter();
-    //cout << param->IterMax();
-    
-    //cout << geom->Size()[1] << endl;
-    
-    
-    
-    
-	return 0;
+  // Create parameter and geometry instances with default values
+  Parameter param;
+  Geometry geom;
+
+  // Create the fluid solver
+  Compute comp(&geom, &param);
+
+  // Create a VTK generator
+  VTK vtk(geom.Mesh(), geom.Size());
+
+  // Create a VTK File in the folder VTK (must exist)
+  vtk.Init("VTK/field");
+  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
+  vtk.AddScalar("Pressure", comp.GetP());
+
+    // Run a few steps
+   for (uint32_t i = 0; i < 9; ++i) {
+       comp.TimeStep(false);
+       vtk.AddField("Velocity", comp.GetU(), comp.GetV());
+       vtk.AddScalar("Pressure", comp.GetP());
+   }
+   comp.TimeStep(true);
+   vtk.AddField("Velocity", comp.GetU(), comp.GetV());
+   vtk.AddScalar("Pressure", comp.GetP());
+   vtk.Finish();
+   
+   return 0;
 }

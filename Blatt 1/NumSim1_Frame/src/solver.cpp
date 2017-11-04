@@ -43,13 +43,13 @@ SOR::~SOR() {
 // @param rhs right hand side
 real_t SOR::Cycle(Grid * grid, const Grid * rhs) const {
     InteriorIterator it = InteriorIterator(_geom);
-    real_t dx = _geom->Size()[0];
-    real_t dy = _geom->Size()[1];
+    real_t dx = _geom->Mesh()[0];
+    real_t dy = _geom->Mesh()[1];
 
     for(it.First(); it.Valid(); it.Next()){
-		// TODO: mistake?! =>
+		// TODO: alternativ?! =>
 		// grid->Cell(it) = (1 - _omega) * grid->Cell(it) + _omega * (dx * dx * dy * dy) / (2.0 * (dx * dx + dy * dy)) * ((grid->Cell(it.Left()) + grid->Cell(it.Right()))/(dx*dx) + (grid->Cell(it.Down()) + grid->Cell(it.Top())) / (dy*dy) - rhs->Cell(it));
-		// (see script, p. 26, formular (4.1))
+		// see script, p. 26, formular (4.1)
         grid->Cell(it) = grid->Cell(it) + _omega*( rhs->Cell(it) -grid->dxx(it) - grid->dyy(it))/(-2.0/(dx*dx) - 2.0/(dy*dy));
     }
     
@@ -61,9 +61,7 @@ real_t SOR::Cycle(Grid * grid, const Grid * rhs) const {
 		total_res += local_res*local_res;
     }
 
-    total_res = total_res/(dx*dy); // TODO: why?
+    total_res = total_res/(_geom->Size()[0] * _geom->Size()[1]);
     total_res = sqrt(total_res);
     return total_res;
-    
-    
 }

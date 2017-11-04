@@ -54,6 +54,10 @@ public:
   const multi_real_t &Length() const;
   /// Returns the meshwidth
   const multi_real_t &Mesh() const;
+  /// Returns the initial velocity
+  const multi_real_t &Velocity() const;
+  /// Returns the initial pressure
+  const real_t &Pressure() const;
 
   /// Updates the velocity field u
   void Update_U(Grid *u) const;
@@ -61,6 +65,7 @@ public:
   void Update_V(Grid *v) const;
   /// Updates the pressure field p
   void Update_P(Grid *p) const;
+
 
 private:
   multi_index_t _size;

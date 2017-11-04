@@ -1,6 +1,4 @@
 #include "grid.hpp"
-#include <iostream>
-using namespace std;
 
 /// Constructs a grid based on a geometry
 Grid::Grid(const Geometry * geom) {
@@ -44,14 +42,14 @@ const real_t & Grid::Cell(const Iterator & it) const {
 }
 
 
-/// Interpolate the value at a arbitrary position
+/// Interpolate the value at an arbitrary position
 /// bilinear interpolation, 
 real_t Grid::Interpolate(const multi_real_t & pos) const {
     index_t pos_x = (index_t)(pos[0] - _offset[0]); //integer value in x direction of lower left corner
     index_t pos_y = (index_t)(pos[1] - _offset[1]); //integer value in y direction of lower left corner
     
 	// Lower left data point
-    real_t val_ll = _data[pos_x + pos_y*_geom->Size()[0]]; //value of field in lower left corner
+    real_t val_ll = _data[pos_x + pos_y*_geom->Size()[0]];
 	// Lower right data point
 	real_t val_lr = _data[pos_x + 1 + pos_y*_geom->Size()[0]];
 	// Upper left data point
@@ -147,7 +145,7 @@ real_t Grid::DC_du2_x(const Iterator & it, const real_t & alpha) const {
 	const real_t val_u_cr = (val_u_r + val_u) / 2.0;
 	// Interpolated value of u between this and its left neighbor cell (u_{i-1/2,j})
 	const real_t val_u_cl = (val_u + val_u_l) / 2.0;
-	return (val_u_cr * val_u_cr - val_u_cl * val_u_cl) / dx;
+	return (val_u_cr * val_u_cr - val_u_cl * val_u_cl) / dx
 			+ alpha * (abs(val_u_cr) * (val_u - val_u_r) / 2.0 - abs(val_u_cl) * (val_u_l - val_u) / 2.0) / dx;
 }
 
@@ -211,7 +209,7 @@ real_t Grid::DC_duv_y(const Iterator & it, const real_t & alpha, const Grid * v)
 	// Interpolated value of v between the iterator cell's lower and its lower right neighbor cell (v_{i+1/2,j-1})
 	const real_t val_v_cdr = (v->Cell(it.Right().Down()) + v->Cell(it.Down())) / 2.0;
 
-	return (val_v_cr * (val_u + val_u_t) / 2.0 - val_v_cdr * (val_u_d + val_u) / 2.0) / dy + 
+	return (val_v_cr * (val_u + val_u_t) / 2.0 - val_v_cdr * (val_u_d + val_u) / 2.0) / dy 
 			+ alpha * (abs(val_v_cr) * (val_u - val_u_t) / 2.0 - abs(val_v_cdr) * (val_u_d - val_u) / 2.0) / dy;
 }
 

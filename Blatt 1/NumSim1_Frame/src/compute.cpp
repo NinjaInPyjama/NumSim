@@ -12,10 +12,13 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     _G = new Grid(_geom, multi_real_t(0.5, 1.0));
     
     _p = new Grid(_geom, multi_real_t(0.5, 0.5));
+    _p->Initialize(_geom->Pressure());
     _v = new Grid(_geom, multi_real_t(0.5, 1.0));
+    _v->Initialize(_geom->Velocity()[1]);
     _u = new Grid(_geom, multi_real_t(1.0, 0.5));
-    
-     _solver = new SOR(_geom, _param->Omega());
+    _u->Initialize(_geom->Velocity()[0]);
+
+    _solver = new SOR(_geom, _param->Omega());
         
     _t = 0.0;
     _dtlimit = _param->Dt();
@@ -32,7 +35,33 @@ Compute::~Compute() {
 // @ param printInfo print information about current solver state (residual
 // etc.)
 void Compute::TimeStep(bool printInfo) {
-    // TODO: see script
+    // TODO: see script p. 23
+    
+    // boundary_val(...)
+    _geom->Update_U(_u);
+    _geom->Update_V(_v);
+    _geom->Update_P(_p);
+
+    // compute_fg(...)
+    MomentumEqu(_dtlimit);
+
+    // compute_rhs(...)
+    RHS(_dtlimit);
+
+    // solver iteration
+    index_t itermax = _param->IterMax();
+    index_t it = 0;
+    real_t res = 0.0;
+    do {
+        it++;
+        res = _solver->Cycle(_p, _rhs);
+    } while(it<=itermax && res>_epslimit);
+    if(printInfo) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << std::endl;
+    
+    // compute_uv(...)
+    NewVelocities(_dtlimit);
+
+    _t += _dtlimit;
 }
 
 /// Returns the simulated time in total
@@ -119,8 +148,8 @@ void Compute::NewVelocities(const real_t & dt) {
 		// see script, p. 18, formular (3.1)
 		// TODO: mistake?! => u^(n+1) = F^(n) - dt*(dp/dx)^(n+1)
 		// _u->Cell(iit) = _F->Cell(iit) - dt*(_p->dx_r(iit));
-        _u->Cell(iit) = _u->Cell(iit) - dt*(_p->dx_r(iit));
-        _v->Cell(iit) = _v->Cell(iit) - dt*(_p->dy_r(iit));  
+        _u->Cell(iit) = _F->Cell(iit) - dt*(_p->dx_r(iit));
+        _v->Cell(iit) = _G->Cell(iit) - dt*(_p->dy_r(iit));
     }
 }
 

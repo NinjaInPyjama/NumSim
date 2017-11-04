@@ -25,6 +25,8 @@
 #include <cmath>
 #endif // _USE_MATH_DEFINES
 
+#include <iostream>
+
 #include "typedef.hpp"
 #include "grid.hpp"
 #include "iterator.hpp"
