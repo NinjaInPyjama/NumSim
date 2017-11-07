@@ -40,29 +40,25 @@ int main(int argc, char **argv) {
   VTK vtk(geom.Mesh(), geom.Size());
 
   // Create a VTK File in the folder VTK (must exist)
-  /*
+  
   vtk.Init("VTK/field");
   vtk.AddField("Velocity", comp.GetU(), comp.GetV());
   vtk.AddScalar("Pressure", comp.GetP());
   vtk.Finish();
-  */
-
-  // saveVTK(&vtk, &comp);
+  
 
   // Steps
   int i = 0;
-  while (i<400 && comp.GetTime() <= param.Tend()) {
+  while (comp.GetTime() <= param.Tend()) {
 	  i++;
 	  cout << "TimeStep: " << i << ", Simulation Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
 	  comp.TimeStep(false);
-	  /*
+	  
 	  vtk.Init("VTK/field");
 	  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
 	  vtk.AddScalar("Pressure", comp.GetP());
 	  vtk.Finish();
-	  */
-	  // saveVTK(&vtk, &comp);
-	   
+	     
   }
 
   comp.GetU()->print();
@@ -72,11 +68,4 @@ int main(int argc, char **argv) {
    int a = 0;
    cin >> a;
    return 0;
-}
-
-void saveVTK(VTK * vtk, Compute * comp ) {
-	vtk->Init("VTK/field");
-	vtk->AddField("Velocity", comp->GetU(), comp->GetV());
-	vtk->AddScalar("Pressure", comp->GetP());
-	vtk->Finish();
 }

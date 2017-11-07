@@ -14,7 +14,7 @@
 //    -------------
 //      u=0, v=0
 Geometry::Geometry() {
-    _size = multi_index_t(32);
+    _size = multi_index_t(16);
     _length  = multi_real_t (1.0, 1.0);
     _h  = multi_real_t (_length[0]/_size[0], _length[1]/_size[1]);
     _velocity = multi_real_t (0.0 , 0.0);
