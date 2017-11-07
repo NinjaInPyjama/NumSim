@@ -62,7 +62,7 @@ real_t Grid::Interpolate(const multi_real_t & pos) const {
     real_t pos_y = pos[1]*(_geom->Size()[1] - 3) + 1 - _offset[1];
 	index_t index_x = (index_t)pos_x;
 	index_t index_y = (index_t)pos_y;
-    
+
 	// Lower left data point
     real_t val_ll = _data[index_x + index_y*_geom->Size()[0]];
 	// Lower right data point
@@ -73,9 +73,9 @@ real_t Grid::Interpolate(const multi_real_t & pos) const {
     real_t val_ur = _data[index_x + 1 + (index_y + 1)*_geom->Size()[0]];
     
 	// Proportion in x-dim
-    real_t prop_x = pos_x - _offset[0] - (real_t)index_x; 
+    real_t prop_x = pos_x - (real_t)index_x; 
 	// Proportion in y-dim
-    real_t prop_y = pos_y - _offset[1] - (real_t)index_y;
+    real_t prop_y = pos_y - (real_t)index_y;
 
 	return (val_ll*(1.0 - prop_x) + prop_x*val_lr)*(1.0-prop_y) + prop_y*( val_ul*(1.0 - prop_x) + prop_x*val_ur );
 }

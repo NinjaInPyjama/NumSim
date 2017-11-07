@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
   comp.GetV()->print();
   comp.GetVelocity()->print();
 
-   int a = 0;
-   cin >> a;
-   return 0;
+  int a = 0;
+  cin >> a;
+  return 0;
 }
