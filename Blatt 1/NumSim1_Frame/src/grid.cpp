@@ -1,5 +1,7 @@
 #include "grid.hpp"
 
+#include <iostream>
+
 /// Constructs a grid based on a geometry
 Grid::Grid(const Geometry * geom) {
 	_data = new real_t[geom->Size()[0] * geom->Size()[1]];
@@ -21,6 +23,17 @@ Grid::Grid(const Geometry * geom, const multi_real_t & offset) {
 /// Deletes the grid
 Grid::~Grid() {}
 
+/// Prints the grid
+void Grid::print() const {
+	std::cout.precision(2);
+	for (int i = _geom->Size()[1] - 1; i >= 0; i--) {
+		for (int j = 0; j < _geom->Size()[0]; j++) {
+			std::cout << " " << _data[i*_geom->Size()[0] + j] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
 
 ///     Initializes the grid with a value
 void Grid::Initialize(const real_t & value) {
@@ -45,22 +58,24 @@ const real_t & Grid::Cell(const Iterator & it) const {
 /// Interpolate the value at an arbitrary position
 /// bilinear interpolation, 
 real_t Grid::Interpolate(const multi_real_t & pos) const {
-    index_t pos_x = (index_t)(pos[0] - _offset[0]); //integer value in x direction of lower left corner
-    index_t pos_y = (index_t)(pos[1] - _offset[1]); //integer value in y direction of lower left corner
+    real_t pos_x = pos[0]*(_geom->Size()[0] - 3) + 1 - _offset[0]; 
+    real_t pos_y = pos[1]*(_geom->Size()[1] - 3) + 1 - _offset[1];
+	index_t index_x = (index_t)pos_x;
+	index_t index_y = (index_t)pos_y;
     
 	// Lower left data point
-    real_t val_ll = _data[pos_x + pos_y*_geom->Size()[0]];
+    real_t val_ll = _data[index_x + index_y*_geom->Size()[0]];
 	// Lower right data point
-	real_t val_lr = _data[pos_x + 1 + pos_y*_geom->Size()[0]];
+	real_t val_lr = _data[index_x + 1 + index_y*_geom->Size()[0]];
 	// Upper left data point
-    real_t val_ul = _data[pos_x + (pos_y + 1)*_geom->Size()[0]];
+    real_t val_ul = _data[index_x + (index_y + 1)*_geom->Size()[0]];
 	// Upper right data point
-    real_t val_ur = _data[pos_x + 1 + (pos_y + 1)*_geom->Size()[0]];
+    real_t val_ur = _data[index_x + 1 + (index_y + 1)*_geom->Size()[0]];
     
 	// Proportion in x-dim
-    real_t prop_x = pos[0] - _offset[0] - (real_t)pos_x; 
+    real_t prop_x = pos_x - _offset[0] - (real_t)index_x; 
 	// Proportion in y-dim
-    real_t prop_y = pos[1] - _offset[1] - (real_t)pos_y;
+    real_t prop_y = pos_y - _offset[1] - (real_t)index_y;
 
 	return (val_ll*(1.0 - prop_x) + prop_x*val_lr)*(1.0-prop_y) + prop_y*( val_ul*(1.0 - prop_x) + prop_x*val_ur );
 }
@@ -98,12 +113,12 @@ real_t Grid::dy_central(const Iterator & it) const {
 
 /// Computes the central difference quatient of 2nd order in x-dim at [it]
 real_t Grid::dxx(const Iterator & it) const {
-	return ((Cell(it.Right()) - 2.0*Cell(it) + Cell(it.Left())) / (_geom->Mesh()[0]) * _geom->Mesh()[0]) ;
+	return (Cell(it.Right()) - 2.0*Cell(it) + Cell(it.Left())) / (_geom->Mesh()[0] * _geom->Mesh()[0]) ;
 }
 
 /// Computes the central difference quatient of 2nd order in y-dim at [it]
 real_t Grid::dyy(const Iterator & it) const {
-	return ((Cell(it.Top()) - 2.0*Cell(it) + Cell(it.Down())) / (_geom->Mesh()[1]) * _geom->Mesh()[1]);
+	return (Cell(it.Top()) - 2.0*Cell(it) + Cell(it.Down())) / (_geom->Mesh()[1] * _geom->Mesh()[1]);
 }
 
 

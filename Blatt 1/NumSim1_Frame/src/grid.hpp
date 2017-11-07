@@ -25,7 +25,7 @@
 #include <cmath>
 #endif // _USE_MATH_DEFINES
 
-// #include <iostream>
+ #include <iostream>
 
 #include "typedef.hpp"
 #include "geometry.hpp"
@@ -45,6 +45,9 @@ public:
 
   /// Deletes the grid
   ~Grid();
+
+  /// prints the grid
+  void print() const;
 
   ///     Initializes the grid with a value
   void Initialize(const real_t &value);

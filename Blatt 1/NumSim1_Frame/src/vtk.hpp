@@ -20,6 +20,7 @@
 #define __VTK_HPP
 
 //------------------------------------------------------------------------------
+#define _CRT_SECURE_NO_DEPRECATE
 #include <cstdio>
 
 #include "typedef.hpp"

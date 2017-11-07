@@ -20,9 +20,13 @@
 #define __GEOMETRY_HPP
 
 //------------------------------------------------------------------------------
+#define _CRT_SECURE_NO_DEPRECATE
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <string>
 
 #include "typedef.hpp"
 #include "grid.hpp"

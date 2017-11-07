@@ -53,6 +53,8 @@ real_t SOR::Cycle(Grid * grid, const Grid * rhs) const {
         grid->Cell(it) = grid->Cell(it) + _omega*( rhs->Cell(it) -grid->dxx(it) - grid->dyy(it))/(-2.0/(dx*dx) - 2.0/(dy*dy));
     }
     
+	_geom->Update_P(grid);
+
     real_t total_res = 0.0;
 	real_t local_res = 0.0;
 

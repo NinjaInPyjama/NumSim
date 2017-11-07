@@ -42,6 +42,7 @@ multi_index_t Iterator::Pos() const {
 /// Sets the iterator to the first element
 void Iterator::First() {
 	_value = 0;
+	_valid = true;
 }
 
 /// Goes to the next element of the iterator, disables it if position is end
@@ -96,6 +97,7 @@ InteriorIterator::InteriorIterator(const Geometry * geom) {
 /// Sets the iterator to the first element
 void InteriorIterator::First() {
 	_value = _geom->Size()[0] + 1;
+	_valid = true;
 }
 
 /// Goes to the next element of the iterator, disables it if position is end
@@ -137,6 +139,7 @@ void BoundaryIterator::SetBoundary(const index_t & boundary) {
 
 /// Sets the iterator to the first element
 void BoundaryIterator::First() {
+	_valid = true;
 	switch(_boundary) {
         case 0: // upper boundary
 			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) + 1;

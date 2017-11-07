@@ -20,7 +20,15 @@
 #define __PARAMETER_HPP
 
 //------------------------------------------------------------------------------
+#define _CRT_SECURE_NO_DEPRECATE
 #include "typedef.hpp"
+
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 //------------------------------------------------------------------------------
 class Parameter {

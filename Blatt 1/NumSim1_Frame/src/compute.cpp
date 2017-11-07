@@ -1,5 +1,7 @@
 #include "compute.hpp"
 
+using namespace std;
+
 /// Creates a compute instance with given geometry and parameter
 Compute::Compute(const Geometry * geom, const Parameter * param) {
     
@@ -9,16 +11,21 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     _tmp = new Grid(_geom);
     
     _F = new Grid(_geom, multi_real_t(1.0, 0.5));
+	_F->Initialize(0.0);
     _G = new Grid(_geom, multi_real_t(0.5, 1.0));
-    
+	_G->Initialize(0.0);
+
     _p = new Grid(_geom, multi_real_t(0.5, 0.5));
     _p->Initialize(_geom->Pressure());
     _v = new Grid(_geom, multi_real_t(0.5, 1.0));
     _v->Initialize(_geom->Velocity()[1]);
     _u = new Grid(_geom, multi_real_t(1.0, 0.5));
-    _u->Initialize(_geom->Velocity()[0]);
+	_u->Initialize(_geom->Velocity()[0]);
 
-    _solver = new SOR(_geom, _param->Omega());
+	_rhs = new Grid(_geom, multi_real_t(0.5, 0.5));
+	_rhs->Initialize(0.0);
+
+	_solver = new SOR(_geom, _param->Omega());
         
     _t = 0.0;
     _dtlimit = _param->Dt();
@@ -37,13 +44,16 @@ Compute::~Compute() {
 void Compute::TimeStep(bool printInfo) {
     // TODO: see script p. 23
     
-    // boundary_val(...)
-    _geom->Update_U(_u);
-    _geom->Update_V(_v);
-    _geom->Update_P(_p);
+	// boundary_val(...)
+	_geom->Update_U(_u);
+	_geom->Update_V(_v);
+	_geom->Update_P(_p);
 
     // compute_fg(...)
     MomentumEqu(_dtlimit);
+	_geom->Update_U(_F);
+	_geom->Update_V(_G);
+	//_F->print();
 
     // compute_rhs(...)
     RHS(_dtlimit);
@@ -55,12 +65,20 @@ void Compute::TimeStep(bool printInfo) {
     do {
         it++;
         res = _solver->Cycle(_p, _rhs);
-    } while(it<=itermax && res>_epslimit);
+		if(printInfo) std::cout << "Residual at iteration " << it << ": " << res << std::endl;
+    } while(it<itermax && res>_epslimit);
     if(printInfo) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << std::endl;
-    
+
+	//_p->print();
+
     // compute_uv(...)
     NewVelocities(_dtlimit);
 
+	// boundary_val(...)
+	_geom->Update_U(_u);
+	_geom->Update_V(_v);
+	_geom->Update_P(_p);
+	
     _t += _dtlimit;
 }
 
@@ -95,7 +113,7 @@ const Grid * Compute::GetRHS() const {
 const Grid * Compute::GetVelocity() {
     InteriorIterator iit = InteriorIterator(_geom);
     Grid * abs_vel = new Grid(_geom);
-	multi_real_t cell_center = multi_real_t(0.5, 0.5);
+	multi_real_t cell_center = multi_real_t(0.5*_geom->Mesh()[0], 0.5*_geom->Mesh()[1]);
 	real_t u_ip = 0.0; // storage for interpolated u to center of cells
 	real_t v_ip = 0.0; // storage for interpolated v to center of cells
 
@@ -103,10 +121,36 @@ const Grid * Compute::GetVelocity() {
     for(iit.First(); iit.Valid(); iit.Next()){
         // Interpolating the velocities to center of cells
         multi_index_t cell_pos = iit.Pos();
-        v_ip = _v->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
-        u_ip = _u->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
+		v_ip = (_v->Cell(iit.Down()) + _v->Cell(iit)) / 2.0; // _v->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
+		u_ip = (_u->Cell(iit.Left()) + _u->Cell(iit)) / 2.0; // _u->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
         abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
+
+	BoundaryIterator bit = BoundaryIterator(_geom);
+	bit.SetBoundary(0);
+	abs_vel->Cell(bit.Left()) = 0;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		abs_vel->Cell(bit) = 0.0;
+	}
+	// Iteration over right boundary
+	bit.SetBoundary(1);
+	abs_vel->Cell(bit.Top()) = 0;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		abs_vel->Cell(bit) = 0.0;
+	}
+	// Iteration over lower boundary
+	bit.SetBoundary(2);
+	abs_vel->Cell(bit.Right()) = 0;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		abs_vel->Cell(bit) = 0.0;
+	}
+
+	// Iteration over left boundary
+	bit.SetBoundary(3);
+	abs_vel->Cell(bit.Down()) = 0;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		abs_vel->Cell(bit) = 0.0;
+	}
     return abs_vel;
 }
 
@@ -127,7 +171,7 @@ const Grid * Compute::GetVorticity() {
     for(iit.First();iit.Valid();iit.Next()){ 
         // Calculating vorticity by dv/dx - du/dy
         multi_index_t cell_pos = iit.Pos();
-        vort->Cell(iit) = dv_dx->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]))
+		vort->Cell(iit) = 0.0; //  dv_dx->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]))
                                 - du_dy->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1]  + cell_center[1]));
     }
     return vort;
@@ -159,8 +203,8 @@ void Compute::MomentumEqu(const real_t & dt) {
 
     for(iit.First();iit.Valid();iit.Next()){
 		// see script, p. 18, formular (3.2)
-		real_t A = ((_u->dxx(iit) + _u->dyy(iit)) / _param->Re() - _u->DC_du2_x(iit, _param->Alpha()) - _u->DC_duv_y(iit, _param->Alpha(), _v));
-		real_t B = ((_v->dxx(iit) + _v->dyy(iit)) / _param->Re() - _v->DC_dv2_y(iit, _param->Alpha()) - _v->DC_duv_x(iit, _param->Alpha(), _u));
+		real_t A = (_u->dxx(iit) + _u->dyy(iit)) / _param->Re() - _u->DC_du2_x(iit, _param->Alpha()) - _u->DC_duv_y(iit, _param->Alpha(), _v);
+		real_t B = (_v->dxx(iit) + _v->dyy(iit)) / _param->Re() - _v->DC_dv2_y(iit, _param->Alpha()) - _v->DC_duv_x(iit, _param->Alpha(), _u);
 		_F->Cell(iit) = _u->Cell(iit) + dt*A;
 		_G->Cell(iit) = _v->Cell(iit) + dt*B;
     }
