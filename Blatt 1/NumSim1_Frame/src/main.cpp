@@ -37,6 +37,8 @@ int main(int argc, char **argv) {
   Compute comp(&geom, &param);
 
   // Create a VTK generator
+  multi_index_t size = geom.Size();
+  multi_real_t newMesh = multi_real_t(geom.Mesh()[0]*size[0]/(size[0]-1), geom.Mesh()[1] * size[1] / (size[1] - 1));
   VTK vtk(geom.Mesh(), geom.Size());
 
   //comp.GetV()->Interpolate(multi_real_t(1.0, 0.5));
