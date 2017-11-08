@@ -123,11 +123,12 @@ void Geometry::Update_U(Grid * u) const {
     
     // Iteration over upper boundary
     bit.SetBoundary(0);
-    bit.First(); 
+    bit.First();
 	u->Cell(bit.Left()) = 2.0; // Upper left corner
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		u->Cell(bit) = 2.0 - u->Cell(bit.Down()); //2.0
 	}
+	u->Cell(bit) = 2.0;
 	
     // Iteration over lower boundary
 	bit.SetBoundary(2);

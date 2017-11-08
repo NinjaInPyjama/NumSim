@@ -58,8 +58,8 @@ const real_t & Grid::Cell(const Iterator & it) const {
 /// Interpolate the value at an arbitrary position
 /// bilinear interpolation, 
 real_t Grid::Interpolate(const multi_real_t & pos) const {
-    real_t pos_x = pos[0]*(_geom->Size()[0] - 3) + 1 - _offset[0]; 
-    real_t pos_y = pos[1]*(_geom->Size()[1] - 3) + 1 - _offset[1];
+    real_t pos_x = pos[0]*(_geom->Size()[0] - 2) + 1 - _offset[0]; 
+    real_t pos_y = pos[1]*(_geom->Size()[1] - 2) + 1 - _offset[1];
 	index_t index_x = (index_t)pos_x;
 	index_t index_y = (index_t)pos_y;
 
@@ -76,6 +76,8 @@ real_t Grid::Interpolate(const multi_real_t & pos) const {
     real_t prop_x = pos_x - (real_t)index_x; 
 	// Proportion in y-dim
     real_t prop_y = pos_y - (real_t)index_y;
+
+	//std::cout << pos_x << " " << pos_y << " " << index_x << " " << index_y << " " << prop_x << " " << prop_y << std::endl;
 
 	return (val_ll*(1.0 - prop_x) + prop_x*val_lr)*(1.0-prop_y) + prop_y*( val_ul*(1.0 - prop_x) + prop_x*val_ur );
 }

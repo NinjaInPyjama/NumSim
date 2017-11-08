@@ -21,6 +21,7 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     _v->Initialize(_geom->Velocity()[1]);
     _u = new Grid(_geom, multi_real_t(1.0, 0.5));
 	_u->Initialize(_geom->Velocity()[0]);
+	_geom->Update_U(_u);
 
 	_rhs = new Grid(_geom, multi_real_t(0.5, 0.5));
 	_rhs->Initialize(0.0);
@@ -190,8 +191,6 @@ void Compute::NewVelocities(const real_t & dt) {
     
     for(iit.First();iit.Valid();iit.Next()){
 		// see script, p. 18, formular (3.1)
-		// TODO: mistake?! => u^(n+1) = F^(n) - dt*(dp/dx)^(n+1)
-		// _u->Cell(iit) = _F->Cell(iit) - dt*(_p->dx_r(iit));
         _u->Cell(iit) = _F->Cell(iit) - dt*(_p->dx_r(iit));
         _v->Cell(iit) = _G->Cell(iit) - dt*(_p->dy_r(iit));
     }
