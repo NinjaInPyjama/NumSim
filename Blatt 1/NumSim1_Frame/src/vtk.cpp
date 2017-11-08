@@ -18,6 +18,7 @@
 #include "vtk.hpp"
 #include <cstring>
 #include <cstdio>
+#include <iostream>
 //------------------------------------------------------------------------------
 uint32_t VTK::_cnt = 0;
 //------------------------------------------------------------------------------
@@ -155,6 +156,9 @@ void VTK::AddField(const char *title, const Grid *v1, const Grid *v2,
     pos[1] = (double)y * _h[1] + _offset[1];
     for (uint32_t x = 0; x < _size[0]; ++x) {
       pos[0] = (double)x * _h[0] + _offset[0];
+	  if ((double)v1->Interpolate(pos) > 10) {
+		  std::cout << x << " " << y << " " << (double)v1->Interpolate(pos) << std::endl;
+	  }
       fprintf(_handle, "%le %le %le\n", (double)v1->Interpolate(pos),
               (double)v2->Interpolate(pos), (double)v3->Interpolate(pos));
     }

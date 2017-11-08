@@ -37,9 +37,8 @@ int main(int argc, char **argv) {
   Compute comp(&geom, &param);
 
   // Create a VTK generator
-  multi_index_t size = geom.Size();
-  multi_real_t newMesh = multi_real_t(geom.Mesh()[0]*size[0]/(size[0]-1), geom.Mesh()[1] * size[1] / (size[1] - 1));
-  VTK vtk(geom.Mesh(), geom.Size());
+  multi_index_t newSize = multi_index_t(geom.Size()[0] - 1, geom.Size()[1] - 1);
+  VTK vtk(geom.Mesh(), newSize);
 
   //comp.GetV()->Interpolate(multi_real_t(1.0, 0.5));
 
@@ -51,6 +50,7 @@ int main(int argc, char **argv) {
   vtk.AddScalar("Pressure", comp.GetP());
   vtk.Finish();
   
+
   
   // Steps
   int i = 0;
@@ -59,21 +59,19 @@ int main(int argc, char **argv) {
 	  cout << "TimeStep: " << i << ", Simulated Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
 	  comp.TimeStep(false);
 	  
+	  
 	  vtk.Init("VTK/field");
 	  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
-	  /*
-	  for (int j = 0; j <= 10; j++) {
-		  cout << "Pos (1.0 / " << j / 10.0 << ") => U = " << comp.GetU()->Interpolate(multi_real_t(1.0, j / 10.0)) << ", V = " << comp.GetV()->Interpolate(multi_real_t(1.0, i / 10.0)) << endl;
-	  }
-	  */
 	  vtk.AddScalar("Pressure", comp.GetP());
 	  vtk.Finish();
 	  
   }
 
-  comp.GetU()->print();
-  comp.GetV()->print();
+  //comp.GetU()->print();
+  //comp.GetV()->print();
   
+  cout << geom.Size()[0] << " " << geom.Size()[1] << " " << 1 / geom.Mesh()[0] << endl;
+
   //comp.GetVelocity()->print();
   
   int a = 0;

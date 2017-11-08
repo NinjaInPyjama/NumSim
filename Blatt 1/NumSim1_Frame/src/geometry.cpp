@@ -14,16 +14,13 @@
 //    -------------
 //      u=0, v=0
 Geometry::Geometry() {
-    _size = multi_index_t(64);
-    _length  = multi_real_t (1.0, 1.0);
-    _h  = multi_real_t (_length[0]/_size[0], _length[1]/_size[1]);
-    _velocity = multi_real_t (0.0 , 0.0);
-    _pressure = 0.0;    
-    
-    //Load("default.geom");
-    
-    //Load("actual.geom");
-    
+    Load("default.geom");
+	// Load("actual.geom");
+
+	_h = multi_real_t(_length[0] / (_size[0] - 2), _length[1] / (_size[1] - 2));
+
+	// _size = multi_index_t(66);
+	// _length = multi_real_t(1.0, 1.0);
 }
 
 
@@ -40,8 +37,8 @@ void Geometry::Load(const char * file) {
         
         if (strcmp(name,"size") == 0) {
             if (fscanf(handle," %i %i\n",&inval_index[0],&inval_index[1])) {
-                _size[0] = inval_index[0];
-                _size[1] = inval_index[1];
+                _size[0] = inval_index[0]+2;
+                _size[1] = inval_index[1]+2;
             }
             continue;
         }
@@ -128,7 +125,6 @@ void Geometry::Update_U(Grid * u) const {
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		u->Cell(bit) = 2.0 - u->Cell(bit.Down()); //2.0
 	}
-	u->Cell(bit) = 2.0;
 	
     // Iteration over lower boundary
 	bit.SetBoundary(2);
