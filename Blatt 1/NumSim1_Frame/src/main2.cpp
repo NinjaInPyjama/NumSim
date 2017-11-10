@@ -42,11 +42,15 @@ int main(int argc, char **argv) {
   // Create a VTK generator
   multi_index_t newSize = multi_index_t(geom.Size()[0] - 1, geom.Size()[1] - 1);
   VTK vtk(geom.Mesh(), newSize);
+<<<<<<< HEAD
 
   uint32_t start = 0.0;
   
   // Create a VTK File in the folder VTK (must exist)  
+=======
+>>>>>>> f8621bc9564672a5bdeac85656f50b27818d24f5
   
+  // Create a VTK File in the folder VTK (must exist)  
   vtk.Init("VTK/field");
   vtk.AddField("Velocity", comp.GetU(), comp.GetV());
   vtk.AddScalar("Pressure", comp.GetP());
@@ -60,11 +64,16 @@ int main(int argc, char **argv) {
 	  //i++;
 	  // cout << "TimeStep: " << i << ", Simulated Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
 	  comp.TimeStep(false);
+<<<<<<< HEAD
 	  /*
+=======
+	  
+>>>>>>> f8621bc9564672a5bdeac85656f50b27818d24f5
 	  vtk.Init("VTK/field");
 	  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
 	  vtk.AddScalar("Pressure", comp.GetP());
 	  vtk.Finish();
+<<<<<<< HEAD
 	  */
   }
   
@@ -75,6 +84,10 @@ int main(int argc, char **argv) {
   vtk.AddScalar("Pressure", comp.GetP());
   vtk.Finish();
 
+=======
+  }
+  
+>>>>>>> f8621bc9564672a5bdeac85656f50b27818d24f5
   int a = 0;
   cin >> a;
   return 0;
