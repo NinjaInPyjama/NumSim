@@ -26,7 +26,7 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
 	_rhs = new Grid(_geom, multi_real_t(0.5, 0.5));
 	_rhs->Initialize(0.0);
 
-	_solver = new SOR(_geom, _param->Omega());
+	_solver = new SOR(_geom); //, _param->Omega());
         
     _t = 0.0;
     _dtlimit = _param->Dt();

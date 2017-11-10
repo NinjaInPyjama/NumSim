@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <time.h>
 
 #include "typedef.hpp"
 #include "geometry.hpp"
@@ -36,44 +37,44 @@ int main(int argc, char **argv) {
   // Create the fluid solver
   Compute comp(&geom, &param);
 
+  cout << param.IterMax() << endl;
+
   // Create a VTK generator
   multi_index_t newSize = multi_index_t(geom.Size()[0] - 1, geom.Size()[1] - 1);
   VTK vtk(geom.Mesh(), newSize);
 
-  //comp.GetV()->Interpolate(multi_real_t(1.0, 0.5));
-
-  // Create a VTK File in the folder VTK (must exist)
-  //comp.GetU()->Interpolate(multi_real_t(1.0, 0.5));
+  uint32_t start = 0.0;
+  
+  // Create a VTK File in the folder VTK (must exist)  
   
   vtk.Init("VTK/field");
   vtk.AddField("Velocity", comp.GetU(), comp.GetV());
   vtk.AddScalar("Pressure", comp.GetP());
   vtk.Finish();
   
-
   
   // Steps
   int i = 0;
+  start = clock();
   while (comp.GetTime() <= param.Tend()) {
-	  i++;
-	  cout << "TimeStep: " << i << ", Simulated Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
+	  //i++;
+	  // cout << "TimeStep: " << i << ", Simulated Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
 	  comp.TimeStep(false);
-	  
-	  
+	  /*
 	  vtk.Init("VTK/field");
 	  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
 	  vtk.AddScalar("Pressure", comp.GetP());
 	  vtk.Finish();
-	  
+	  */
   }
-
-  //comp.GetU()->print();
-  //comp.GetV()->print();
   
-  cout << geom.Size()[0] << " " << geom.Size()[1] << " " << 1 / geom.Mesh()[0] << endl;
+  cout << "Run Time: " << (float)(clock() - start)/1000.0 << " s" << endl;
 
-  //comp.GetVelocity()->print();
-  
+  vtk.Init("VTK/field");
+  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
+  vtk.AddScalar("Pressure", comp.GetP());
+  vtk.Finish();
+
   int a = 0;
   cin >> a;
   return 0;

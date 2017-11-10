@@ -12,7 +12,7 @@ Parameter::Parameter() {
     _omega = 1.7;
     _alpha = 0.9;
     _dt = 0.05;
-    _tend = 50;
+    _tend = 20;
     _eps = 0.001;
     _tau = 0.5;
     _itermax = 100;
