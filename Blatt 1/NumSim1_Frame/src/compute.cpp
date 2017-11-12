@@ -22,6 +22,10 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     _p = new Grid(_geom, multi_real_t(0.5, 0.5));
     _p->Initialize(_geom->Pressure());
 
+	_geom->Update_U(_u);
+	_geom->Update_V(_v);
+	_geom->Update_P(_p);
+
 	_rhs = new Grid(_geom, multi_real_t(0.5, 0.5));
 	_rhs->Initialize(0.0);
 

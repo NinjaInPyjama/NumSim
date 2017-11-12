@@ -41,14 +41,14 @@ int main(int argc, char **argv) {
   VTK vtk(geom.Mesh(), geom.Length());
 
   int32_t start = 0.0;
-    
+  
   // Create a VTK File in the folder VTK (must exist)
-  /*
+  
   vtk.Init("VTK/field");
   vtk.AddField("Velocity", comp.GetU(), comp.GetV());
   vtk.AddScalar("Pressure", comp.GetP());
   vtk.Finish();
-  */
+
   
   // Steps
   int i = 0;
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
   vtk.AddField("Velocity", comp.GetU(), comp.GetV());
   vtk.AddScalar("Pressure", comp.GetP());
   vtk.Finish();
-
+  
 
   int a = 0;
   cin >> a;
