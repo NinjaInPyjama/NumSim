@@ -15,12 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "typedef.hpp"
-#include "geometry.hpp"
 
 //------------------------------------------------------------------------------
 #ifndef __ITERATOR_HPP
 #define __ITERATOR_HPP
+
+//------------------------------------------------------------------------------
+#include "typedef.hpp"
+#include "geometry.hpp"
+
 //------------------------------------------------------------------------------
 /** Iterator base class
 */

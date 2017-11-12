@@ -51,7 +51,12 @@
                 "C:/cygwin64/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++",
                 "${workspaceRoot}",
                 "${workspaceRoot}/src",
-                "c:/cygwin64/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin"
+                "c:/cygwin64/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/x86_64-pc-cygwin",
+                "c:/cygwin64/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++",
+                "c:/cygwin64/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++",
+                "c:/cygwin64/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++",
+                "c:/cygwin64/usr/include",
+                "c:/cygwin64/lib/gcc/x86_64-pc-cygwin/6.4.0/include/c++/tr1"
             ],
             "defines": [
                 "_DEBUG",

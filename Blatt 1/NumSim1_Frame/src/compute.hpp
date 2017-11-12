@@ -15,11 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "typedef.hpp"
-#include <cmath>
 //------------------------------------------------------------------------------
 #ifndef __COMPUTE_HPP
 #define __COMPUTE_HPP
+
+//------------------------------------------------------------------------------
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif // _USE_MATH_DEFINES
+
+#include <iostream>
+
+#include "typedef.hpp"
+#include "grid.hpp"
+#include "iterator.hpp"
+#include "parameter.hpp"
+#include "solver.hpp"
+
 //------------------------------------------------------------------------------
 class Compute {
 public:

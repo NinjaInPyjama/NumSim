@@ -1,6 +1,4 @@
 #include "grid.hpp"
-#include <iostream>
-using namespace std;
 
 /// Constructs a grid based on a geometry
 Grid::Grid(const Geometry * geom) {
@@ -23,8 +21,19 @@ Grid::Grid(const Geometry * geom, const multi_real_t & offset) {
 /// Deletes the grid
 Grid::~Grid() {}
 
+/// Prints the values of grid
+void Grid::print() const {
+	std::cout.precision(2);
+	for (int i = _geom->Size()[1] - 1; i >= 0; i--) {
+		for (int j = 0; j < _geom->Size()[0]; j++) {
+			std::cout << " " << _data[i*_geom->Size()[0] + j] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
 
-///     Initializes the grid with a value
+///  Initializes the grid with a value
 void Grid::Initialize(const real_t & value) {
     index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
     for (index_t i = 0; i < num_cells; i++) {
@@ -44,28 +53,30 @@ const real_t & Grid::Cell(const Iterator & it) const {
 }
 
 
-/// Interpolate the value at a arbitrary position
-///bilinear interpolation, 
+/// Interpolate the value at an arbitrary position by bilinear interpolation
 real_t Grid::Interpolate(const multi_real_t & pos) const {
-    index_t pos_x = index_t(pos[0] - _offset[0]); //integer value in x direction of lower left corner
-    //cout << pos_x << endl;
-    index_t pos_y = index_t(pos[1] - _offset[1]); //integer value in y direction of lower left corner
-    //cout << pos_y << endl;
+    real_t pos_x = pos[0]*(_geom->Size()[0] - 2) + 1 - _offset[0]; 
+    real_t pos_y = pos[1]*(_geom->Size()[1] - 2) + 1 - _offset[1];
+	index_t index_x = (index_t)pos_x;
+	index_t index_y = (index_t)pos_y;
+
+	// Lower left data point
+    real_t val_ll = _data[index_x + index_y*_geom->Size()[0]];
+	// Lower right data point
+	real_t val_lr = _data[index_x + 1 + index_y*_geom->Size()[0]];
+	// Upper left data point
+    real_t val_ul = _data[index_x + (index_y + 1)*_geom->Size()[0]];
+	// Upper right data point
+    real_t val_ur = _data[index_x + 1 + (index_y + 1)*_geom->Size()[0]];
     
-    real_t unten_links = _data[pos_x + pos_y*_geom->Size()[0]]; //value of field in lower left corner
-    //cout << unten_links << endl;
-    real_t unten_rechts = _data[pos_x + 1 + pos_y*_geom->Size()[0]];
-    //cout << unten_rechts << endl;
-    real_t oben_links = _data[pos_x + (pos_y + 1)*_geom->Size()[0]];
-    //cout << oben_links << endl;
-    real_t oben_rechts = _data[pos_x + 1 + (pos_y + 1)*_geom->Size()[0]];
-    //cout << oben_rechts << endl;
-    
-    real_t anteil_x = pos[0] - _offset[0] - real_t(pos_x); 
-    //cout << anteil_x << endl;
-    real_t anteil_y = pos[1] - _offset[1] - real_t(pos_y);
-    //cout << anteil_y << endl;
-	return (unten_links*(1.0 - anteil_x) + anteil_x*unten_rechts)*(1.0-anteil_y) + anteil_y*( oben_links*(1.0 - anteil_x) + anteil_x*oben_rechts );
+	// Proportion in x-dim
+    real_t prop_x = pos_x - (real_t)index_x; 
+	// Proportion in y-dim
+    real_t prop_y = pos_y - (real_t)index_y;
+
+	//std::cout << pos_x << " " << pos_y << " " << index_x << " " << index_y << " " << prop_x << " " << prop_y << std::endl;
+
+	return (val_ll*(1.0 - prop_x) + prop_x*val_lr)*(1.0-prop_y) + prop_y*( val_ul*(1.0 - prop_x) + prop_x*val_ur );
 }
 
 
@@ -81,32 +92,32 @@ real_t Grid::dx_r(const Iterator & it) const {
 
 /// Computes the left-sided difference quatient in y-dim at [it]
 real_t Grid::dy_l(const Iterator & it) const {
-	return (Cell(it.Top()) - Cell(it)) / _geom->Mesh()[1];
+	return (Cell(it) - Cell(it.Down())) / _geom->Mesh()[1];
 }
 
 /// Computes the right-sided difference quatient in x-dim at [it]
 real_t Grid::dy_r(const Iterator & it) const {
-	return (Cell(it) - Cell(it.Down())) / _geom->Mesh()[1];
-}
-
-/// Computes the central difference quatient of 2nd order in x-dim at [it]
-real_t Grid::dxx(const Iterator & it) const {
-	return ((Cell(it.Right()) -2.0*Cell(it) + Cell(it.Left())) / (_geom->Mesh()[0])) / (_geom->Mesh()[0]) ;
-}
-
-/// Computes the central difference quatient of 2nd order in y-dim at [it]
-real_t Grid::dyy(const Iterator & it) const {
-	return ((Cell(it.Top()) -2.0*Cell(it) + Cell(it.Down())) / (_geom->Mesh()[1])) / (_geom->Mesh()[1]);
+	return (Cell(it.Top()) - Cell(it)) / _geom->Mesh()[1];
 }
 
 /// Computes the central difference quatient of 1st order in x-dim at [it]
 real_t Grid::dx_central(const Iterator & it) const {
-	return (Cell(it.Right()) - Cell(it.Left())) / (2.0 * _geom->Mesh()[0]) ;
+	return (Cell(it.Right()) - Cell(it.Left())) / (2.0 * _geom->Mesh()[0]);
 }
 
 /// Computes the central difference quatient of 1st order in y-dim at [it]
 real_t Grid::dy_central(const Iterator & it) const {
 	return (Cell(it.Top()) - Cell(it.Down())) / (2.0 * _geom->Mesh()[1]);
+}
+
+/// Computes the central difference quatient of 2nd order in x-dim at [it]
+real_t Grid::dxx(const Iterator & it) const {
+	return (Cell(it.Right()) - 2.0*Cell(it) + Cell(it.Left())) / (_geom->Mesh()[0] * _geom->Mesh()[0]) ;
+}
+
+/// Computes the central difference quatient of 2nd order in y-dim at [it]
+real_t Grid::dyy(const Iterator & it) const {
+	return (Cell(it.Top()) - 2.0*Cell(it) + Cell(it.Down())) / (_geom->Mesh()[1] * _geom->Mesh()[1]);
 }
 
 
@@ -132,31 +143,95 @@ real_t Grid::DC_vdv_y(const Iterator & it, const real_t & alpha) const {
 
 
 
-/// Computes du²/dx with the donor cell method
+/// Computes du^2/dx with the donor cell method
 real_t Grid::DC_du2_x(const Iterator & it, const real_t & alpha) const {
-	return 0;
+	// see script, p.22
+
+	const real_t dx = _geom->Mesh()[0];
+
+	// Value of u at iterator cell (u_{i,j})
+	const real_t val_u = Cell(it);
+	// Value of u at the right neighbor of the iterator cell (u_{i+1,j})
+	const real_t val_u_r = Cell(it.Right());
+	// Value of u at the left neighbor of the iterator cell (u_{i-1,j})
+	const real_t val_u_l = Cell(it.Left());
+	// Interpolated value of u between this and its right neighbor cell (u_{i+1/2,j})
+	const real_t val_u_cr = (val_u_r + val_u) / 2.0;
+	// Interpolated value of u between this and its left neighbor cell (u_{i-1/2,j})
+	const real_t val_u_cl = (val_u + val_u_l) / 2.0;
+	return (val_u_cr * val_u_cr - val_u_cl * val_u_cl) / dx
+			+ alpha * (abs(val_u_cr) * (val_u - val_u_r) / 2.0 - abs(val_u_cl) * (val_u_l - val_u) / 2.0) / dx;
 }
 
-/// Computes v*dv/dy with the donor cell method
+/// Computes dv^2/dy with the donor cell method
 real_t Grid::DC_dv2_y(const Iterator & it, const real_t & alpha) const {
-	return 0;
+	// see script, p.22
+
+	const real_t dy = _geom->Mesh()[1];
+
+	// Value of v at iterator cell (v_{i,j})
+	const real_t val_v = Cell(it);
+	// Value of v at the upper neighbor (top) of the iterator cell (v_{i,j+1})
+	const real_t val_v_t = Cell(it.Top());
+	// Value of v at the lower neighbor (down) of the iterator cell (v_{i,j-1})
+	const real_t val_v_d = Cell(it.Down());
+	// Interpolated value of v between this and its upper neighbor cell (v_{i,j+1/2})
+	const real_t val_v_ct = (val_v_t + val_v) / 2.0;
+	// Interpolated value of v between this and its lower neighbor cell (v_{i,j-1/2})
+	const real_t val_v_cd = (val_v + val_v_d) / 2.0;
+	return (val_v_ct * val_v_ct - val_v_cd * val_v_cd) / dy
+			+ alpha * (abs(val_v_ct) * (val_v - val_v_t) / 2.0 - abs(val_v_cd) * (val_v_d - val_v) / 2.0) / dy;
 }
 
-/// Computes v*dv/dy with the donor cell method
-real_t Grid::DC_duv_y(const Iterator & it, const real_t & alpha, const Grid * u) const {
-	return 0;
+/// Computes d(uv)/dx with the donor cell method
+real_t Grid::DC_duv_x(const Iterator & it, const real_t & alpha, const Grid * u) const {
+	// see script, p.22
+
+	const real_t dx = _geom->Mesh()[0];
+
+	// Value of v at iterator cell (v_{i,j})
+	const real_t val_v = Cell(it);
+	// Value of v at the right neighbor of the iterator cell (v_{i+1,j})
+	const real_t val_v_r = Cell(it.Right());
+	// Value of u at the left neighbor of the iterator cell (v_{i-1,j})
+	const real_t val_v_l = Cell(it.Left());
+
+	// Interpolated value of u between this and its upper neighbor cell (u_{i,j+1/2})
+	const real_t val_u_ct = (u->Cell(it.Top()) + u->Cell(it)) / 2.0;
+	// Interpolated value of u between the iterator cell's left and its upper left neighbor cell (u_{i-1,j+1/2})
+	const real_t val_u_ctl = (u->Cell(it.Left().Top()) + u->Cell(it.Left())) / 2.0;
+
+	return (val_u_ct * (val_v + val_v_r) / 2.0 - val_u_ctl * (val_v_l + val_v) / 2.0) / dx +
+			+ alpha * (abs(val_u_ct) * (val_v - val_v_r) / 2.0 - abs(val_u_ctl) * (val_v_l - val_v) / 2.0) / dx;
 }
 
-/// Computes v*dv/dy with the donor cell method
-real_t Grid::DC_duv_x(const Iterator & it, const real_t & alpha, const Grid * v) const {
-	return 0;
+/// Computes d(uv)/dy with the donor cell method
+real_t Grid::DC_duv_y(const Iterator & it, const real_t & alpha, const Grid * v) const {
+	// see script, p.22
+
+	const real_t dy = _geom->Mesh()[1];
+
+	// Value of u at iterator cell (u_{i,j})
+	const real_t val_u = Cell(it);
+	// Value of u at the upper neighbor of the iterator cell (u_{i,j+1})
+	const real_t val_u_t = Cell(it.Top());
+	// Value of u at the lower neighbor of the iterator cell (u_{i,j-1})
+	const real_t val_u_d = Cell(it.Down());
+
+	// Interpolated value of v between this and its right neighbor cell (v_{i+1/2,j})
+	const real_t val_v_cr = (v->Cell(it.Right()) + v->Cell(it)) / 2.0;
+	// Interpolated value of v between the iterator cell's lower and its lower right neighbor cell (v_{i+1/2,j-1})
+	const real_t val_v_cdr = (v->Cell(it.Right().Down()) + v->Cell(it.Down())) / 2.0;
+
+	return (val_v_cr * (val_u + val_u_t) / 2.0 - val_v_cdr * (val_u_d + val_u) / 2.0) / dy 
+			+ alpha * (abs(val_v_cr) * (val_u - val_u_t) / 2.0 - abs(val_v_cdr) * (val_u_d - val_u) / 2.0) / dy;
 }
 
 
 /// Returns the maximal value of the grid
 real_t Grid::Max() const {
 	real_t max = _data[0];
-	index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
+	const index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
 	for (index_t i = 1; i < num_cells; i++) {
 		if(max < _data[i]) max = _data[i];
 	}
@@ -166,7 +241,7 @@ real_t Grid::Max() const {
 /// Returns the minimal value of the grid
 real_t Grid::Min() const {
 	real_t min = _data[0];
-	index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
+	const index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
 	for (index_t i = 1; i < num_cells; i++) {
 		if (min > _data[i]) min = _data[i];
 	}
@@ -176,7 +251,7 @@ real_t Grid::Min() const {
 /// Returns the absolute maximal value
 real_t Grid::AbsMax() const {
 	real_t max = abs(_data[0]);
-	index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
+	const index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
 	for (index_t i = 1; i < num_cells; i++) {
 		if (max < abs(_data[i])) max = abs(_data[i]);
 	}

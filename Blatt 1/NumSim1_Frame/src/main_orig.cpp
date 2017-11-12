@@ -19,7 +19,7 @@
 #include "compute.hpp"
 #include "geometry.hpp"
 #include "parameter.hpp"
-#include "visu.hpp"
+//#include "visu.hpp"
 #include "vtk.hpp"
 
 int main(int argc, char **argv) {

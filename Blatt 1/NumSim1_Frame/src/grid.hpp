@@ -15,14 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//------------------------------------------------------------------------------
+#ifndef __GRID_HPP
+#define __GRID_HPP
+
+//------------------------------------------------------------------------------
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
 #include <cmath>
+#endif // _USE_MATH_DEFINES
+
+#include <iostream>
+
 #include "typedef.hpp"
 #include "geometry.hpp"
 #include "iterator.hpp"
 
-//------------------------------------------------------------------------------
-#ifndef __GRID_HPP
-#define __GRID_HPP
 //------------------------------------------------------------------------------
 class Grid {
 public:
@@ -37,6 +45,9 @@ public:
 
   /// Deletes the grid
   ~Grid();
+
+  /// prints the grid
+  void print() const;
 
   ///     Initializes the grid with a value
   void Initialize(const real_t &value);
