@@ -32,7 +32,7 @@ Iterator::operator const index_t&() const {
 multi_index_t Iterator::Pos() const {
 	if (_valid) { 
 		index_t xPos = (_value % _geom->Size()[0]) ; // Getting the xPos by using the modulu operator
-		index_t yPos = (index_t)(real_t(_value)/ real_t(_geom->Size()[0])) ; // Getting the yPos by using division and floor operator
+		index_t yPos = (index_t)(real_t(_value) / real_t(_geom->Size()[0])) ; // Getting the yPos by using division and floor operator
 		return multi_index_t(xPos, yPos);
 	}
 	else return multi_index_t(-1);
@@ -86,6 +86,7 @@ Iterator Iterator::Down() const {
 //------------------------------------------------------------------------------
 /** Iterator for interior cells
 */
+
 /// Construct a new InteriorIterator
 InteriorIterator::InteriorIterator(const Geometry * geom) {
 	_geom = geom;
@@ -101,7 +102,7 @@ void InteriorIterator::First() {
 }
 
 /// Goes to the next element of the iterator, disables it if position is end
-// Iterating over inner cells => has to skip a cell when on right border
+// Iterating over inner cells => has to skip cells when on right border
 // Inner cells (*):
 // 0 0 0 0 0 0
 // 0 * * * * 0
@@ -111,7 +112,7 @@ void InteriorIterator::First() {
 // 0 0 0 0 0 0
 void InteriorIterator::Next() {
 	_value = ((_value + 2) % _geom->Size()[0] == 0) ? _value + 3 : _value + 1;
-	_valid = (_value <= _geom->Size()[0] * (_geom->Size()[1] - 1) - 2);
+	_valid = _value <= _geom->Size()[0] * (_geom->Size()[1] - 1) - 2;
 }
 
 //------------------------------------------------------------------------------

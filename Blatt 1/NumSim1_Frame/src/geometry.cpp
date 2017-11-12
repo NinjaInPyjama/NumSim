@@ -18,9 +18,6 @@ Geometry::Geometry() {
 	// Load("actual.geom");
 
 	_h = multi_real_t(_length[0] / (_size[0] - 2), _length[1] / (_size[1] - 2));
-
-	// _size = multi_index_t(66);
-	// _length = multi_real_t(1.0, 1.0);
 }
 
 
@@ -101,9 +98,9 @@ const real_t & Geometry::Pressure() const {
 
 /// Updates the velocity field u
 void Geometry::Update_U(Grid * u) const {
+	// see script, p. 17
 	BoundaryIterator bit = BoundaryIterator(this);
     
-	// see script, p. 17
     // Iteration over right boundary
     bit.SetBoundary(1);
 	for(bit.First(); bit.Valid(); bit.Next()) {
@@ -136,9 +133,9 @@ void Geometry::Update_U(Grid * u) const {
 
 /// Updates the velocity field v
 void Geometry::Update_V(Grid * v) const {
+	// see script, p. 17	
 	BoundaryIterator bit = BoundaryIterator(this);
     
-	// see script, p. 17
     // Iteration over upper boundary
 	bit.SetBoundary(0);
 	for(bit.First(); bit.Valid(); bit.Next()) {
@@ -171,11 +168,10 @@ void Geometry::Update_V(Grid * v) const {
 
 /// Updates the pressure field p
 void Geometry::Update_P(Grid * p) const {
-    BoundaryIterator bit = BoundaryIterator(this);
-    
 	// see script, p. 20 (p_{0,j} = p{1,j}), ...
+	BoundaryIterator bit = BoundaryIterator(this);
     
-    // Iteration over upper boundary
+	// Iteration over upper boundary
     bit.SetBoundary(0);
     for(bit.First(); bit.Valid(); bit.Next()) {
 		p->Cell(bit) = p->Cell(bit.Down());

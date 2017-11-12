@@ -4,24 +4,10 @@ using namespace std;
 /// Constructs a new Parameter set with default values
 // Driven Cavity parameters; see exercise sheet 1
 Parameter::Parameter() {
-    
-    //parameter aus example 1.3 
-    // dt, tend geraten
-    
-    _re = 1000;
-    _omega = 1.7;
-    _alpha = 0.9;
-    _dt = 0.05;
-    _tend = 20;
-    _eps = 0.001;
-    _tau = 0.5;
-    _itermax = 100;
-    
-    
-    // eigentlich mit if file exits
+        
+    // load parameters from file
     Load("default.param");
-    
-    //this->Load("actual.param");
+    // Load("actual.param");
    
     
 }

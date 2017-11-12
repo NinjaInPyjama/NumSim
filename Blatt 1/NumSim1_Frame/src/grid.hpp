@@ -25,7 +25,7 @@
 #include <cmath>
 #endif // _USE_MATH_DEFINES
 
- #include <iostream>
+#include <iostream>
 
 #include "typedef.hpp"
 #include "geometry.hpp"

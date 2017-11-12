@@ -15,18 +15,17 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     _G = new Grid(_geom, multi_real_t(0.5, 1.0));
 	_G->Initialize(0.0);
 
+	_u = new Grid(_geom, multi_real_t(1.0, 0.5));
+	_u->Initialize(_geom->Velocity()[0]);
+	_v = new Grid(_geom, multi_real_t(0.5, 1.0));
+	_v->Initialize(_geom->Velocity()[1]);
     _p = new Grid(_geom, multi_real_t(0.5, 0.5));
     _p->Initialize(_geom->Pressure());
-    _v = new Grid(_geom, multi_real_t(0.5, 1.0));
-    _v->Initialize(_geom->Velocity()[1]);
-    _u = new Grid(_geom, multi_real_t(1.0, 0.5));
-	_u->Initialize(_geom->Velocity()[0]);
-	_geom->Update_U(_u);
 
 	_rhs = new Grid(_geom, multi_real_t(0.5, 0.5));
 	_rhs->Initialize(0.0);
 
-	_solver = new SOR(_geom); //, _param->Omega());
+	_solver = new SOR(_geom);
         
     _t = 0.0;
     _dtlimit = _param->Dt();
@@ -34,32 +33,29 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
 }
 
 /// Deletes all grids
-Compute::~Compute() {
-
-}
+Compute::~Compute() {}
 
 
 /// Execute one time step of the fluid simulation (with or without debug info)
 // @ param printInfo print information about current solver state (residual
 // etc.)
 void Compute::TimeStep(bool printInfo) {
-    // TODO: see script p. 23
+    // see script p. 23
     
-	// boundary_val(...)
+	// update boundary values
 	_geom->Update_U(_u);
 	_geom->Update_V(_v);
 	_geom->Update_P(_p);
 
-    // compute_fg(...)
+    // compute 'preliminary' velocities and setting boundary values
     MomentumEqu(_dtlimit);
 	_geom->Update_U(_F);
 	_geom->Update_V(_G);
-	//_F->print();
 
-    // compute_rhs(...)
+    // compute rhs
     RHS(_dtlimit);
 
-    // solver iteration
+    // solver iterations
     index_t itermax = _param->IterMax();
     index_t it = 0;
     real_t res = 0.0;
@@ -69,17 +65,16 @@ void Compute::TimeStep(bool printInfo) {
 		if(printInfo) std::cout << "Residual at iteration " << it << ": " << res << std::endl;
     } while(it<itermax && res>_epslimit);
     if(printInfo) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << std::endl;
-
-	//_p->print();
-
-    // compute_uv(...)
+	
+    // compute new velocities
     NewVelocities(_dtlimit);
 
-	// boundary_val(...)
+	// udating boundary values (to be consistent when saving vtks)
 	_geom->Update_U(_u);
 	_geom->Update_V(_v);
 	_geom->Update_P(_p);
 	
+	// save timestep
     _t += _dtlimit;
 }
 
@@ -122,11 +117,13 @@ const Grid * Compute::GetVelocity() {
     for(iit.First(); iit.Valid(); iit.Next()){
         // Interpolating the velocities to center of cells
         multi_index_t cell_pos = iit.Pos();
-		v_ip = (_v->Cell(iit.Down()) + _v->Cell(iit)) / 2.0; // _v->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
-		u_ip = (_u->Cell(iit.Left()) + _u->Cell(iit)) / 2.0; // _u->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]));
+		v_ip = (_v->Cell(iit.Down()) + _v->Cell(iit)) / 2.0;
+		u_ip = (_u->Cell(iit.Left()) + _u->Cell(iit)) / 2.0;
         abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
 
+	// setting boundary values to 0 (even if probably not necessary)
+	// Iteration over top boundary
 	BoundaryIterator bit = BoundaryIterator(_geom);
 	bit.SetBoundary(0);
 	abs_vel->Cell(bit.Left()) = 0;

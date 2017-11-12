@@ -1,7 +1,5 @@
 #include "grid.hpp"
 
-#include <iostream>
-
 /// Constructs a grid based on a geometry
 Grid::Grid(const Geometry * geom) {
 	_data = new real_t[geom->Size()[0] * geom->Size()[1]];
@@ -23,7 +21,7 @@ Grid::Grid(const Geometry * geom, const multi_real_t & offset) {
 /// Deletes the grid
 Grid::~Grid() {}
 
-/// Prints the grid
+/// Prints the values of grid
 void Grid::print() const {
 	std::cout.precision(2);
 	for (int i = _geom->Size()[1] - 1; i >= 0; i--) {
@@ -35,7 +33,7 @@ void Grid::print() const {
 	std::cout << std::endl;
 }
 
-///     Initializes the grid with a value
+///  Initializes the grid with a value
 void Grid::Initialize(const real_t & value) {
     index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
     for (index_t i = 0; i < num_cells; i++) {
@@ -55,8 +53,7 @@ const real_t & Grid::Cell(const Iterator & it) const {
 }
 
 
-/// Interpolate the value at an arbitrary position
-/// bilinear interpolation, 
+/// Interpolate the value at an arbitrary position by bilinear interpolation
 real_t Grid::Interpolate(const multi_real_t & pos) const {
     real_t pos_x = pos[0]*(_geom->Size()[0] - 2) + 1 - _offset[0]; 
     real_t pos_y = pos[1]*(_geom->Size()[1] - 2) + 1 - _offset[1];
