@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/W32TeX) (preloaded format=pdflatex 2015.4.22)  12 NOV 2017 22:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/W32TeX) (preloaded format=pdflatex 2015.4.22)  14 NOV 2017 00:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -822,48 +822,48 @@ LaTeX Font Info:    Try loading font information for U+esint on input line 52.
 
 (c:/texlive/2014/texmf-dist/tex/latex/esint/uesint.fd
 File: uesint.fd 
-)
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 58.
+) [1
 
-(c:/texlive/2014/texmf-dist/tex/latex/base/omscmr.fd
-File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 58.
-
-<pics/Reynoldszahl.png, id=4, 1071.25218pt x 779.16093pt>
+{c:/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+<pics/Reynoldszahl.png, id=13, 1071.25218pt x 779.16093pt>
 File: pics/Reynoldszahl.png Graphic file (type png)
 
 <use pics/Reynoldszahl.png>
-Package pdftex.def Info: pics/Reynoldszahl.png used on input line 62.
+Package pdftex.def Info: pics/Reynoldszahl.png used on input line 75.
 (pdftex.def)             Requested size: 390.0pt x 283.6602pt.
- [1
+ [2 <./pics/Reynoldszahl.png>]
+<pics/Berechnungszeit.jpg, id=19, 564.60938pt x 338.01282pt>
+File: pics/Berechnungszeit.jpg Graphic file (type jpg)
 
-{c:/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./pics/Reynolds
-zahl.png>]
-<pics/grid.jpg, id=16, 970.62625pt x 966.61125pt>
+<use pics/Berechnungszeit.jpg>
+Package pdftex.def Info: pics/Berechnungszeit.jpg used on input line 85.
+(pdftex.def)             Requested size: 390.0pt x 233.48181pt.
+ [3 <./pics/Berechnungszeit.jpg>]
+<pics/grid.jpg, id=24, 970.62625pt x 966.61125pt>
 File: pics/grid.jpg Graphic file (type jpg)
  <use pics/grid.jpg>
-Package pdftex.def Info: pics/grid.jpg used on input line 78.
+Package pdftex.def Info: pics/grid.jpg used on input line 95.
 (pdftex.def)             Requested size: 390.0pt x 388.39282pt.
- [2 <./pics/grid.jpg>] (./Plots.aux) ) 
-Here is how much of TeX's memory you used:
- 15244 strings out of 493117
- 284598 string characters out of 6138984
- 346059 words of memory out of 5000000
- 18397 multiletter control sequences out of 15000+600000
- 7900 words of font info for 33 fonts, out of 8000000 for 9000
- 1141 hyphenation exceptions out of 8191
- 55i,6n,54p,412b,309s stack positions out of 5000i,500n,10000p,200000b,80000s
-<c:/texlive/2014/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmbx12.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmr12.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mr17.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
+ [4
 
-Output written on Plots.pdf (2 pages, 967049 bytes).
+ <./pics/grid.jpg>] (./Plots.aux) ) 
+Here is how much of TeX's memory you used:
+ 15260 strings out of 493117
+ 284757 string characters out of 6138984
+ 347057 words of memory out of 5000000
+ 18408 multiletter control sequences out of 15000+600000
+ 12498 words of font info for 53 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 55i,9n,54p,412b,243s stack positions out of 5000i,500n,10000p,200000b,80000s
+<c:/texlive/2014/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmbx12.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmmi12.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmm
+i8.pfb><c:/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:
+/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb>
+Output written on Plots.pdf (4 pages, 1011426 bytes).
 PDF statistics:
- 34 PDF objects out of 1000 (max. 8388607)
- 22 compressed objects within 1 object stream
+ 45 PDF objects out of 1000 (max. 8388607)
+ 29 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 23 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 28 words of extra memory for PDF output out of 10000 (max. 10000000)
 

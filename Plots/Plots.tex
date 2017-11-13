@@ -53,9 +53,22 @@
 
 \section*{Zu 1.6: Fragen}
 
-\begin{itemize}
+\subsection*{Stabilität der Zeitschrittweite:}
 
-\item Variation der Reynoldszahl:
+\begin{table}[h]
+\begin{tabular}{l|c}
+  Reynoldszahl & Grenze für stabile Zeitschrittweiten  \\ \hline
+  100 & 0.9-1.0 \\ 
+  500 & 0.09-0.1 \\
+  1 000 & 0.07-0.08 \\
+  2 000 & 0.05-0.06 \\
+  10 000 & 0.03-0.04\\ \hline
+\end{tabular}
+\caption{Obergrenzen für stabile Zeitschrittweiten in Abhängigkeit der Reynoldszahl bei 16x16 Elementen, Gittergröße von 1x1, $\alpha=1.0$ und optimalem $\omega$}
+\end{table}
+
+\newpage
+\subsection*{Variation der Reynoldszahl:}
 
 \begin{figure}[h!tb]
 \centering
@@ -64,13 +77,17 @@
 \label{fig:Re}
 \end{figure}
 
-\item Laufzeiten in Abhängigkeit der Gitterweite:
-
-Tabelle/Plot einfügen
-
-\end{itemize}
-
 \newpage
+\subsection*{Laufzeiten:}
+
+\begin{figure}[h!tb]
+\centering
+\includegraphics[width=1.0\textwidth]{pics/Berechnungszeit.jpg}
+\caption{Laufzeiten in Abhängigkeit der Gitterweite bei $Re=1000$, Gittergröße von 1x1, $dt=0.01$ und $t_{end}=10$}
+\label{fig:runtime}
+\end{figure}
+
+\clearpage
 \section*{Anhang}
 
 \begin{figure}[h!tb]
