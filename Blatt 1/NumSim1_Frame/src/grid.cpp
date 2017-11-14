@@ -250,10 +250,10 @@ real_t Grid::Min() const {
 
 /// Returns the absolute maximal value
 real_t Grid::AbsMax() const {
-	real_t max = abs(_data[0]);
+	real_t max = std::abs(_data[0]);
 	const index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
 	for (index_t i = 1; i < num_cells; i++) {
-		if (max < abs(_data[i])) max = abs(_data[i]);
+		if (max < std::abs(_data[i])) max = std::abs(_data[i]);
 	}
 	return max;
 }
