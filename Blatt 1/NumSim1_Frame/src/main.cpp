@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
   start = clock();
   while (comp.GetTime() <= param.Tend()) {
 	  i++;
-	  cout << "TimeStep: " << i << ", Simulated Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
+	  //cout << "TimeStep: " << i << ", Simulated Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
 	  comp.TimeStep(false);
 
 	  /*
@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
   
   cout << "Run Time: " << (float)(clock() - start)/1000.0 << " s" << endl;
 
+  
   vtk.Init("VTK/field");
   vtk.AddField("Velocity", comp.GetU(), comp.GetV());
   vtk.AddScalar("Pressure", comp.GetP());

@@ -107,10 +107,10 @@ public:
 
   /** Get the offset value of the grid
   */
-  const multi_real_t &getOffset() const;
+  const multi_real_t & Grid::getOffset() const;
 
   /// Return a pointer to the Geometry
-  const Geometry *getGeometry() const;
+  const Geometry * Grid::getGeometry() const;
 
 private:
   real_t *_data;
