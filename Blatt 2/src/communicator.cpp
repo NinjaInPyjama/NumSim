@@ -19,19 +19,19 @@ Communicator::~Communicator() {}
 *  fields lower left corner
 */
 const multi_index_t & Communicator::ThreadIdx() const {
-	return multi_index_t();
+	return _tidx;
 }
 
 /** Returns the way the domain is partitioned among all processes
 */
 const multi_index_t & Communicator::ThreadDim() const {
-	return multi_index_t();
+	return _tdim;
 }
 
 /** Returns whether this process is a red or a black field
 */
 const bool & Communicator::EvenOdd() const {
-	return false;
+	return _evenodd;
 }
 
 /** Gets the sum of all values and distributes the result among all
@@ -40,7 +40,7 @@ const bool & Communicator::EvenOdd() const {
 * \param [in] val The data over which the sum is to be calculated
 */
 real_t Communicator::gatherSum(const real_t & val) const {
-	return real_t();
+	return real_t(0.0);
 }
 
 /** Finds the minimum of the values and distributes the result among
@@ -49,7 +49,7 @@ real_t Communicator::gatherSum(const real_t & val) const {
 * \param [in] val The data over which to find the minimum
 */
 real_t Communicator::gatherMin(const real_t & val) const {
-	return real_t();
+	return real_t(0.0);
 }
 
 /** Finds the maximum of the values and distributes the result among
@@ -72,42 +72,57 @@ void Communicator::copyBoundary(Grid * grid) const {
 /** Decide whether our left boundary is a domain boundary
 */
 const bool Communicator::isLeft() const {
-	return false;
+	return _tidx[0]==0;
 }
 
 /** Decide whether our right boundary is a domain boundary
 */
 const bool Communicator::isRight() const {
-	return false;
+	return _tidx[0]==_tdim[0]-1;
 }
 
 /** Decide whether our top boundary is a domain boundary
 */
 const bool Communicator::isTop() const {
-	return false;
+	return _tidx[1]==_tdim[1]-1;
 }
 
 /** Decide whether our bottom boundary is a domain boundary
 */
 const bool Communicator::isBottom() const {
-	return false;
+	return _tidx[1]==0;
 }
 
-/** Decide whether our bottom boundary is a domain boundary
-*/
+/** Get MPI rank of current process
+ */
 const int & Communicator::getRank() const {
-	// TODO: insert return statement here
+	return _rank;
 }
 
 /** Get number of MPI processes
 */
 const int & Communicator::getSize() const {
-	// TODO: insert return statement here
+	return _size;
 }
 
 
-/** Get number of MPI processes
-*/
+  /** Function to sync ghost layer on left boundary:
+   *  send values of own left boundary to left neighbor and
+   *  and receive values from his right boundary
+   *
+   *   ------------ ------------
+   *  |           x|y           |
+   *  |           x|y           |
+   *  |           x|y           |
+   *  |           x|y           |
+   *  |           x|y           |
+   *   ------------ ------------
+   *
+   *   y: values that are sent
+   *   x: values that are received
+   *
+   * \param [in] grid  values whose boundary shall be synced
+   */
 bool Communicator::copyLeftBoundary(Grid * grid) const {
 	return false;
 }
