@@ -94,9 +94,9 @@ class BoundaryIterator : public Iterator {
 public:
   enum {
     boundaryBottom = 0,
-    boundaryLeft = 1,
+    boundaryLeft = 3,
     boundaryTop = 2,
-    boundaryRight = 3
+    boundaryRight = 1
   };
   /// Constructs a new BoundaryIterator
   BoundaryIterator(const Geometry *geom);
