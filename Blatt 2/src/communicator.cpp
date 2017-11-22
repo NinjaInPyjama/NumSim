@@ -158,7 +158,7 @@ const int & Communicator::getSize() const {
 bool Communicator::copyLeftBoundary(Grid * grid) const {
 	MPI_Status stat;
 	const index_t bufferlength = grid->getGeometry()->Size()[1];
-	real_t* buffer[bufferlength];
+	real_t buffer[bufferlength];
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 	
 	bit.SetBoundary(bit.boundaryRight);
@@ -220,7 +220,7 @@ bool Communicator::copyRightBoundary(Grid * grid) const {
 bool Communicator::copyTopBoundary(Grid * grid) const {
 	MPI_Status stat;
 	const index_t bufferlength = grid->getGeometry()->Size()[0];
-	real_t* buffer[bufferlength];
+	real_t buffer[bufferlength];
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 
 	bit.SetBoundary(bit.boundaryBottom);
@@ -252,13 +252,13 @@ bool Communicator::copyTopBoundary(Grid * grid) const {
 bool Communicator::copyBottomBoundary(Grid * grid) const {
 	MPI_Status stat;
 	const index_t bufferlength = grid->getGeometry()->Size()[0];
-	real_t* buffer[bufferlength];
+	real_t buffer[bufferlength];
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 
 	bit.SetBoundary(bit.boundaryTop);
 	int i = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
-		buffer[i] = grid->Cell(bit.Bottom());
+		buffer[i] = grid->Cell(bit.Down());
 		i++;
 	}
 	// TODO: maybe right processes do not send (send to themselfs)

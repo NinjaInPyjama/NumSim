@@ -1,5 +1,4 @@
 #include "grid.hpp"
-//#include "..\..\Blatt 1\NumSim1_Frame\src\grid.hpp"
 
 /// Constructs a grid based on a geometry
 Grid::Grid(const Geometry * geom) {
