@@ -26,15 +26,12 @@ Communicator::Communicator(int * argc, char *** argv) {
     
     //unten link ist even (true)
     _evenodd = (_tidx[0]+_tidx[1])%2 == 0;
-    
-    
 }
 
 
 /** Communicator destructor; finalizes MPI Environment
 */
 Communicator::~Communicator() {
-    
     MPI_Finalize();
 }
 
@@ -159,22 +156,29 @@ const int & Communicator::getSize() const {
    * \param [in] grid  values whose boundary shall be synced
    */
 bool Communicator::copyLeftBoundary(Grid * grid) const {
-	if(isLeft()){
-        
+	MPI_Status stat;
+	const index_t bufferlength = grid->getGeometry()->Size()[1];
+	real_t* buffer[bufferlength];
+	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
+	
+	bit.SetBoundary(bit.boundaryRight);
+	int i = 0;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		buffer[i] = grid->Cell(bit.Left());
+		i++;
+	}
+	// TODO: maybe right processes do not send (send to themselfs)
+	MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + 1) % _size, 1, (_rank - 1) % _size, 1, MPI_COMM_WORLD, &stat);
+
+	if(!isLeft()){
+		bit.SetBoundary(bit.boundaryLeft);
+		int i = 0;
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			grid->Cell(bit) = buffer[i];
+			i++;
+		}
     }
-    else if(isRight()){
-        
-    }
-    else {
-        MPI_Status stat;
-        index_t bufferlength = grid->getGeometry()->getSize()[1];
-        real_t buffer[bufferlength];
-        BoundaryIterator 
-        for()
-        
-        MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, _rank+1, 1, _rank-1, 1, MPI_COMM_WORLD, &stat);
-    }
-    return ;
+    return false;
 }
 
 /** Function to sync ghost layer on right boundary
