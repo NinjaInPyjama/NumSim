@@ -6,7 +6,7 @@
 * \param [in] argv Arguments passed to the program on start
 */
 Communicator::Communicator(int * argc, char *** argv) {
-
+	
 }
 
 
