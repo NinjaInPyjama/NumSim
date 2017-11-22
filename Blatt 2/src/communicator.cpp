@@ -1,4 +1,5 @@
 #include "communicator.hpp"
+#include <mpi.h>
 
 /** Communicator constructor; initializes MPI Environment
 *
@@ -6,13 +7,33 @@
 * \param [in] argv Arguments passed to the program on start
 */
 Communicator::Communicator(int * argc, char *** argv) {
-	
+    MPI_Init(argc, argv);
+    
+    MPI_Comm_rank(MPI_COMM_WORLD, &_rank);
+    
+    MPI_Comm_size(MPI_COMM_WORLD, &this->_size);
+    
+    for (int i=(int)sqrt(_size) ; i>=1;i--){
+        if((real_t( _size)/real_t(i)) == _size/i){
+            _tdim = multi_index_t(i,_size/i);
+            break;
+        }
+    }
+    //unten links ist (0,0)
+    _tidx[0] = _rank%_tdim[0];
+    _tidx[1] = (index_t)(_rank/_tdim[0]);
+    
+    //unten link ist even (true)
+    _evenodd = (_tidx[0]+_tidx[1])%2 == 0;
 }
 
 
 /** Communicator destructor; finalizes MPI Environment
 */
-Communicator::~Communicator() {}
+Communicator::~Communicator() {
+    
+    MPI_Finalize();
+}
 
 
 /** Returns the position of the current process with respect to the
@@ -40,7 +61,10 @@ const bool & Communicator::EvenOdd() const {
 * \param [in] val The data over which the sum is to be calculated
 */
 real_t Communicator::gatherSum(const real_t & val) const {
-	return real_t(0.0);
+	real_t sum = 0;
+    MPI_Allreduce(&val, &sum, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    
+    return sum;
 }
 
 /** Finds the minimum of the values and distributes the result among
@@ -49,7 +73,10 @@ real_t Communicator::gatherSum(const real_t & val) const {
 * \param [in] val The data over which to find the minimum
 */
 real_t Communicator::gatherMin(const real_t & val) const {
-	return real_t(0.0);
+	real_t min = 0;
+    MPI_Allreduce(&val, &min, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    
+    return min;
 }
 
 /** Finds the maximum of the values and distributes the result among
@@ -58,7 +85,10 @@ real_t Communicator::gatherMin(const real_t & val) const {
 * \param [in] val The data over which to find the maximum
 */
 real_t Communicator::gatherMax(const real_t & val) const {
-	return real_t();
+	real_t max = 0;
+    MPI_Allreduce(&val, &max, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+    
+    return max;
 }
 
 /** Synchronizes ghost layer
@@ -67,6 +97,8 @@ real_t Communicator::gatherMax(const real_t & val) const {
 */
 void Communicator::copyBoundary(Grid * grid) const {
 
+    
+    
 }
 
 /** Decide whether our left boundary is a domain boundary
@@ -124,7 +156,22 @@ const int & Communicator::getSize() const {
    * \param [in] grid  values whose boundary shall be synced
    */
 bool Communicator::copyLeftBoundary(Grid * grid) const {
-	return false;
+	if(isLeft()){
+        
+    }
+    else if(isRight()){
+        
+    }
+    else {
+        MPI_Status stat;
+        index_t bufferlength = grid->getGeometry()->getSize()[1];
+        real_t buffer[bufferlength];
+        BoundaryIterator 
+        for()
+        
+        MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, _rank+1, 1, _rank-1, 1, MPI_COMM_WORLD, &stat);
+    }
+    return ;
 }
 
 /** Function to sync ghost layer on right boundary
@@ -149,6 +196,7 @@ bool Communicator::copyTopBoundary(Grid * grid) const {
 *  Details analog to left boundary
 *
 * \param [in] grid  values whose boundary shall be synced
+/** Get
 */
 bool Communicator::copyBottomBoundary(Grid * grid) const {
 	return false;
