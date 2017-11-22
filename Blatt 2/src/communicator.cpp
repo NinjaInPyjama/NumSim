@@ -95,9 +95,10 @@ real_t Communicator::gatherMax(const real_t & val) const {
 * \param [in] grid  The values to sync
 */
 void Communicator::copyBoundary(Grid * grid) const {
-
-    
-    
+	copyRightBoundary(grid);
+	copyLeftBoundary(grid);
+	copyBottomBoundary(grid);
+	copyTopBoundary(grid);
 }
 
 /** Decide whether our left boundary is a domain boundary
@@ -167,17 +168,17 @@ bool Communicator::copyLeftBoundary(Grid * grid) const {
 		i++;
 	}
 	// TODO: maybe right processes do not send (send to themselfs)
-	MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + 1) % _size, 1, (_rank - 1) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + 1) % _size, 1, (_rank - 1) % _size, 1, MPI_COMM_WORLD, &stat);
 
 	if(!isLeft()){
 		bit.SetBoundary(bit.boundaryLeft);
-		int i = 0;
+		int i = bufferlength - 1;
 		for (bit.First(); bit.Valid(); bit.Next()) {
 			grid->Cell(bit) = buffer[i];
-			i++;
+			i--;
 		}
     }
-    return true;
+    return (result == MPI_SUCCESS);
 }
 
 /** Function to sync ghost layer on right boundary
@@ -188,7 +189,7 @@ bool Communicator::copyLeftBoundary(Grid * grid) const {
 bool Communicator::copyRightBoundary(Grid * grid) const {
 	MPI_Status stat;
 	const index_t bufferlength = grid->getGeometry()->Size()[1];
-	real_t* buffer[bufferlength];
+	real_t buffer[bufferlength];
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 
 	bit.SetBoundary(bit.boundaryLeft);
@@ -198,17 +199,17 @@ bool Communicator::copyRightBoundary(Grid * grid) const {
 		i++;
 	}
 	// TODO: maybe right processes do not send (send to themselfs)
-	MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - 1) % _size, 1, (_rank + 1) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - 1) % _size, 1, (_rank + 1) % _size, 1, MPI_COMM_WORLD, &stat);
 
-	if (!isLeft()) {
+	if (!isRight()) {
 		bit.SetBoundary(bit.boundaryRight);
-		int i = 0;
+		int i = bufferlength - 1;
 		for (bit.First(); bit.Valid(); bit.Next()) {
 			grid->Cell(bit) = buffer[i];
-			i++;
+			i--;
 		}
 	}
-	return true;
+	return (result == MPI_SUCCESS);
 }
 
 /** Function to sync ghost layer on top boundary
@@ -229,17 +230,17 @@ bool Communicator::copyTopBoundary(Grid * grid) const {
 		i++;
 	}
 	// TODO: maybe right processes do not send (send to themselfs)
-	MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + 1) % _size, 1, (_rank - 1) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - _tdim[0]) % _size, 1, (_rank + _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
 
-	if (!isLeft()) {
-		bit.SetBoundary(bit.boundaryLeft);
-		int i = 0;
+	if (!isTop()) {
+		bit.SetBoundary(bit.boundaryTop);
+		int i = bufferlength - 1;
 		for (bit.First(); bit.Valid(); bit.Next()) {
 			grid->Cell(bit) = buffer[i];
-			i++;
+			i--;
 		}
 	}
-	return true;
+	return (result == MPI_SUCCESS);
 }
 
 /** Function to sync ghost layer on bottom boundary
@@ -249,5 +250,27 @@ bool Communicator::copyTopBoundary(Grid * grid) const {
 /** Get
 */
 bool Communicator::copyBottomBoundary(Grid * grid) const {
-	return false;
+	MPI_Status stat;
+	const index_t bufferlength = grid->getGeometry()->Size()[0];
+	real_t* buffer[bufferlength];
+	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
+
+	bit.SetBoundary(bit.boundaryTop);
+	int i = 0;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		buffer[i] = grid->Cell(bit.Bottom());
+		i++;
+	}
+	// TODO: maybe right processes do not send (send to themselfs)
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + _tdim[0]) % _size, 1, (_rank - _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
+
+	if (!isBottom()) {
+		bit.SetBoundary(bit.boundaryBottom);
+		int i = bufferlength - 1;
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			grid->Cell(bit) = buffer[i];
+			i--;
+		}
+	}
+	return (result == MPI_SUCCESS);
 }
