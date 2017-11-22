@@ -28,6 +28,7 @@
 #include <cstdio>
 
 #include "iterator.hpp"
+#include "communicator.hpp"
 
 //------------------------------------------------------------------------------
 class Geometry {

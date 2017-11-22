@@ -7,7 +7,6 @@
 * \param [in] argv Arguments passed to the program on start
 */
 Communicator::Communicator(int * argc, char *** argv) {
-
     MPI_Init(argc, argv);
     
     MPI_Comm_rank(MPI_COMM_WORLD, &_rank);
@@ -26,8 +25,6 @@ Communicator::Communicator(int * argc, char *** argv) {
     
     //unten link ist even (true)
     _evenodd = (_tidx[0]+_tidx[1])%2 == 0;
-    
-    
 }
 
 

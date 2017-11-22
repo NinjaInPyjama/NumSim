@@ -3,7 +3,7 @@
 using namespace std;
 
 /// Creates a compute instance with given geometry and parameter
-Compute::Compute(const Geometry * geom, const Parameter * param, const Communicator *comm = 0) {
+Compute::Compute(const Geometry * geom, const Parameter * param, const Communicator *comm) {
 	// TODO: insertstatements here
 
     _geom = geom;
@@ -47,18 +47,33 @@ Compute::~Compute() {}
 void Compute::TimeStep(bool printInfo) {
     // see script p. 23
     
+    //compute dt
+    //stability  condition induced by the diffusion operator
+    real_t dtlimit_diff = _param->Re()/2.0 * (_geom->Mesh()[0]*_geom->Mesh()[0]*_geom->Mesh()[1]*_geom->Mesh()[1])/(_geom->Mesh()[0]*_geom->Mesh()[0]+_geom->Mesh()[1]*_geom->Mesh()[1]);
+    //stability  condition induced by the convection operator
+    real_t dtlimit_conv_x = _dtlimit;
+    if(_u->AbsMax() != 0)
+        real_t dtlimit_conv_x = _geom->Mesh()[0]/_u->AbsMax();
+    
+    real_t dtlimit_conv_y = _dtlimit;
+    if(_v->AbsMax() != 0)
+        real_t dtlimit_conv_y = _geom->Mesh()[1]/_v->AbsMax();
+
+    //minimum of all time limits
+    real_t dt = 0.5*std::min(std::min(dtlimit_diff, _dtlimit),std::min(dtlimit_conv_x, dtlimit_conv_y));
+    
 	// update boundary values
 	_geom->Update_U(_u);
 	_geom->Update_V(_v);
 	_geom->Update_P(_p);
 
     // compute 'preliminary' velocities and setting boundary values
-    MomentumEqu(_dtlimit);
+    MomentumEqu(dt);
 	_geom->Update_U(_F);
 	_geom->Update_V(_G);
 
     // compute rhs
-    RHS(_dtlimit);
+    RHS(dt);
 
     // solver iterations
     index_t itermax = _param->IterMax();
@@ -72,7 +87,7 @@ void Compute::TimeStep(bool printInfo) {
     if(printInfo) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << std::endl;
 	
     // compute new velocities
-    NewVelocities(_dtlimit);
+    NewVelocities(dt);
 
 	// udating boundary values (to be consistent when saving vtks)
 	_geom->Update_U(_u);
@@ -80,7 +95,7 @@ void Compute::TimeStep(bool printInfo) {
 	_geom->Update_P(_p);
 	
 	// save timestep
-    _t += _dtlimit;
+    _t += dt;
 }
 
 /// Returns the simulated time in total

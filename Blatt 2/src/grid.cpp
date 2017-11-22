@@ -1,5 +1,5 @@
 #include "grid.hpp"
-#include "..\..\Blatt 1\NumSim1_Frame\src\grid.hpp"
+//#include "..\..\Blatt 1\NumSim1_Frame\src\grid.hpp"
 
 /// Constructs a grid based on a geometry
 Grid::Grid(const Geometry * geom) {
@@ -268,11 +268,12 @@ real_t * Grid::Data() {
 /** Get the offset value of the grid
 */
 const multi_real_t & Grid::getOffset() const {
+        return _offset;
 	// TODO: insert return statement here
 }
 
 /// Return a pointer to the Geometry
 const Geometry * Grid::getGeometry() const {
-	return nullptr;
+	return _geom;
 }
 
