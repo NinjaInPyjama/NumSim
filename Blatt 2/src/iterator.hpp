@@ -87,6 +87,21 @@ public:
   void Next();
 };
 
+
+//------------------------------------------------------------------------------
+/** Iterator for interior cells for the red black solver
+ */
+class RedBlackIterator : public Iterator {
+public:
+  /// Construct a new RedBlackIterator
+  RedBlackIterator(const Geometry *geom);
+
+  /// Sets the iterator to the first red element
+  void First();
+  /// Goes to the next element of the iterator, disables it if position is end
+  void Next();
+};
+
 //------------------------------------------------------------------------------
 /** Iterator for domain boundary cells.
  */

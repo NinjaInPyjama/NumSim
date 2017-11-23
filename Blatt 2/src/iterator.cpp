@@ -115,6 +115,50 @@ void InteriorIterator::Next() {
 	_valid = _value <= _geom->Size()[0] * (_geom->Size()[1] - 1) - 2;
 }
 
+
+
+
+//------------------------------------------------------------------------------
+/** Iterator for interior cells for the red black solver
+*/
+
+/// Construct a new RedBlackIterator
+RedBlackIterator::RedBlackIterator(const Geometry * geom) {
+	_geom = geom;
+	First();
+	_valid = true;
+}
+
+
+/// Sets the iterator to the first red element
+void RedBlackIterator::First() {
+	_value = _geom->RedBlack() ? _geom->Size()[0] + 1 : _geom->Size()[0] + 2;
+	_valid = true;
+}
+
+/// Goes to the next element of the iterator, disables it if position is end
+// Iterating over inner cells => has to skip cells when on right border
+// Inner cells (*):
+// 0 0 0 0 0 0
+// 0 * * * * 0
+// 0 * * * * 0
+// 0 * * * * 0
+// 0 * * * * 0
+// 0 0 0 0 0 0
+void RedBlackIterator::Next() {
+	if( ((_value + 3) % _geom->Size()[0] == 0) ){
+        _value = (_geom->Size()[0]%2 == 0) ? _value + 5 : _value + 4;
+    }
+    else if ( ((_value + 2) % _geom->Size()[0] == 0) ){
+        _value = (_geom->Size()[0]%2 == 0) ? _value + 3 : _value + 4;
+    }
+    else {
+        _value = _value + 2;
+    }
+    
+    _valid = _value <= _geom->Size()[0] * (_geom->Size()[1] - 1) - 2;
+}
+
 //------------------------------------------------------------------------------
 /** Iterator for domain boundary cells.
 */

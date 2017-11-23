@@ -20,11 +20,27 @@ Geometry::Geometry() {
 	_h = multi_real_t(_length[0] / (_size[0] - 2), _length[1] / (_size[1] - 2));
 }
 
+
 Geometry::Geometry(const Communicator *comm) {
     Load("default.geom");
     _comm = comm;
+    const multi_index_t real_size = multi_index_t((_bsize[0]-2)/_comm->ThreadDim()[0],(_bsize[1]-2)/_comm->ThreadDim()[1]) ;
+    
+    _redblack = (_comm->ThreadIdx()[0]*real_size[0]+_comm->ThreadIdx()[1]*real_size[1])%2 == 0;
+    
+    _size = multi_index_t(real_size[0]+2,real_size[1]+2);
+    
+    if ( _comm->isRight() ){
+        _size[0] = _bsize[0] - (_comm->ThreadDim()[0]-1)*real_size[0];
+    }
+    if ( _comm->isTop() ){
+        _size[1] = _bsize[1] - (_comm->ThreadDim()[1]-1)*real_size[1];
+    }
+    
     _h = multi_real_t(_blength[0] / (_bsize[0] - 2), _blength[1] / (_bsize[1] - 2));
-    // TODO: insert statements here
+    
+    _length = multi_real_t(real_t(_size[0]-2)/(_bsize[0]-2)*_blength[0], real_t(_size[1]-2)/(_bsize[1]-2)*_blength[1]);
+    
 }
 
 /// Loads a geometry from a file
@@ -38,7 +54,7 @@ void Geometry::Load(const char * file) {
         
         if (!fscanf(handle, "%s =", name)) continue;
         
-        if (strcmp(name,"bsize") == 0) {
+        if (strcmp(name,"size") == 0) {
             if (fscanf(handle," %i %i\n",&inval_index[0],&inval_index[1])) {
                 _bsize[0] = inval_index[0]+2;
                 _bsize[1] = inval_index[1]+2;
@@ -46,7 +62,7 @@ void Geometry::Load(const char * file) {
             continue;
         }
         
-        if (strcmp(name,"blength") == 0) {
+        if (strcmp(name,"length") == 0) {
             if (fscanf(handle," %lf %lf\n",&inval_real[0],&inval_real[1])) {
                 _blength[0] = inval_real[0];
                 _blength[1] = inval_real[1];
@@ -75,6 +91,10 @@ void Geometry::Load(const char * file) {
 	fclose(handle);
 }
 
+/// Returns whether the lower left corner is red or black
+const bool & Geometry::RedBlack() const {
+	return _redblack;
+}
 
 /// Returns the number of cells in each dimension
 const multi_index_t & Geometry::Size() const {

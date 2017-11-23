@@ -54,6 +54,7 @@ const bool & Communicator::EvenOdd() const {
 	return _evenodd;
 }
 
+
 /** Gets the sum of all values and distributes the result among all
 *  processes
 *
@@ -95,10 +96,33 @@ real_t Communicator::gatherMax(const real_t & val) const {
 * \param [in] grid  The values to sync
 */
 void Communicator::copyBoundary(Grid * grid) const {
-	copyRightBoundary(grid);
-	copyLeftBoundary(grid);
-	copyBottomBoundary(grid);
-	copyTopBoundary(grid);
+	if(this->EvenOdd()) {
+        if(!this->isLeft()) {
+            this->copyLeftBoundary(grid);
+        }
+        if(!this->isRight()) {
+            this->copyRightBoundary(grid);
+        }
+        if(!this->isTop()) {
+            this->copyTopBoundary(grid);
+        }
+        if(!this->isBottom()) {
+            this->copyBottomBoundary(grid);
+        }
+    } else {
+        if(!this->isRight()) {
+            this->copyRightBoundary(grid);
+        }
+        if(!this->isLeft()) {
+            this->copyLeftBoundary(grid);
+        }
+        if(!this->isBottom()) {
+            this->copyBottomBoundary(grid);
+        }
+        if(!this->isTop()) {
+            this->copyTopBoundary(grid);
+        }
+    }
 }
 
 /** Decide whether our left boundary is a domain boundary
@@ -162,22 +186,29 @@ bool Communicator::copyLeftBoundary(Grid * grid) const {
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 	
 	bit.SetBoundary(bit.boundaryRight);
-	int i = 0;
+    bit.First();
+    buffer[0] = grid->Cell(bit.Top().Left());
+    int i = 1;
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		buffer[i] = grid->Cell(bit.Left());
 		i++;
 	}
+	buffer[bufferlength-1] = grid->Cell(bit.Left());
+	
 	// TODO: maybe right processes do not send (send to themselfs)
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + 1) % _size, 1, (_rank - 1) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - 1) % _size, 1, (_rank - 1) % _size, 1, MPI_COMM_WORLD, &stat);
 
-	if(!isLeft()){
-		bit.SetBoundary(bit.boundaryLeft);
-		int i = bufferlength - 1;
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			grid->Cell(bit) = buffer[i];
-			i--;
-		}
-    }
+	
+	bit.SetBoundary(bit.boundaryLeft);
+    bit.First();
+    grid->Cell(bit.Down()) = buffer[bufferlength-1];
+	i = bufferlength - 2;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		grid->Cell(bit) = buffer[i];
+		i--;
+	}
+	grid->Cell(bit) = buffer[0];
+    
     return (result == MPI_SUCCESS);
 }
 
@@ -193,22 +224,30 @@ bool Communicator::copyRightBoundary(Grid * grid) const {
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 
 	bit.SetBoundary(bit.boundaryLeft);
-	int i = 0;
+	bit.First();
+    buffer[0] = grid->Cell(bit.Down().Right());
+    int i = 1;
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		buffer[i] = grid->Cell(bit.Right());
 		i++;
 	}
+	buffer[bufferlength-1] = grid->Cell(bit.Right());
+    
+	
 	// TODO: maybe right processes do not send (send to themselfs)
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - 1) % _size, 1, (_rank + 1) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + 1) % _size, 1, (_rank + 1) % _size, 1, MPI_COMM_WORLD, &stat);
 
-	if (!isRight()) {
-		bit.SetBoundary(bit.boundaryRight);
-		int i = bufferlength - 1;
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			grid->Cell(bit) = buffer[i];
-			i--;
-		}
+	
+	bit.SetBoundary(bit.boundaryRight);
+    bit.First();
+    grid->Cell(bit.Top()) = buffer[bufferlength-1];
+	i = bufferlength - 2;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		grid->Cell(bit) = buffer[i];
+		i--;
 	}
+	grid->Cell(bit) = buffer[0];
+	
 	return (result == MPI_SUCCESS);
 }
 
@@ -224,22 +263,29 @@ bool Communicator::copyTopBoundary(Grid * grid) const {
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 
 	bit.SetBoundary(bit.boundaryBottom);
-	int i = 0;
+    bit.First();
+    buffer[0] = grid->Cell(bit.Top().Right());
+    int i = 1;
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		buffer[i] = grid->Cell(bit.Top());
 		i++;
 	}
+	buffer[bufferlength-1] = grid->Cell(bit.Top());
+	
 	// TODO: maybe right processes do not send (send to themselfs)
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - _tdim[0]) % _size, 1, (_rank + _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + _tdim[0]) % _size, 1, (_rank + _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
 
-	if (!isTop()) {
-		bit.SetBoundary(bit.boundaryTop);
-		int i = bufferlength - 1;
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			grid->Cell(bit) = buffer[i];
-			i--;
-		}
+	
+	bit.SetBoundary(bit.boundaryTop);
+    bit.First();
+    grid->Cell(bit.Left()) = buffer[bufferlength-1];
+	i = bufferlength - 2;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		grid->Cell(bit) = buffer[i];
+		i--;
 	}
+	grid->Cell(bit) = buffer[0];
+	
 	return (result == MPI_SUCCESS);
 }
 
@@ -256,21 +302,28 @@ bool Communicator::copyBottomBoundary(Grid * grid) const {
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 
 	bit.SetBoundary(bit.boundaryTop);
-	int i = 0;
+	bit.First();
+    buffer[0] = grid->Cell(bit.Down().Left());
+    int i = 1;
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		buffer[i] = grid->Cell(bit.Down());
 		i++;
 	}
+	buffer[bufferlength-1] = grid->Cell(bit.Down());
+    
 	// TODO: maybe right processes do not send (send to themselfs)
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + _tdim[0]) % _size, 1, (_rank - _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - _tdim[0]) % _size, 1, (_rank - _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
 
-	if (!isBottom()) {
-		bit.SetBoundary(bit.boundaryBottom);
-		int i = bufferlength - 1;
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			grid->Cell(bit) = buffer[i];
-			i--;
-		}
+	
+	bit.SetBoundary(bit.boundaryBottom);
+	bit.First();
+    grid->Cell(bit.Right()) = buffer[bufferlength-1];
+    i = bufferlength - 2;
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		grid->Cell(bit) = buffer[i];
+		i--;
 	}
+	grid->Cell(bit) = buffer[0];
+	
 	return (result == MPI_SUCCESS);
 }

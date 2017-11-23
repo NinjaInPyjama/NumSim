@@ -66,6 +66,9 @@ public:
   const multi_real_t &Velocity() const;
   /// Returns the initial pressure
   const real_t &Pressure() const;
+  
+  /// Returns whether the lower left corner is red or black
+  const bool & RedBlack() const;
 
   /// Updates the velocity field u
   void Update_U(Grid *u) const;
@@ -82,6 +85,7 @@ private:
   multi_real_t _length;
   multi_real_t _blength;
   multi_real_t _h;
+  bool _redblack;
 
   multi_real_t _velocity;
   real_t _pressure;
