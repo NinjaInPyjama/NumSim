@@ -94,12 +94,14 @@ public:
 class RedBlackIterator : public Iterator {
 public:
   /// Construct a new RedBlackIterator
-  RedBlackIterator(const Geometry *geom);
+  RedBlackIterator(const Geometry *geom,bool rb);
 
   /// Sets the iterator to the first red element
   void First();
   /// Goes to the next element of the iterator, disables it if position is end
   void Next();
+private:
+  bool _rb;
 };
 
 //------------------------------------------------------------------------------
@@ -108,9 +110,9 @@ public:
 class BoundaryIterator : public Iterator {
 public:
   enum {
-    boundaryBottom = 0,
+    boundaryBottom = 2,
     boundaryLeft = 3,
-    boundaryTop = 2,
+    boundaryTop = 0,
     boundaryRight = 1
   };
   /// Constructs a new BoundaryIterator

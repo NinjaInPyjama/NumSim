@@ -69,7 +69,7 @@ public:
   
   /// Returns whether the lower left corner is red or black
   const bool & RedBlack() const;
-
+  
   /// Updates the velocity field u
   void Update_U(Grid *u) const;
   /// Updates the velocity field v

@@ -41,6 +41,14 @@ void Grid::Initialize(const real_t & value) {
 	}
 }
 
+///  Adds a Constant to the values of the grid
+void Grid::AddConstant(const real_t & value) {
+    index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
+    for (index_t i = 0; i < num_cells; i++) {
+		_data[i] += value;
+	}
+}
+
 
 /// Write access to the grid cell at position [it]
 real_t & Grid::Cell(const Iterator & it) {

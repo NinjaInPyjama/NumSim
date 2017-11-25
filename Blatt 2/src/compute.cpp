@@ -1,4 +1,5 @@
 #include "compute.hpp"
+#include <mpi.h>
 
 using namespace std;
 
@@ -8,6 +9,7 @@ Compute::Compute(const Geometry * geom, const Parameter * param, const Communica
 
     _geom = geom;
     _param = param;
+    _comm = comm;
     
     _tmp = new Grid(_geom);
     
@@ -30,7 +32,7 @@ Compute::Compute(const Geometry * geom, const Parameter * param, const Communica
 	_rhs = new Grid(_geom, multi_real_t(0.5, 0.5));
 	_rhs->Initialize(0.0);
 
-	//_solver = new SOR(_geom);
+	_solver = new RedOrBlackSOR(_geom,_param->Omega());
         
     _t = 0.0;
     _dtlimit = _param->Dt();
@@ -52,15 +54,23 @@ void Compute::TimeStep(bool printInfo) {
     real_t dtlimit_diff = _param->Re()/2.0 * (_geom->Mesh()[0]*_geom->Mesh()[0]*_geom->Mesh()[1]*_geom->Mesh()[1])/(_geom->Mesh()[0]*_geom->Mesh()[0]+_geom->Mesh()[1]*_geom->Mesh()[1]);
     //stability  condition induced by the convection operator
     real_t dtlimit_conv_x = _dtlimit;
-    if(_u->AbsMax() != 0)
-        real_t dtlimit_conv_x = _geom->Mesh()[0]/_u->AbsMax();
-    
     real_t dtlimit_conv_y = _dtlimit;
-    if(_v->AbsMax() != 0)
-        real_t dtlimit_conv_y = _geom->Mesh()[1]/_v->AbsMax();
+    real_t AbsMax_v = _comm->gatherMax(_v->AbsMax());
+    real_t AbsMax_u = _comm->gatherMax(_u->AbsMax());
+    
+    
+    if(AbsMax_u != 0)
+        real_t dtlimit_conv_x = _geom->Mesh()[0]/AbsMax_u;
+    
+    
+    if(AbsMax_v != 0)
+        real_t dtlimit_conv_y = _geom->Mesh()[1]/AbsMax_v;
 
     //minimum of all time limits
     real_t dt = 0.5*std::min(std::min(dtlimit_diff, _dtlimit),std::min(dtlimit_conv_x, dtlimit_conv_y));
+    
+    if(printInfo && _comm->getRank()==0) std::cout << "Timestep dt: " << dt << std::endl;
+	
     
 	// update boundary values
 	_geom->Update_U(_u);
@@ -69,7 +79,10 @@ void Compute::TimeStep(bool printInfo) {
 
     // compute 'preliminary' velocities and setting boundary values
     MomentumEqu(dt);
-	_geom->Update_U(_F);
+	_comm->copyBoundary(_F);
+    _geom->Update_U(_F);
+    
+	_comm->copyBoundary(_G);
 	_geom->Update_V(_G);
 
     // compute rhs
@@ -79,19 +92,28 @@ void Compute::TimeStep(bool printInfo) {
     index_t itermax = _param->IterMax();
     index_t it = 0;
     real_t res = 0.0;
+    _comm->copyBoundary(_p);
     do {
         it++;
-        res = _solver->Cycle(_p, _rhs);
-		if(printInfo) std::cout << "Residual at iteration " << it << ": " << res << std::endl;
+        res = _comm->gatherSum(_solver->RedCycle(_p, _rhs));
+        
+        _comm->copyBoundary(_p);
+        res += _comm->gatherSum(_solver->BlackCycle(_p, _rhs));
+        _comm->copyBoundary(_p);
+        res = sqrt(res);
+		//if(printInfo && _comm->getRank()==0) std::cout << "Residual at iteration " << it << ": " << res << std::endl;
     } while(it<itermax && res>_epslimit);
-    if(printInfo) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << std::endl;
+    if(printInfo && _comm->getRank()==0) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << std::endl;
 	
     // compute new velocities
     NewVelocities(dt);
-
+    if (_comm->getRank() == 0) _u->print();
 	// udating boundary values (to be consistent when saving vtks)
+    _comm->copyBoundary(_u);
 	_geom->Update_U(_u);
+    _comm->copyBoundary(_v);
 	_geom->Update_V(_v);
+    _comm->copyBoundary(_p);
 	_geom->Update_P(_p);
 	
 	// save timestep
@@ -128,47 +150,40 @@ const Grid * Compute::GetRHS() const {
 /// Computes and returns the absolute velocity
 const Grid * Compute::GetVelocity() {
     InteriorIterator iit = InteriorIterator(_geom);
-    Grid * abs_vel = new Grid(_geom);
-	multi_real_t cell_center = multi_real_t(0.5*_geom->Mesh()[0], 0.5*_geom->Mesh()[1]);
+    BoundaryIterator bit = BoundaryIterator(_geom);
+    multi_real_t cell_center = multi_real_t(0.5*_geom->Mesh()[0], 0.5*_geom->Mesh()[1]);
+    Grid * abs_vel = new Grid(_geom,cell_center);
+	
 	real_t u_ip = 0.0; // storage for interpolated u to center of cells
 	real_t v_ip = 0.0; // storage for interpolated v to center of cells
-
-
+	
+	
+	abs_vel->Initialize(0);
+    
     for(iit.First(); iit.Valid(); iit.Next()){
-        // Interpolating the velocities to center of cells
-        multi_index_t cell_pos = iit.Pos();
+        // Interpolating the velocities to center of cells  
 		v_ip = (_v->Cell(iit.Down()) + _v->Cell(iit)) / 2.0;
 		u_ip = (_u->Cell(iit.Left()) + _u->Cell(iit)) / 2.0;
         abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-
-	// setting boundary values to 0 (even if probably not necessary)
-	// Iteration over top boundary
-	BoundaryIterator bit = BoundaryIterator(_geom);
+    
 	bit.SetBoundary(0);
-	abs_vel->Cell(bit.Left()) = 0;
+    
 	for (bit.First(); bit.Valid(); bit.Next()) {
-		abs_vel->Cell(bit) = 0.0;
+		v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+		u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+        abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
 	}
-	// Iteration over right boundary
+	v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+    u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+    abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
 	bit.SetBoundary(1);
-	abs_vel->Cell(bit.Top()) = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
-		abs_vel->Cell(bit) = 0.0;
-	}
-	// Iteration over lower boundary
-	bit.SetBoundary(2);
-	abs_vel->Cell(bit.Right()) = 0;
-	for (bit.First(); bit.Valid(); bit.Next()) {
-		abs_vel->Cell(bit) = 0.0;
+		v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+		u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+        abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
 	}
 
-	// Iteration over left boundary
-	bit.SetBoundary(3);
-	abs_vel->Cell(bit.Down()) = 0;
-	for (bit.First(); bit.Valid(); bit.Next()) {
-		abs_vel->Cell(bit) = 0.0;
-	}
     return abs_vel;
 }
 
@@ -197,8 +212,70 @@ const Grid * Compute::GetVorticity() {
 
 /// Computes and returns the stream line values
 const Grid * Compute::GetStream() {
-    // whatever
-	return nullptr;
+    Grid * psi = new Grid(_geom);
+    psi->Initialize(0.0);
+    
+    BoundaryIterator bit = BoundaryIterator(_geom);
+    bit.SetBoundary(3);
+    for (bit.First(); bit.Valid(); bit.Next()) {
+		psi->Cell(bit) = _geom->Mesh()[1]*_u->Cell(bit) + psi->Cell(bit.Down());
+	}
+    
+    InteriorIterator iit = InteriorIterator(_geom);
+    
+    for(iit.First(); iit.Valid(); iit.Next()){
+        psi->Cell(iit.Down()) = -_geom->Mesh()[0]*_v->Cell(iit.Down()) + psi->Cell(iit.Left().Down());
+    }
+    
+    bit.SetBoundary(0);
+    for (bit.First(); bit.Valid(); bit.Next()) {
+        psi->Cell(bit.Down()) = -_geom->Mesh()[0]*_v->Cell(bit.Down()) + psi->Cell(bit.Left().Down());
+	}
+	
+	
+    bit.SetBoundary(3);
+    bit.First();
+    double offset = psi->Cell(bit.Down());
+    double buffer = 0.0;
+    
+    MPI_Status stat;
+	
+	for( int i = 0;i < _comm->ThreadDim()[1] - 1;i++){
+        if( _comm->getRank()==i*_comm->ThreadDim()[0]){
+            bit.SetBoundary(0);
+            bit.First();
+            buffer = offset + (double)psi->Cell(bit.Down().Left());
+	        MPI_Send(&buffer, 1, MPI_DOUBLE, (i+1)*_comm->ThreadDim()[0], 1, MPI_COMM_WORLD);
+        }
+        if( _comm->getRank()==(i+1)*_comm->ThreadDim()[0]){
+            
+            MPI_Recv(&buffer, 1, MPI_DOUBLE, i*_comm->ThreadDim()[0], 1, MPI_COMM_WORLD, &stat);
+            offset = buffer;
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+    
+    
+    for( int j = 0;j < _comm->ThreadDim()[0]-1;j++){
+        for( int i = 0;i < _comm->ThreadDim()[1];i++){
+            if( _comm->getRank()==i*_comm->ThreadDim()[0]+j){
+                bit.SetBoundary(2);
+                bit.First();
+                buffer = offset + (double)psi->Cell(bit);
+                MPI_Send(&buffer, 1, MPI_DOUBLE, (i+1)*_comm->ThreadDim()[0]+j+1, 1, MPI_COMM_WORLD);
+            }
+            if( _comm->getRank()==i*_comm->ThreadDim()[0]+j+1){
+                MPI_Recv(&buffer, 1, MPI_DOUBLE, i*_comm->ThreadDim()[0]+j, 1, MPI_COMM_WORLD, &stat);
+                offset = buffer;
+            }
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+    
+    psi->AddConstant(offset);
+        
+    
+	return psi;
 }
 
 

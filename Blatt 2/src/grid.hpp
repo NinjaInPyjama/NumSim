@@ -52,6 +52,9 @@ public:
   ///     Initializes the grid with a value
   void Initialize(const real_t &value);
 
+  ///     Adds a Constant to the values of the grid
+  void AddConstant(const real_t &value);
+
   /// Write access to the grid cell at position [it]
   real_t &Cell(const Iterator &it);
   /// Read access to the grid cell at position [it]

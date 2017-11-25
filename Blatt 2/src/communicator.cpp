@@ -11,7 +11,12 @@ Communicator::Communicator(int * argc, char *** argv) {
     
     MPI_Comm_rank(MPI_COMM_WORLD, &_rank);
     
+    std::cout << "Rang: " << _rank << std::endl;
+    
     MPI_Comm_size(MPI_COMM_WORLD, &this->_size);
+    
+    std::cout << "Size: " << _size << std::endl;
+    
     
     for (int i=(int)sqrt(_size) ; i>=1;i--){
         if((real_t( _size)/real_t(i)) == _size/i){
@@ -23,8 +28,17 @@ Communicator::Communicator(int * argc, char *** argv) {
     _tidx[0] = _rank%_tdim[0];
     _tidx[1] = (index_t)(_rank/_tdim[0]);
     
+    std::cout << "tidx: " << _tidx[0] << _tidx[1] << "tdim: " << _tdim[0] << _tdim[1]  << std::endl;
+    
+    
+    
     //unten link ist even (true)
     _evenodd = (_tidx[0]+_tidx[1])%2 == 0;
+    
+    std::cout << "evenodd: " << _evenodd << std::endl;
+    
+    
+    
 }
 
 
@@ -51,7 +65,7 @@ const multi_index_t & Communicator::ThreadDim() const {
 /** Returns whether this process is a red or a black field
 */
 const bool & Communicator::EvenOdd() const {
-	return _evenodd;
+    return _evenodd;
 }
 
 
@@ -96,7 +110,8 @@ real_t Communicator::gatherMax(const real_t & val) const {
 * \param [in] grid  The values to sync
 */
 void Communicator::copyBoundary(Grid * grid) const {
-	if(this->EvenOdd()) {
+	
+    if(this->EvenOdd()) {
         if(!this->isLeft()) {
             this->copyLeftBoundary(grid);
         }
@@ -134,13 +149,13 @@ const bool Communicator::isLeft() const {
 /** Decide whether our right boundary is a domain boundary
 */
 const bool Communicator::isRight() const {
-	return _tidx[0]==_tdim[0]-1;
+	return _tidx[0]==(_tdim[0]-1);
 }
 
 /** Decide whether our top boundary is a domain boundary
 */
 const bool Communicator::isTop() const {
-	return _tidx[1]==_tdim[1]-1;
+	return _tidx[1]==(_tdim[1]-1);
 }
 
 /** Decide whether our bottom boundary is a domain boundary
@@ -262,20 +277,23 @@ bool Communicator::copyTopBoundary(Grid * grid) const {
 	real_t buffer[bufferlength];
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 
-	bit.SetBoundary(bit.boundaryBottom);
-    bit.First();
-    buffer[0] = grid->Cell(bit.Top().Right());
+	
+	bit.SetBoundary(bit.boundaryTop);
+	bit.First();
+    buffer[0] = grid->Cell(bit.Down().Left());
     int i = 1;
 	for (bit.First(); bit.Valid(); bit.Next()) {
-		buffer[i] = grid->Cell(bit.Top());
+		buffer[i] = grid->Cell(bit.Down());
 		i++;
 	}
-	buffer[bufferlength-1] = grid->Cell(bit.Top());
-	
+	buffer[bufferlength-1] = grid->Cell(bit.Down());
+    
+    //std::cout << getRank() << std::endl;
+    
 	// TODO: maybe right processes do not send (send to themselfs)
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + _tdim[0]) % _size, 1, (_rank + _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
-
-	
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + _tdim[0]) % _size, 1, (_rank + _tdim[0]) % _size, 0, MPI_COMM_WORLD, &stat);
+    
+    
 	bit.SetBoundary(bit.boundaryTop);
     bit.First();
     grid->Cell(bit.Left()) = buffer[bufferlength-1];
@@ -301,18 +319,19 @@ bool Communicator::copyBottomBoundary(Grid * grid) const {
 	real_t buffer[bufferlength];
 	BoundaryIterator bit = BoundaryIterator(grid->getGeometry());
 
-	bit.SetBoundary(bit.boundaryTop);
-	bit.First();
-    buffer[0] = grid->Cell(bit.Down().Left());
+    bit.SetBoundary(bit.boundaryBottom);
+    bit.First();
+    buffer[0] = grid->Cell(bit.Top().Right());
     int i = 1;
 	for (bit.First(); bit.Valid(); bit.Next()) {
-		buffer[i] = grid->Cell(bit.Down());
+		buffer[i] = grid->Cell(bit.Top());
 		i++;
 	}
-	buffer[bufferlength-1] = grid->Cell(bit.Down());
+	buffer[bufferlength-1] = grid->Cell(bit.Top());
+    
     
 	// TODO: maybe right processes do not send (send to themselfs)
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - _tdim[0]) % _size, 1, (_rank - _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - _tdim[0]) % _size, 0, (_rank - _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
 
 	
 	bit.SetBoundary(bit.boundaryBottom);

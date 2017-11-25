@@ -123,8 +123,9 @@ void InteriorIterator::Next() {
 */
 
 /// Construct a new RedBlackIterator
-RedBlackIterator::RedBlackIterator(const Geometry * geom) {
-	_geom = geom;
+RedBlackIterator::RedBlackIterator(const Geometry * geom, bool rb) {
+	_rb = rb; //true means red cycle
+    _geom = geom;
 	First();
 	_valid = true;
 }
@@ -132,7 +133,7 @@ RedBlackIterator::RedBlackIterator(const Geometry * geom) {
 
 /// Sets the iterator to the first red element
 void RedBlackIterator::First() {
-	_value = _geom->RedBlack() ? _geom->Size()[0] + 1 : _geom->Size()[0] + 2;
+	_value = (_geom->RedBlack() == _rb) ? _geom->Size()[0] + 1 : _geom->Size()[0] + 2;
 	_valid = true;
 }
 

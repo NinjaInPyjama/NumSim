@@ -31,11 +31,15 @@ int main(int argc, char **argv) {
 
   // Create parameter and geometry instances with default values
   Communicator comm(&argc, &argv);
+    
+  
   Parameter param;
   Geometry geom(&comm);
+  
   // Create the fluid solver
   Compute comp(&geom, &param, &comm);
 
+  
   if (comm.getRank() == 0) {
     // check if folder "VTK" exists
     struct stat info;
@@ -101,9 +105,12 @@ int main(int argc, char **argv) {
     vtk.AddPointScalar("Pressure", comp.GetP());
     vtk.Finish();
 
+  
     // Run a few steps
-    for (uint32_t i = 0; i < 9; ++i)
+    for (uint32_t i = 0; i < 9; ++i) {
+        
       comp.TimeStep(false);
+    }
     bool printOnlyOnMaster = !comm.getRank();
     comp.TimeStep(printOnlyOnMaster);
   }

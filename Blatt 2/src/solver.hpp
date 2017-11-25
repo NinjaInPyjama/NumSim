@@ -83,6 +83,7 @@ public:
 
   real_t RedCycle(Grid *grid, const Grid *rhs) const;
   real_t BlackCycle(Grid *grid, const Grid *rhs) const;
+  real_t Cycle(Grid * grid, const Grid * rhs) const ;
 };
 //------------------------------------------------------------------------------
 #endif // __SOLVER_HPP

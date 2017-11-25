@@ -91,6 +91,7 @@ void Geometry::Load(const char * file) {
 	fclose(handle);
 }
 
+
 /// Returns whether the lower left corner is red or black
 const bool & Geometry::RedBlack() const {
 	return _redblack;
@@ -163,6 +164,7 @@ void Geometry::Update_U(Grid * u) const {
 	for(bit.First(); bit.Valid(); bit.Next()) {
 		u->Cell(bit) = 2.0 - u->Cell(bit.Down()); //2.0
 	}
+	u->Cell(bit) = 2.0;
     }
 	
     // Iteration over lower boundary

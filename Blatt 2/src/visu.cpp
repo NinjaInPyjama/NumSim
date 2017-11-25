@@ -100,8 +100,8 @@ Renderer::Renderer(const multi_real_t &length, const multi_real_t &h)
   _click_x = 0;
   _click_y = 1;
   _grid = true;
-  _min = std::numeric_limits<real_t>::max();
-  _max = std::numeric_limits<real_t>::min();
+  _min = 0;//std::numeric_limits<real_t>::max();
+  _max = 2;//std::numeric_limits<real_t>::min();
 }
 //------------------------------------------------------------------------------
 Renderer::~Renderer() {
