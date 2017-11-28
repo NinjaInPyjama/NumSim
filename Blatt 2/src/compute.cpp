@@ -149,16 +149,14 @@ const Grid * Compute::GetRHS() const {
 
 /// Computes and returns the absolute velocity
 const Grid * Compute::GetVelocity() {
-    InteriorIterator iit = InteriorIterator(_geom);
-    BoundaryIterator bit = BoundaryIterator(_geom);
-    multi_real_t cell_center = multi_real_t(0.5*_geom->Mesh()[0], 0.5*_geom->Mesh()[1]);
-    Grid * abs_vel = new Grid(_geom,cell_center);
+    InteriorIterator iit(_geom);
+    Grid * abs_vel = new Grid(_geom, multi_real_t(0.5, 0.5));
 	
 	real_t u_ip = 0.0; // storage for interpolated u to center of cells
 	real_t v_ip = 0.0; // storage for interpolated v to center of cells
 	
 	
-	abs_vel->Initialize(0);
+	abs_vel->Initialize(0.0);
     
     for(iit.First(); iit.Valid(); iit.Next()){
         // Interpolating the velocities to center of cells  
@@ -167,45 +165,30 @@ const Grid * Compute::GetVelocity() {
         abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
     
-	bit.SetBoundary(0);
-    
-	for (bit.First(); bit.Valid(); bit.Next()) {
-		v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-		u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-        abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-	}
-	v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-    u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-    abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-	bit.SetBoundary(1);
-	for (bit.First(); bit.Valid(); bit.Next()) {
-		v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-		u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-        abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-	}
+	_geom->Update_U(abs_vel);
 
     return abs_vel;
 }
 
 /// Computes and returns the vorticity
 const Grid * Compute::GetVorticity() {
-    InteriorIterator iit = InteriorIterator(_geom);
-    Grid * vort = new Grid(_geom);
-    multi_real_t cell_center = multi_real_t(0.5, 0.5);
-
-    // Creating grids of derivatives of u (in y-dim) and v (in x-dim) (for interpolation reasons)
-    Grid * du_dy = new Grid(_geom);
-    Grid * dv_dx = new Grid(_geom);
-    for(iit.First();iit.Valid();iit.Next()){
-        du_dy->Cell(iit) = _u->dy_central(iit);
-        dv_dx->Cell(iit) = _v->dx_central(iit);
-    }
+    InteriorIterator iit(_geom);
+	BoundaryIterator bit = BoundaryIterator(_geom);
+    Grid * vort = new Grid(_geom, multi_real_t(1.0, 1.0));
     
-    for(iit.First();iit.Valid();iit.Next()){ 
-        // Calculating vorticity by dv/dx - du/dy
-        multi_index_t cell_pos = iit.Pos();
-		vort->Cell(iit) = 0.0; //  dv_dx->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]))
-                                - du_dy->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1]  + cell_center[1]));
+	bit.SetBoundary(bit.boundaryBottom);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		vort->Cell(bit) = _u->dy_r(bit); // _v->dx_r(bit) = 0!
+	}
+
+	bit.SetBoundary(bit.boundaryLeft);
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		vort->Cell(bit) = - _v->dx_r(bit); // _u->dy_r(bit) = 0!
+	}
+
+    for(iit.First(); iit.Valid(); iit.Next()){ 
+        // Calculating vorticity by du/dy - dv/dx
+		vort->Cell(iit) = _u->dy_r(iit) - _v->dx_r(iit);
     }
     return vort;
 }
