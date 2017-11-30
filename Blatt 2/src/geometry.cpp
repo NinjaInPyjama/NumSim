@@ -141,9 +141,10 @@ void Geometry::Update_U(Grid * u) const {
     // Iteration over right boundary
     bit.SetBoundary(1);
     if(_comm->isRight()){
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		u->Cell(bit.Left()) = 0.0;
-	}
+		for(bit.First(); bit.Valid(); bit.Next()) {
+			u->Cell(bit) = 0.0;
+			u->Cell(bit.Left()) = 0.0;
+		}
     }
     
     // Iteration over left boundary
@@ -152,27 +153,27 @@ void Geometry::Update_U(Grid * u) const {
         bit.First();
         u->Cell(bit.Down()) = 0.0; // Lower left corner
         for(bit.First(); bit.Valid(); bit.Next()) {
-		u->Cell(bit) = 0.0;
-	}
+			u->Cell(bit) = 0.0;
+		}
     }
     
     // Iteration over upper boundary
     bit.SetBoundary(0);
     if(_comm->isTop()){
         bit.First();
-	u->Cell(bit.Left()) = 2.0; // Upper left corner
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		u->Cell(bit) = 2.0 - u->Cell(bit.Down()); //2.0
-	}
-	u->Cell(bit) = 2.0;
+		u->Cell(bit.Left()) = 2.0; // Upper left corner
+		for(bit.First(); bit.Valid(); bit.Next()) {
+			u->Cell(bit) = 2.0 - u->Cell(bit.Down()); //2.0
+		}
+		u->Cell(bit) = 2.0;
     }
 	
     // Iteration over lower boundary
     if(_comm->isBottom()){
 	bit.SetBoundary(2);
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		u->Cell(bit) =  - u->Cell(bit.Top());
-	}
+		for(bit.First(); bit.Valid(); bit.Next()) {
+			u->Cell(bit) =  - u->Cell(bit.Top());
+		}
     }
 	
 }
@@ -185,9 +186,10 @@ void Geometry::Update_V(Grid * v) const {
     // Iteration over upper boundary
     bit.SetBoundary(0);
     if(_comm->isTop()){
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		v->Cell(bit.Down()) = 0.0;
-	}
+		for(bit.First(); bit.Valid(); bit.Next()) {
+			v->Cell(bit) = 0.0;
+			v->Cell(bit.Down()) = 0.0;
+		}
     }
     
     // Iteration over lower boundary
@@ -196,8 +198,8 @@ void Geometry::Update_V(Grid * v) const {
         bit.First();
         v->Cell(bit.Right()) = 0.0; // Lower right corner
         for(bit.First(); bit.Valid(); bit.Next()) {
-		v->Cell(bit) = 0.0;
-	}
+			v->Cell(bit) = 0.0;
+		}
     }
     
     // Iteration over left boundary
@@ -205,17 +207,17 @@ void Geometry::Update_V(Grid * v) const {
     if(_comm->isLeft()){
         bit.First();
         v->Cell(bit.Down()) = 0.0; // Lower left corner
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		v->Cell(bit) = - v->Cell(bit.Right());
-	}
+		for(bit.First(); bit.Valid(); bit.Next()) {
+			v->Cell(bit) = - v->Cell(bit.Right());
+		}
     }
     
     // Iteration over right boundary
     bit.SetBoundary(1);
     if(_comm->isRight()){
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		v->Cell(bit) = - v->Cell(bit.Left());
-	}
+		for(bit.First(); bit.Valid(); bit.Next()) {
+			v->Cell(bit) = - v->Cell(bit.Left());
+		}
     }
 	
 }
@@ -229,7 +231,7 @@ void Geometry::Update_P(Grid * p) const {
     bit.SetBoundary(0);
     if(_comm->isTop()){
         for(bit.First(); bit.Valid(); bit.Next()) {
-		p->Cell(bit) = p->Cell(bit.Down());
+			p->Cell(bit) = p->Cell(bit.Down());
         }
     }
     
@@ -237,7 +239,7 @@ void Geometry::Update_P(Grid * p) const {
     bit.SetBoundary(1);
     if(_comm->isRight()){
 	for(bit.First(); bit.Valid(); bit.Next()) {
-		p->Cell(bit) = p->Cell(bit.Left());
+			p->Cell(bit) = p->Cell(bit.Left());
         }
     }
     
@@ -245,15 +247,15 @@ void Geometry::Update_P(Grid * p) const {
     bit.SetBoundary(2);
     if(_comm->isBottom()){
 	for(bit.First(); bit.Valid(); bit.Next()) {
-		p->Cell(bit) = p->Cell(bit.Top());
+			p->Cell(bit) = p->Cell(bit.Top());
         }
     }
     
     // Iteration over left boundary
     bit.SetBoundary(3);
     if(_comm->isLeft()){
-	for(bit.First(); bit.Valid(); bit.Next()) {
-		p->Cell(bit) = p->Cell(bit.Right());
-	}
+		for(bit.First(); bit.Valid(); bit.Next()) {
+			p->Cell(bit) = p->Cell(bit.Right());
+		}
     }
 }

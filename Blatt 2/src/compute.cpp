@@ -150,6 +150,7 @@ const Grid * Compute::GetRHS() const {
 /// Computes and returns the absolute velocity
 const Grid * Compute::GetVelocity() {
     InteriorIterator iit(_geom);
+	BoundaryIterator bit(_geom);
     Grid * abs_vel = new Grid(_geom, multi_real_t(0.5, 0.5));
 	
 	real_t u_ip = 0.0; // storage for interpolated u to center of cells
@@ -164,6 +165,26 @@ const Grid * Compute::GetVelocity() {
 		u_ip = (_u->Cell(iit.Left()) + _u->Cell(iit)) / 2.0;
         abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
+
+	bit.SetBoundary(bit.boundaryTop);
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		abs_vel->Cell(bit) = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+	}
+
+	bit.SetBoundary(bit.boundaryRight);
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		abs_vel->Cell(bit) = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+	}
+
+	bit.SetBoundary(bit.boundaryBottom);
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		abs_vel->Cell(bit) = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+	}
+
+	bit.SetBoundary(bit.boundaryLeft);
+	for (bit.First(); bit.Valid(); bit.Next()) {
+		abs_vel->Cell(bit) = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+	}
     
 	_geom->Update_U(abs_vel);
 
