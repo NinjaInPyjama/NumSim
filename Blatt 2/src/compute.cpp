@@ -185,8 +185,6 @@ const Grid * Compute::GetVelocity() {
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		abs_vel->Cell(bit) = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
 	}
-    
-	_geom->Update_U(abs_vel);
 
     return abs_vel;
 }
