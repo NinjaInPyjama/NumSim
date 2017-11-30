@@ -77,7 +77,6 @@ real_t RedOrBlackSOR::RedCycle(Grid * grid, const Grid * rhs) const {
 	RedBlackIterator it = RedBlackIterator(_geom,true);
     real_t dx = _geom->Mesh()[0];
     real_t dy = _geom->Mesh()[1];
-
     for(it.First(); it.Valid(); it.Next()){
 		// see script, p. 26, formular (4.1)
         grid->Cell(it) = grid->Cell(it) + _omega*( rhs->Cell(it) -grid->dxx(it) - grid->dyy(it))/(-2.0/(dx*dx) - 2.0/(dy*dy));

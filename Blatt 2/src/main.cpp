@@ -72,6 +72,14 @@ int main(int argc, char **argv) {
 
   // Run the time steps until the end is reached
   while (comp.GetTime() < param.Tend()) {
+      
+//       BoundaryIterator bit = BoundaryIterator(&geom);
+//       for(bit.First();bit.Valid();bit.Next()) {
+//       
+//           std::cout << "f";
+//     }
+//       
+//       std::cout << "fail" << std::endl;
 #ifdef USE_DEBUG_VISU
     // Render and check if window is closed
     switch (visu.Render(visugrid)) {
@@ -102,7 +110,10 @@ int main(int argc, char **argv) {
     vtk.AddCellField("Cell Velocity", comp.GetU(), comp.GetV());
     vtk.SwitchToPointData();
     vtk.AddPointField("Velocity", comp.GetU(), comp.GetV());
+    vtk.AddPointScalar("Stream", comp.GetStream());
+    
     vtk.AddPointScalar("Pressure", comp.GetP());
+    
     vtk.Finish();
 
   

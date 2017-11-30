@@ -11,11 +11,11 @@ Communicator::Communicator(int * argc, char *** argv) {
     
     MPI_Comm_rank(MPI_COMM_WORLD, &_rank);
     
-    std::cout << "Rang: " << _rank << std::endl;
+    //std::cout << "Rang: " << _rank << std::endl;
     
     MPI_Comm_size(MPI_COMM_WORLD, &this->_size);
     
-    std::cout << "Size: " << _size << std::endl;
+    //std::cout << "Size: " << _size << std::endl;
     
     
     for (int i=(int)sqrt(_size) ; i>=1;i--){
@@ -28,14 +28,14 @@ Communicator::Communicator(int * argc, char *** argv) {
     _tidx[0] = _rank%_tdim[0];
     _tidx[1] = (index_t)(_rank/_tdim[0]);
     
-    std::cout << "tidx: " << _tidx[0] << _tidx[1] << "tdim: " << _tdim[0] << _tdim[1]  << std::endl;
+    //std::cout << "tidx: " << _tidx[0] << _tidx[1] << "tdim: " << _tdim[0] << _tdim[1]  << std::endl;
     
     
     
     //unten link ist even (true)
     _evenodd = (_tidx[0]+_tidx[1])%2 == 0;
     
-    std::cout << "evenodd: " << _evenodd << std::endl;
+    //std::cout << "evenodd: " << _evenodd << std::endl;
     
     
     
