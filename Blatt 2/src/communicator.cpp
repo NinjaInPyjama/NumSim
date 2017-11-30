@@ -1,5 +1,5 @@
 #include "communicator.hpp"
-#include <mpi.h>
+#include <mpi/mpi.h>
 
 /** Communicator constructor; initializes MPI Environment
 *
@@ -203,11 +203,11 @@ bool Communicator::copyLeftBoundary(Grid * grid) const {
 
     int i = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
-		buffer[i] = grid->Cell(bit.Left());
+		buffer[i] = grid->Cell(bit.Right());
 		i++;
 	}
 	
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - 1) % _size, 0, (_rank - 1) % _size, 1, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, _rank - 1, 0, _rank - 1, 1, MPI_COMM_WORLD, &stat);
 
 	i = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
@@ -232,11 +232,11 @@ bool Communicator::copyRightBoundary(Grid * grid) const {
 
     int i = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
-		buffer[i] = grid->Cell(bit.Right());
+		buffer[i] = grid->Cell(bit.Left());
 		i++;
 	}    
 	
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + 1) % _size, 1, (_rank + 1) % _size, 0, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, _rank + 1, 1, _rank + 1, 0, MPI_COMM_WORLD, &stat);
 
 	i = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
@@ -265,7 +265,7 @@ bool Communicator::copyTopBoundary(Grid * grid) const {
 		i++;
 	}
     
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank + _tdim[0]) % _size, 1, (_rank + _tdim[0]) % _size, 0, MPI_COMM_WORLD, &stat);
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, _rank + _tdim[0], 3, _rank + _tdim[0], 2, MPI_COMM_WORLD, &stat);
     
 	i = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
@@ -295,8 +295,8 @@ bool Communicator::copyBottomBoundary(Grid * grid) const {
 		i++;
 	}
     
-	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, (_rank - _tdim[0]) % _size, 0, (_rank - _tdim[0]) % _size, 1, MPI_COMM_WORLD, &stat);
-	
+	int result = MPI_Sendrecv_replace(buffer, bufferlength, MPI_DOUBLE, _rank - _tdim[0], 2, _rank - _tdim[0], 3, MPI_COMM_WORLD, &stat);
+
     i = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		grid->Cell(bit) = buffer[i];

@@ -196,7 +196,7 @@ void BoundaryIterator::First() {
 			_value = 0;
 			break;
 		default: // simulates top boundary
-			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) + 1;
+			_value = _geom->Size()[0]*(_geom->Size()[1] - 1);
 			break;
 	}
 }
