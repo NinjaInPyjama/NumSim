@@ -149,81 +149,80 @@ const Grid * Compute::GetRHS() const {
 
 /// Computes and returns the absolute velocity
 const Grid * Compute::GetVelocity() {
-    InteriorIterator iit(_geom);
+  InteriorIterator iit(_geom);
 	BoundaryIterator bit(_geom);
-    Grid * abs_vel = new Grid(_geom, multi_real_t(0.5, 0.5));
+  Grid * abs_vel = new Grid(_geom, multi_real_t(0.5, 0.5));
 	
 	real_t u_ip = 0.0; // storage for interpolated u to center of cells
 	real_t v_ip = 0.0; // storage for interpolated v to center of cells
 	
-	
 	abs_vel->Initialize(0.0);
     
-    for(iit.First(); iit.Valid(); iit.Next()){
-        // Interpolating the velocities to center of cells  
-		v_ip = (_v->Cell(iit.Down()) + _v->Cell(iit)) / 2.0;
-		u_ip = (_u->Cell(iit.Left()) + _u->Cell(iit)) / 2.0;
-        abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
+  for(iit.First(); iit.Valid(); iit.Next()){
+      // Interpolating the velocities to center of cells  
+  v_ip = (_v->Cell(iit.Down()) + _v->Cell(iit)) / 2.0;
+  u_ip = (_u->Cell(iit.Left()) + _u->Cell(iit)) / 2.0;
+      abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
+  }
+
+  bit.SetBoundary(bit.boundaryTop);
+  if(_comm->isTop()) {
+    for (bit.First(); bit.Valid(); bit.Next()) {
+      abs_vel->Cell(bit) = 2.0 - abs_vel->Cell(bit.Down());
     }
-    
-	bit.SetBoundary(bit.boundaryTop);
-    if(_comm->isTop()) {
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			abs_vel->Cell(bit) = 2.0 - abs_vel->Cell(bit.Down());
-		}
+  }
+  else{
+    for (bit.First(); bit.Valid(); bit.Next()) {
+      v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+      u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+      abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-	else{
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-			u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-			abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-		}
+  }
+
+  bit.SetBoundary(bit.boundaryBottom);
+  if(_comm->isBottom()) {
+    for (bit.First(); bit.Valid(); bit.Next()) {
+      abs_vel->Cell(bit) = - abs_vel->Cell(bit.Top());
     }
-    
-    bit.SetBoundary(bit.boundaryBottom);
-    if(_comm->isBottom()) {
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			abs_vel->Cell(bit) = - abs_vel->Cell(bit.Top());
-		}
+  }
+  else {
+    for (bit.First(); bit.Valid(); bit.Next()) {
+      v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+      u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+      abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-    else {
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-			u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-			abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-		}
+  }
+
+  bit.SetBoundary(bit.boundaryRight);
+  if(_comm->isRight()) {
+    for (bit.First(); bit.Valid(); bit.Next()) {
+      abs_vel->Cell(bit) = - abs_vel->Cell(bit.Left());
     }
-	
-	bit.SetBoundary(bit.boundaryRight);
-	if(_comm->isRight()) {
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			abs_vel->Cell(bit) = - abs_vel->Cell(bit.Left());
-		}
+  }
+  else {
+    for (bit.First(); bit.Valid(); bit.Next()) {
+      v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+      u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+      abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-    else {
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-			u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-			abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-		}
+  }
+
+
+  bit.SetBoundary(bit.boundaryLeft);
+  if(_comm->isLeft()) {
+    for (bit.First(); bit.Valid(); bit.Next()) {
+      abs_vel->Cell(bit) = - abs_vel->Cell(bit.Right());
     }
-    
-    
-	bit.SetBoundary(bit.boundaryLeft);
-    if(_comm->isLeft()) {
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			abs_vel->Cell(bit) = - abs_vel->Cell(bit.Right());
-		}
+  }
+  else {
+    for (bit.First(); bit.Valid(); bit.Next()) {
+      v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+      u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+      abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-    else {
-		for (bit.First(); bit.Valid(); bit.Next()) {
-			v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-			u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-			abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-		}
-    }
-    
-    return abs_vel;
+  }
+
+  return abs_vel;
 }
 
 /// Computes and returns the vorticity
