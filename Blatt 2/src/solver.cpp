@@ -83,8 +83,6 @@ real_t RedOrBlackSOR::RedCycle(Grid * grid, const Grid * rhs) const {
     }
     
 	//Updating boundary values to reduce artifactial values in calculation of residual
-	
-	
 	_geom->Update_P(grid);
 
     real_t total_res = 0.0;
@@ -113,8 +111,6 @@ real_t RedOrBlackSOR::BlackCycle(Grid * grid, const Grid * rhs) const {
     }
     
 	//Updating boundary values to reduce artifactial values in calculation of residual
-	
-	
 	_geom->Update_P(grid);
 
     real_t total_res = 0.0;

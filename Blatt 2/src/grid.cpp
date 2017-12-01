@@ -275,8 +275,7 @@ real_t * Grid::Data() {
 /** Get the offset value of the grid
 */
 const multi_real_t & Grid::getOffset() const {
-        return _offset;
-	// TODO: insert return statement here
+	return _offset;
 }
 
 /// Return a pointer to the Geometry

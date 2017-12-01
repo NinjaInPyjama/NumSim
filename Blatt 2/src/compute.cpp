@@ -5,7 +5,6 @@ using namespace std;
 
 /// Creates a compute instance with given geometry and parameter
 Compute::Compute(const Geometry * geom, const Parameter * param, const Communicator *comm) {
-	// TODO: insertstatements here
 
     _geom = geom;
     _param = param;
@@ -48,10 +47,10 @@ Compute::~Compute() {}
 // etc.)
 void Compute::TimeStep(bool printInfo) {
     // see script p. 23
-    //compute dt
-    //stability  condition induced by the diffusion operator
+    // compute dt
+    // stability  condition induced by the diffusion operator
     real_t dtlimit_diff = _param->Re()/2.0 * (_geom->Mesh()[0]*_geom->Mesh()[0]*_geom->Mesh()[1]*_geom->Mesh()[1])/(_geom->Mesh()[0]*_geom->Mesh()[0]+_geom->Mesh()[1]*_geom->Mesh()[1]);
-    //stability  condition induced by the convection operator
+    // stability  condition induced by the convection operator
     real_t dtlimit_conv_x = _dtlimit;
     real_t dtlimit_conv_y = _dtlimit;
     real_t AbsMax_v = _comm->gatherMax(_v->AbsMax());
@@ -65,7 +64,7 @@ void Compute::TimeStep(bool printInfo) {
     if(AbsMax_v != 0)
         real_t dtlimit_conv_y = _geom->Mesh()[1]/AbsMax_v;
 
-    //minimum of all time limits
+    // minimum of all time limits
     real_t dt = 0.5*std::min(std::min(dtlimit_diff, _dtlimit),std::min(dtlimit_conv_x, dtlimit_conv_y));
     
     if(printInfo && _comm->getRank()==0) std::cout << "Timestep dt: " << dt << std::endl;
@@ -95,21 +94,20 @@ void Compute::TimeStep(bool printInfo) {
     index_t it = 0;
     real_t res = 0.0;
     _comm->copyBoundary(_p);
+
     do {
         it++;
         res = _comm->gatherSum(_solver->RedCycle(_p, _rhs));
-        //std::cout << "fail5" << std::endl;
         _comm->copyBoundary(_p);
         res += _comm->gatherSum(_solver->BlackCycle(_p, _rhs));
         _comm->copyBoundary(_p);
         res = sqrt(res);
-		//if(printInfo && _comm->getRank()==0) std::cout << "Residual at iteration " << it << ": " << res << std::endl;
     } while(it<itermax && res>_epslimit);
     if(printInfo && _comm->getRank()==0) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << std::endl;
 	
     // compute new velocities
     NewVelocities(dt);
-    //if (_comm->getRank() == 0) _u->print();
+
 	// udating boundary values (to be consistent when saving vtks)
     _comm->copyBoundary(_u);
 	_geom->Update_U(_u);
@@ -119,10 +117,7 @@ void Compute::TimeStep(bool printInfo) {
 	_geom->Update_P(_p);
 	
 	// save timestep
-    _t += dt;
-    
-    //GetStream()->print();
-    
+    _t += dt;    
 }
 
 /// Returns the simulated time in total
@@ -172,64 +167,62 @@ const Grid * Compute::GetVelocity() {
     }
     
 	bit.SetBoundary(bit.boundaryTop);
-    if(_comm->isTop()){
-	for (bit.First(); bit.Valid(); bit.Next()) {
-        abs_vel->Cell(bit) = 2.0 - abs_vel->Cell(bit.Down());
-	}
-    } else{
-    for (bit.First(); bit.Valid(); bit.Next()) {
-        v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-		u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-        abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-	}
+    if(_comm->isTop()) {
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			abs_vel->Cell(bit) = 2.0 - abs_vel->Cell(bit.Down());
+		}
     }
-    
+	else{
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+			u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+			abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
+		}
+    }
     
     bit.SetBoundary(bit.boundaryBottom);
-    if(_comm->isBottom()){
-	for (bit.First(); bit.Valid(); bit.Next()) {
-        abs_vel->Cell(bit) = - abs_vel->Cell(bit.Top());
-	}
+    if(_comm->isBottom()) {
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			abs_vel->Cell(bit) = - abs_vel->Cell(bit.Top());
+		}
     }
-    else{
-    for (bit.First(); bit.Valid(); bit.Next()) {
-        v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-		u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-        abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-	}
+    else {
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+			u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+			abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
+		}
     }
-	
 	
 	bit.SetBoundary(bit.boundaryRight);
-	if(_comm->isRight()){
-	for (bit.First(); bit.Valid(); bit.Next()) {
-        abs_vel->Cell(bit) = - abs_vel->Cell(bit.Left());
-	}
+	if(_comm->isRight()) {
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			abs_vel->Cell(bit) = - abs_vel->Cell(bit.Left());
+		}
     }
-    else{
-    for (bit.First(); bit.Valid(); bit.Next()) {
-        v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-		u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-        abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-	}
+    else {
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+			u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+			abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
+		}
     }
     
     
 	bit.SetBoundary(bit.boundaryLeft);
-    if(_comm->isLeft()){
-	for (bit.First(); bit.Valid(); bit.Next()) {
-        abs_vel->Cell(bit) = - abs_vel->Cell(bit.Right());
-	}
+    if(_comm->isLeft()) {
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			abs_vel->Cell(bit) = - abs_vel->Cell(bit.Right());
+		}
     }
-    else{
-    for (bit.First(); bit.Valid(); bit.Next()) {
-        v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
-		u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
-        abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
-	}
+    else {
+		for (bit.First(); bit.Valid(); bit.Next()) {
+			v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
+			u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+			abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
+		}
     }
     
-	
     return abs_vel;
 }
 
@@ -258,18 +251,18 @@ const Grid * Compute::GetVorticity() {
 
 /// Computes and returns the stream line values
 const Grid * Compute::GetStream() {
-    Grid * psi = new Grid(_geom, multi_real_t(1.0,1.0));
+    Grid * psi = new Grid(_geom, multi_real_t(1.0, 1.0));
     psi->Initialize(0.0);
     
     BoundaryIterator bit = BoundaryIterator(_geom);
-    bit.SetBoundary(3);
+    bit.SetBoundary(bit.boundaryLeft);
     bit.First();
     bit.Next();
     for (; bit.Valid(); bit.Next()) {
 		psi->Cell(bit) = _geom->Mesh()[1]*_u->Cell(bit) + psi->Cell(bit.Down());
 	}
     
-    bit.SetBoundary(2);
+    bit.SetBoundary(bit.boundaryBottom);
     bit.First();
     bit.Next();
     for (; bit.Valid(); bit.Next()) {
@@ -285,33 +278,31 @@ const Grid * Compute::GetStream() {
     
 	//psi->print();
 	
-    bit.SetBoundary(3);
+    bit.SetBoundary(bit.boundaryLeft);
     bit.First();
     double offset = psi->Cell(bit);
     double buffer = 0.0;
     
     MPI_Status stat;
 	
-	for( int i = 0;i < _comm->ThreadDim()[1] - 1;i++){
-        if( _comm->getRank()==i*_comm->ThreadDim()[0]){
-            bit.SetBoundary(0);
+	for(int i = 0; i < _comm->ThreadDim()[1] - 1; i++) {
+        if( _comm->getRank()==i*_comm->ThreadDim()[0]) {
+            bit.SetBoundary(bit.boundaryTop);
             bit.First();
             buffer = offset + (double)psi->Cell(bit.Down());
 	        MPI_Send(&buffer, 1, MPI_DOUBLE, (i+1)*_comm->ThreadDim()[0], 1, MPI_COMM_WORLD);
         }
-        if( _comm->getRank()==(i+1)*_comm->ThreadDim()[0]){
-            
+        if( _comm->getRank()==(i+1)*_comm->ThreadDim()[0]) {
             MPI_Recv(&buffer, 1, MPI_DOUBLE, i*_comm->ThreadDim()[0], 1, MPI_COMM_WORLD, &stat);
             offset = buffer;
         }
         MPI_Barrier(MPI_COMM_WORLD);
     }
     
-    
-    for( int j = 0;j < _comm->ThreadDim()[0]-1;j++){
-        for( int i = 0;i < _comm->ThreadDim()[1];i++){
-            if( _comm->getRank()==i*_comm->ThreadDim()[0]+j){
-                bit.SetBoundary(1);
+    for(int j = 0; j < _comm->ThreadDim()[0]-1; j++) {
+        for(int i = 0; i < _comm->ThreadDim()[1]; i++) {
+            if( _comm->getRank()==i*_comm->ThreadDim()[0]+j) {
+                bit.SetBoundary(bit.boundaryRight);
                 bit.First();
                 buffer = offset + (double)psi->Cell(bit.Left());
                 MPI_Send(&buffer, 1, MPI_DOUBLE, i*_comm->ThreadDim()[0]+j+1, i, MPI_COMM_WORLD);
@@ -323,10 +314,9 @@ const Grid * Compute::GetStream() {
         }
         MPI_Barrier(MPI_COMM_WORLD);
     }
-    
+
     psi->AddConstant(offset);
-        
-    
+
 	return psi;
 }
 

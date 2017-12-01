@@ -139,6 +139,13 @@ void RedBlackIterator::First() {
 
 /// Goes to the next element of the iterator, disables it if position is end
 // Iterating over only red or black cells
+// Cells (*):
+// 0 0 0 0 0 0
+// 0 0 * 0 * 0
+// 0 * 0 * 0 0
+// 0 0 * 0 * 0
+// 0 * 0 * 0 0
+// 0 0 0 0 0 0
 void RedBlackIterator::Next() {
     if (_geom->Size()[0] % 2 == 0) {
 		if ((_value + 3) % _geom->Size()[0] == 0) {
@@ -153,7 +160,7 @@ void RedBlackIterator::Next() {
 			_value = _value + 2;
 		}
 	}
-	_value = _value + 2;
+	_value += 2;
     _valid = _value < _geom->Size()[0] * (_geom->Size()[1] - 1) - 1;
 }
 
