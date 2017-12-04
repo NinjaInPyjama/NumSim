@@ -28,6 +28,7 @@
 #include "iterator.hpp"
 #include "parameter.hpp"
 #include "solver.hpp"
+#include "zeitgeist.hpp"
 
 //------------------------------------------------------------------------------
 class Compute {
@@ -61,6 +62,8 @@ public:
   const Grid *GetVorticity();
   /// Computes and returns the stream line values
   const Grid *GetStream();
+  
+  void  printTimes();
 
 private:
   // current timestep
@@ -85,6 +88,13 @@ private:
 
   // right-hand side
   Grid *_rhs;
+  
+  //Zeitgeist
+  Zeitgeist *_zeit_comm;
+  Zeitgeist *_zeit_comp;
+  Zeitgeist *_zeit_dt;
+  Zeitgeist *_zeit_res;
+  
 
   // container for interpolating whichever values
   Grid *_tmp;

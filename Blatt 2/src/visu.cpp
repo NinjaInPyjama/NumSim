@@ -100,8 +100,8 @@ Renderer::Renderer(const multi_real_t &length, const multi_real_t &h)
   _click_x = 0;
   _click_y = 1;
   _grid = true;
-  _min = 0;//std::numeric_limits<real_t>::max();
-  _max = 2;//std::numeric_limits<real_t>::min();
+  _min = std::numeric_limits<real_t>::max();
+  _max = std::numeric_limits<real_t>::min();
 }
 //------------------------------------------------------------------------------
 Renderer::~Renderer() {
@@ -112,14 +112,36 @@ Renderer::~Renderer() {
   _count--;
 }
 //------------------------------------------------------------------------------
-void Renderer::Init(const index_t &width, const index_t &height,
-                    const int &idx) {
+void Renderer::Init(const index_t &width, const index_t &height, const multi_index_t &threadDim, const multi_index_t &threadIdx, const int &idx) {
   // SDL_WM_SetCaption("Grid Renderer","Grid Renderer");
-  _width = width;
-  _height = height;
+  _width = width/threadDim[0];
+  _height = height/threadDim[1];
   _idx = idx;
-  _window = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED,
-                             SDL_WINDOWPOS_UNDEFINED, _width, _height, 0);
+  
+  
+  //_window = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED,
+  //                           SDL_WINDOWPOS_UNDEFINED, _width, _height, 0);
+  _window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED,
+                             SDL_WINDOWPOS_CENTERED, _width, _height, 0);
+  
+  int* x_pos = 0;
+  int* y_pos = 0;
+  
+  //SDL_GetWindowPosition(_window,x_pos,y_pos);
+  
+  SDL_DisplayMode DM;
+  SDL_GetCurrentDisplayMode(0, &DM);
+  auto screen_x = DM.w;
+  auto screen_y = DM.h;
+  
+  int setpos_x = int(int(screen_x/2) + threadIdx[0]*_width  - _width*(threadDim[0])/2.0);
+  int setpos_y = int( 50 - threadIdx[1]*_height + (threadDim[1]-1)*_height);
+  
+  
+  SDL_SetWindowPosition( _window, setpos_x, setpos_y);
+  
+  //SDL_SetWindowPosition( _window, 50, 50);
+  
   _screen = SDL_GetWindowSurface(_window); // SDL_SetVideoMode(_width,_height,
                                            // 32, SDL_HWSURFACE |
                                            // SDL_DOUBLEBUF);

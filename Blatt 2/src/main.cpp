@@ -23,6 +23,7 @@
 #include "parameter.hpp"
 #include "visu.hpp"
 #include "vtk.hpp"
+#include "zeitgeist.hpp"
 
 #include <iostream>
 #include <sys/stat.h>
@@ -32,12 +33,17 @@ int main(int argc, char **argv) {
   // Create parameter and geometry instances with default values
   Communicator comm(&argc, &argv);
     
+  Zeitgeist zeit;
+  zeit.Tic();
+  
   
   Parameter param;
   Geometry geom(&comm);
   
   // Create the fluid solver
   Compute comp(&geom, &param, &comm);
+  
+  
 
   
   if (comm.getRank() == 0) {
@@ -52,8 +58,8 @@ int main(int argc, char **argv) {
 // Create and initialize the visualization
 #ifdef USE_DEBUG_VISU
   Renderer visu(geom.Length(), geom.Mesh());
-  visu.Init(800 / comm.ThreadDim()[0], 800 / comm.ThreadDim()[1],
-            comm.getRank() + 1);
+  visu.Init(800,  800, 
+            comm.ThreadDim(), comm.ThreadIdx(), comm.getRank() + 1);
 #endif // USE_DEBUG_VISU
 
   // Create a VTK generator;
@@ -72,6 +78,7 @@ int main(int argc, char **argv) {
 
   // Run the time steps until the end is reached
   while (comp.GetTime() < param.Tend()) {
+      
 #ifdef USE_DEBUG_VISU
     // Render and check if window is closed
     switch (visu.Render(visugrid)) {
@@ -89,10 +96,13 @@ int main(int argc, char **argv) {
     case 3:
       visugrid = comp.GetP();
       break;
+    case 4:
+      visugrid = comp.GetVorticity();
+      break;
     default:
       break;
     };
-#endif // USE_DEBUG_VISU
+ #endif // USE_DEBUG_VISU
 
     // Create VTK Files in the folder VTK
     // Note that when using VTK module as it is you first have to write cell
@@ -102,7 +112,10 @@ int main(int argc, char **argv) {
     vtk.AddCellField("Cell Velocity", comp.GetU(), comp.GetV());
     vtk.SwitchToPointData();
     vtk.AddPointField("Velocity", comp.GetU(), comp.GetV());
+    vtk.AddPointScalar("Stream", comp.GetStream());
+    
     vtk.AddPointScalar("Pressure", comp.GetP());
+    
     vtk.Finish();
 
   
@@ -114,5 +127,8 @@ int main(int argc, char **argv) {
     bool printOnlyOnMaster = !comm.getRank();
     comp.TimeStep(printOnlyOnMaster);
   }
+    zeit.Tac();
+    
+    std::cout << "Gesamtzeit: " << zeit.Toc() << std::endl;
   return 0;
 }

@@ -22,6 +22,7 @@
 //------------------------------------------------------------------------------
 
 #include "grid.hpp"
+#include "zeitgeist.hpp"
 
 //------------------------------------------------------------------------------
 
@@ -84,6 +85,10 @@ public:
   real_t RedCycle(Grid *grid, const Grid *rhs) const;
   real_t BlackCycle(Grid *grid, const Grid *rhs) const;
   real_t Cycle(Grid * grid, const Grid * rhs) const ;
+  void  printTimes();
+  
+  private:
+  Zeitgeist *_zeit;
 };
 //------------------------------------------------------------------------------
 #endif // __SOLVER_HPP

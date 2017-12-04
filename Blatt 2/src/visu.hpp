@@ -43,7 +43,7 @@ public:
   ~Renderer();
 
   /// Initializes the Renderer
-  void Init(const index_t &width, const index_t &height, const int &idx = 0);
+  void Init(const index_t &width, const index_t &height, const multi_index_t &threadDim, const multi_index_t &threadIdx, const int &idx = 0);
 
   /// Defines visible dimensions
   void SetSlice(const index_t &xdim, const index_t &ydim,
