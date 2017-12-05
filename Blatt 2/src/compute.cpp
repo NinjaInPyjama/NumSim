@@ -121,7 +121,7 @@ void Compute::TimeStep(bool printInfo) {
     do {
         it++;
         //_zeit_comp->Tic();
-         zahl = _solver->RedCycle(_p, _rhs);
+        zahl = _solver->RedCycle(_p, _rhs);
         //_zeit_comp->Tac();
         //_zeit_comm->Tic();
         res = _comm->gatherSum(zahl);

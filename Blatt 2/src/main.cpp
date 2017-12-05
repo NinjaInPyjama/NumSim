@@ -120,10 +120,10 @@ int main(int argc, char **argv) {
 
   
     // Run a few steps
-    for (uint32_t i = 0; i < 9; ++i) {
-        
-      comp.TimeStep(false);
-    }
+//     for (uint32_t i = 0; i < 9; ++i) {
+//         
+//       comp.TimeStep(false);
+//     }
     bool printOnlyOnMaster = !comm.getRank();
     comp.TimeStep(printOnlyOnMaster);
   }

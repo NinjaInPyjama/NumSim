@@ -88,6 +88,7 @@ real_t RedOrBlackSOR::RedCycle(Grid * grid, const Grid * rhs) const {
     real_t total_res = 0.0;
     real_t local_res = 0.0;
     
+    
     real_t factor = 1.0/(2.0/(dx*dx) + 2.0/(dy*dy));
     for(it.First(); it.Valid(); it.Next()){
         //_zeit->Tic();
@@ -96,12 +97,14 @@ real_t RedOrBlackSOR::RedCycle(Grid * grid, const Grid * rhs) const {
         //_zeit->Tac();
         // see script, p. 26, formular (4.1)
         grid->Cell(it) +=  _omega*local_res*factor;
+        
+        
     }
     
     //Updating boundary values to reduce artifactial values in calculation of residual
     _geom->Update_P(grid);
 
-    total_res = total_res/(_geom->Size()[0] * _geom->Size()[1]);
+    total_res = total_res/(_geom->TotalSize()[0] * _geom->TotalSize()[1]);
     
     return total_res;
     
@@ -130,7 +133,7 @@ real_t RedOrBlackSOR::BlackCycle(Grid * grid, const Grid * rhs) const {
     _geom->Update_P(grid);
 
 
-    total_res = total_res/(_geom->Size()[0] * _geom->Size()[1]);
+    total_res = total_res/(_geom->TotalSize()[0] * _geom->TotalSize()[1]);
     
     return total_res;
 }
