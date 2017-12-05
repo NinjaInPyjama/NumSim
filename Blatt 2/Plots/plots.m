@@ -4,11 +4,11 @@ clc
 
 DATA = xlsread("tabelle.xlsx");
 c = DATA(:,1);
-comp = DATA(:,2);
-comm = DATA(:,3);
-dt = DATA(:,4);
-res = DATA(:,5);
-runT = DATA(1:7,6);
+% comp = DATA(:,2);
+% comm = DATA(:,3);
+% dt = DATA(:,4);
+% res = DATA(:,5);
+runT = DATA(1:8,6);
 
 % figure(1)
 % hold on
