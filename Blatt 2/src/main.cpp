@@ -120,15 +120,15 @@ int main(int argc, char **argv) {
 
   
     // Run a few steps
-//     for (uint32_t i = 0; i < 9; ++i) {
-//         
-//       comp.TimeStep(false);
-//     }
+     for (uint32_t i = 0; i < 9; ++i) {
+         
+       comp.TimeStep(false);
+     }
     bool printOnlyOnMaster = !comm.getRank();
     comp.TimeStep(printOnlyOnMaster);
   }
     zeit.Tac();
     
-    std::cout << "Gesamtzeit: " << zeit.Toc() << std::endl;
+    if(comm.getRank()==0) std::cout << "Gesamtzeit: " << zeit.Toc() << std::endl;
   return 0;
 }

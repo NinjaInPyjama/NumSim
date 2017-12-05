@@ -81,12 +81,6 @@ void Compute::TimeStep(bool printInfo) {
     //_zeit_dt->Tac();
     
     
-    //if(_comm->getRank()==0) std::cout << "Zeitberechnung: " << _zeit->Toc() << std::endl;
-    
-    //if(printInfo && _comm->getRank()==0) std::cout << "Timestep dt: " << dt << std::endl;
-	
-    
-    
     
 	// update boundary values
 	_geom->Update_U(_u);
@@ -94,8 +88,6 @@ void Compute::TimeStep(bool printInfo) {
 	_geom->Update_P(_p);
     
     
-    //GetStream()->print();
-
     // compute 'preliminary' velocities and setting boundary values
     MomentumEqu(dt);
     
@@ -140,7 +132,6 @@ void Compute::TimeStep(bool printInfo) {
     } while(it<itermax && res>_epslimit*_epslimit);
     if(printInfo && _comm->getRank()==0) std::cout << "Solver stopped at iteration " << it << " with residual**2: " << res << std::endl;
 	
-    //_solver->printTimes();
     // compute new velocities
     
     NewVelocities(dt);
