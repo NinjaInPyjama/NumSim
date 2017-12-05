@@ -64,7 +64,14 @@ real_t SOR::Cycle(Grid * grid, const Grid * rhs) const {
 RedOrBlackSOR::RedOrBlackSOR(const Geometry * geom, const real_t & omega) {
     _omega = omega;
     _geom = geom;
-    _zeit = new Zeitgeist();
+	_zeit = new Zeitgeist();
+}
+
+/// Constructs an actual SOR solver
+RedOrBlackSOR::RedOrBlackSOR(const Geometry * geom) {
+	_omega = real_t(2.0 / (1.0 + sin(M_PI*geom->Mesh()[0]))); // optimal omega, see script p. 26
+	_geom = geom;
+	_zeit = new Zeitgeist();
 }
 
 /// Destructor

@@ -20,6 +20,10 @@
 #ifndef __SOLVER_HPP
 #define __SOLVER_HPP
 //------------------------------------------------------------------------------
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif // _USE_MATH_DEFINES
 
 #include "grid.hpp"
 #include "zeitgeist.hpp"
@@ -79,6 +83,9 @@ class RedOrBlackSOR : public SOR {
 public:
   /// Constructs an actual SOR solver
   RedOrBlackSOR(const Geometry *geom, const real_t &omega);
+
+  RedOrBlackSOR(const Geometry * geom);
+
   /// Destructor
   ~RedOrBlackSOR();
 

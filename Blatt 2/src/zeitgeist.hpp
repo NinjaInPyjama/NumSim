@@ -20,7 +20,7 @@ public:
   //starts the timer
   void Tic();
   
-  //blablabladföhi
+  // interim
   void Tac();
 
   //ends the timer

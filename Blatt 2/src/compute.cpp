@@ -38,7 +38,9 @@ Compute::Compute(const Geometry * geom, const Parameter * param, const Communica
 	_rhs = new Grid(_geom, multi_real_t(0.5, 0.5));
 	_rhs->Initialize(0.0);
 
-	_solver = new RedOrBlackSOR(_geom,_param->Omega());
+	//_solver = new RedOrBlackSOR(_geom,_param->Omega());
+	_solver = new RedOrBlackSOR(_geom);
+      
         
     _t = 0.0;
     _dtlimit = _param->Dt();
@@ -133,9 +135,9 @@ void Compute::TimeStep(bool printInfo) {
         _comm->copyBoundary(_p);
         //_zeit_comm->Tac();
         
-        printTimes();
+        // printTimes();
         
-    } while(false && it<itermax && res>_epslimit*_epslimit);
+    } while(it<itermax && res>_epslimit*_epslimit);
     if(printInfo && _comm->getRank()==0) std::cout << "Solver stopped at iteration " << it << " with residual**2: " << res << std::endl;
 	
     //_solver->printTimes();
@@ -164,7 +166,7 @@ const real_t & Compute::GetTime() const {
 }
 
 void  Compute::printTimes()  {
-	std::cout << "Computation: " << _zeit_comp->Toc() << "Communication: " << _zeit_comm->Toc() << "Timestep: " << _zeit_dt->Toc() << "Residual: " << _zeit_res->Toc() << std::endl;
+	std::cout << "Computation: " << _zeit_comp->Toc() << ", Communication: " << _zeit_comm->Toc() << ", Timestep: " << _zeit_dt->Toc() << ", Residual: " << _zeit_res->Toc() << std::endl;
 }
 
 

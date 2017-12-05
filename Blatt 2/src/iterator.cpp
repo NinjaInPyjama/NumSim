@@ -124,7 +124,7 @@ void InteriorIterator::Next() {
 
 /// Construct a new RedBlackIterator
 RedBlackIterator::RedBlackIterator(const Geometry * geom, bool rb) {
-	_rb = rb; //true means red cycle
+	_rb = rb; // true means red cycle
 	_geom = geom;
 	First();
 	_valid = true;
