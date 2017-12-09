@@ -1,0 +1,47 @@
+Flags:
+
+  ' '  -  Fluid
+  '#'  -  NOSPLIP
+  'I'  -  INFLOW
+  'H'  -  Horizontal INFLOW
+  'V'  -  Vertical INFLOW
+  'O'  -  OUTFLOW
+  '|'  -  Vertical SLIP
+  '-'  -  Horizontal SLIP
+
+Types:
+
+   x
+  oXx  -  3  ->  4
+   o
+
+   o
+  oXx  -  6  ->  5
+   x
+   
+   x
+  oXx  -  7  ->  1
+   x 
+
+   x
+  xXo  -  9  ->  7
+   o
+
+   x
+  xXx  -  11 ->  0 
+   o 
+
+   x
+  xXo  -  13 ->  3 
+   x 
+
+   o
+  xXx  -  14 ->  2 
+   x 
+
+   x
+  xXx  -  15 ->  8 
+   x 
+
+Values:
+
