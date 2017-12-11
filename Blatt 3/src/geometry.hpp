@@ -33,6 +33,18 @@
 //------------------------------------------------------------------------------
 class Geometry {
 public:
+    enum {
+    boundaryBottom = 14,
+    boundaryLeft = 13,
+    boundaryTop = 11,
+    boundaryRight = 7,
+    cornerTopRight = 3,
+    cornerBottomRight = 6,
+    cornerBottomLeft = 12,
+    cornerTopRight = 9,
+    inner = 15
+  };
+    
   /// Constructs a default geometry:
   // driven cavity with 128 x 128 grid, no-slip boundary conditions
   // as shown below
@@ -89,6 +101,9 @@ private:
 
   multi_real_t _velocity;
   real_t _pressure;
+  char _field[][];
+  
+  
 };
 //------------------------------------------------------------------------------
 #endif // __GEOMETRY_HPP

@@ -43,6 +43,8 @@ Geometry::Geometry(const Communicator *comm) {
     
 }
 
+
+
 /// Loads a geometry from a file
 void Geometry::Load(const char * file) {
     
@@ -51,6 +53,8 @@ void Geometry::Load(const char * file) {
     multi_real_t inval_real;
     multi_index_t inval_index;
     while (!feof(handle)) {
+        
+        
         
         if (!fscanf(handle, "%s =", name)) continue;
         
@@ -84,11 +88,62 @@ void Geometry::Load(const char * file) {
         //funktioniert nur wenn das break drin ist sonst hängt er sich an der |#- geometry definition in default.geom auf.
         // |#- geometry definition in default.geom wird nicht eingelesen.
         if (strcmp(name,"geometry") == 0) {
+            if (fscanf(handle," %s\n"),&name)
+                if(strcmp(name,"free") == 0) {
+                    _field = char[_bsize[1]][_bsize[0]];
+                    for (int i=0; i<_bsize[1];i++){
+                        if (fscanf(handle," %s\n",&field[_bsize[1]-i-1]))
+                            //std::cout << line << std::endl;
+                    }
+                }
+            continue;
             break;
         }
         
     }
 	fclose(handle);
+}
+
+/// Returns whether the lower left corner is red or black
+void Geometry::InitializeFlags(Grid *flag, Grid *type, Grid *value) const {
+	Iterator it = Iterator(this);
+    for( it.First();it.Valid();itt.Next() ){
+        multi_index_t pos = it.Pos();
+        flag->Cell(it) = index_t(_field[pos[1]][pos[0]]);
+    }
+    for( it.First();it.Valid();itt.Next() ){
+        index_t type_id = 0;
+        type_id += flag->Cell(it.Top())==flag->Cell(it) ? 1 : 0;
+        type_id += flag->Cell(it.Right())==flag->Cell(it) ? 2 : 0;
+        type_id += flag->Cell(it.Down())==flag->Cell(it) ? 4 : 0;
+        type_id += flag->Cell(it.Left())==flag->Cell(it) ? 8 : 0;
+        type->Cell(it) = type_id;
+    }
+    BoundaryIterator bit = BoundaryIterator(this);
+    
+    for(int i = 0 ; i<4 ; i++) {
+        bit.SetBoundary(i);
+        int start_idx = -1;
+        for(bit.First();bit.Valid();bit.Next()){
+            if(start_idx==-1 && (flag->Cell(it)=='H' || flag->Cell(it)=='V')){
+                start_idx = it.Value();
+            }
+            else if(start_idx!=-1 && (flag->Cell(it)!='H' || flag->Cell(it)=='V')){
+                int end_idx = it.Left().Value();
+            
+            //-4.0/(end_idx-start_idx+1.0)/(end_idx-start_idx+1.0)*velocity[1]*(y-start_idx+1.0/2.0)*(y-end_idx-1.0/2.0)
+            
+                BoundaryIterator bit_intern = BoundaryIterator(this);
+                bit_intern.SetBoundary(i);
+                for(bit_intern.First();bit_intern.Valid();bit_intern.Next()){
+                    if(bit_intern.Value()<=end_idx && bit_intern.Value()>=start_idx){
+                        value->Cell(bit) = -4.0/(end_idx-start_idx+1.0)/(end_idx-start_idx+1.0)*velocity[1]*(bit.Value()-start_idx+1.0/2.0)*(bit.Value()-end_idx-1.0/2.0);
+                    }
+                }
+                start_idx = -1;
+            }
+        }
+    }
 }
 
 
