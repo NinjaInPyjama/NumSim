@@ -41,7 +41,7 @@ public:
     cornerTopRight = 3,
     cornerBottomRight = 6,
     cornerBottomLeft = 12,
-    cornerTopRight = 9,
+    cornerTopLeft = 9,
     inner = 15
   };
     
@@ -64,7 +64,8 @@ public:
   /// Loads a geometry from a file
   void Load(const char *file);
 
-  void InitializeFlags(Grid * flag, Grid * type, Grid * value) const;
+  /// Sets the flags, types and values
+  void InitializeFlags() const;
 
   /// Returns the number of cells in each dimension
   const multi_index_t &Size() const;
@@ -104,7 +105,10 @@ private:
   multi_real_t _velocity;
   real_t _pressure;
 
-  char * _field;
+  char * _flag;
+  char * _type;
+  char * _value;
+
   
 };
 //------------------------------------------------------------------------------
