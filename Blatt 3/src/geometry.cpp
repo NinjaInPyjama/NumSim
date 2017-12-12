@@ -195,39 +195,165 @@ const real_t & Geometry::Pressure() const {
 /// Updates the velocity field u
 void Geometry::Update_U(Grid * u) const {
 	// see script, p. 17
-	BoundaryIterator bit = BoundaryIterator(this);
+	Iterator it = Iterator(this);
     
-    // Iteration over right boundary
-    if(_comm->isRight()) {
-      bit.SetBoundary(bit.boundaryRight);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        u->Cell(bit) = 0.0;
-        u->Cell(bit.Left()) = 0.0;
-      }
-    }
-    
-    // Iteration over left boundary
-    if(_comm->isLeft()) {
-      bit.SetBoundary(bit.boundaryLeft);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        u->Cell(bit) = 0.0;
-      }
-    }
-    
-    // Iteration over upper boundary
-    if(_comm->isTop()) {
-      bit.SetBoundary(bit.boundaryTop);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        u->Cell(bit) = 2.0 - u->Cell(bit.Down());
-      }
-    }
-	
-    // Iteration over lower boundary
-    if(_comm->isBottom()){
-      bit.SetBoundary(bit.boundaryBottom);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        u->Cell(bit) =  - u->Cell(bit.Top());
-      }
+    for(it.First(); it.Valid(); it.Next()) {
+        switch(_flag[it.Value()]) {
+            case 'H' :
+                switch(_type[it.Value()]) {
+                    case boudaryBottom :
+                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+                        break;
+                    case boudaryTop :
+                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+                        break;
+                    case boudaryRight :
+                        u->Cell(it.Left()) = _value[it.Value()];
+                        break;
+                    case boudaryLeft :
+                        u->Cell(it) = _value[it.Value()];
+                        break;
+                    case cornerTopRight :
+                        u->Cell(it.Left()) = _value[it.Value()] ;
+                        break;
+                    case cornerTopLeft :
+                        u->Cell(it) = _value[it.Value()];
+                        break;
+                    case cornerBottomLeft :
+                        u->Cell(it) = _value[it.Value()];
+                        break;
+                    case cornerBottomRight :
+                        u->Cell(it.Left()) = _value[it.Value()];
+                        break;
+                }
+                break;
+            case 'V' :
+                switch(_type[it.Value()]) {
+                    case boudaryBottom :
+                        u->Cell(it) = - u->Cell(it.Top());
+                        break;
+                    case boudaryTop :
+                        u->Cell(it) = - u->Cell(it.Down());
+                        break;
+                    case boudaryRight :
+                        u->Cell(it.Left()) = 0;
+                        break;
+                    case boudaryLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerTopRight :
+                        u->Cell(it.Left()) = 0 ;
+                        break;
+                    case cornerTopLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerBottomLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerBottomRight :
+                        u->Cell(it.Left()) = 0;
+                        break;
+                }
+                break; 
+            case '-' :
+                switch(_type[it.Value()]) {
+                    case boudaryBottom :
+                        u->Cell(it) = u->Cell(it.Top());
+                        break;
+                    case boudaryTop :
+                        u->Cell(it) = u->Cell(it.Down());
+                        break;
+                    case boudaryRight :
+                        u->Cell(it) = u->Cell(it.Left());
+                        break;
+                    case boudaryLeft :
+                        u->Cell(it) = u->Cell(it.Right());
+                        break;
+                    case cornerTopRight :
+                        u->Cell(it) = u->Cell(it.Left()) ;
+                        break;
+                    case cornerTopLeft :
+                        u->Cell(it) = u_Cell(it.Right());
+                        break;
+                    case cornerBottomLeft :
+                        u->Cell(it) = u_Cell(it.Right());
+                        break;
+                    case cornerBottomRight :
+                        u->Cell(it) = u->Cell(it.Left());
+                        break;
+                }
+                break; 
+                
+            case '|' :
+                switch(_type[it.Value()]) {
+                    case boudaryBottom :
+                        u->Cell(it) = - u->Cell(it.Top());
+                        break;
+                    case boudaryTop :
+                        u->Cell(it) = - u->Cell(it.Down());
+                        break;
+                    case boudaryRight :
+                        u->Cell(it.Left()) = 0;
+                        break;
+                    case boudaryLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerTopRight :
+                        u->Cell(it.Left()) = 0 ;
+                        break;
+                    case cornerTopLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerBottomLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerBottomRight :
+                        u->Cell(it.Left()) = 0;
+                        break;
+                }
+                
+                break; 
+            case '#' :
+                switch(_type[it.Value()]) {
+                    case boudaryBottom :
+                        u->Cell(it) =  - u->Cell(it.Top());
+                        break;
+                    case boudaryTop :
+                        u->Cell(it) = - u->Cell(it.Down());
+                        break;
+                    case boudaryRight :
+                        u->Cell(it.Left()) = 0;
+                        break;
+                    case boudaryLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerTopRight :
+                        u->Cell(it.Left()) = 0;
+                        break;
+                    case cornerTopLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerBottomLeft :
+                        u->Cell(it) = 0;
+                        break;
+                    case cornerBottomRight :
+                        u->Cell(it.Left()) = 0;
+                        break;
+                }
+                break; 
+            
+            case 'O' :
+                
+                break; 
+            case ' ' :
+                
+                break; 
+            case 'I' :
+                
+                break; 
+        }
+            
+        
     }
 	
 }
