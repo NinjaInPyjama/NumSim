@@ -101,6 +101,7 @@ void PathLine::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
 
 StreakLine::StreakLine(const multi_real_t& pos) {
 	// TODO: do something
+	// init 'org'
 }
 
 StreakLine::~StreakLine() {}
