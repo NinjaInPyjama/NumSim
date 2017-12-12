@@ -95,6 +95,9 @@ private:
   Zeitgeist *_zeit_dt;
   Zeitgeist *_zeit_res;
   
+  Grid *_flag;
+  Grid *_type;
+  Grid *_value;
 
   // container for interpolating whichever values
   Grid *_tmp;
