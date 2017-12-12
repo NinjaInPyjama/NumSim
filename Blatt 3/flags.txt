@@ -1,7 +1,7 @@
 Flags:
 
   ' '  -  Fluid
-  '#'  -  NOSPLIP
+  '#'  -  NOSLIP
   'I'  -  INFLOW
   'H'  -  Horizontal INFLOW
   'V'  -  Vertical INFLOW
@@ -30,6 +30,10 @@ Types:
    x
   xXx  -  11 ->  0 
    o 
+
+   o
+  xXo  -  12 ->  6 
+   x 
 
    x
   xXo  -  13 ->  3 
