@@ -22,6 +22,21 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+Particle::Particle(const multi_real_t& pos) {
+	_pos = pos;
+}
+
+Particle::~Particle() {}
+
+void Particle::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
+	// TODO: do something
+}
+
+const multi_real_t& Particle::Pos() const {
+	return _pos;
+}
+
+
 void ParticleLine::SaveVTK (const index_t& rank, const index_t& nump, const char* basename, const index_t& idx) const {
   char fname[1000];
   const char *filebase = basename;
@@ -74,6 +89,25 @@ void ParticleLine::SaveVTK (const index_t& rank, const index_t& nump, const char
 }
 
 
+PathLine::PathLine(const multi_real_t& pos) {
+	// TODO: do something
+}
+PathLine::~PathLine() {}
+
+void PathLine::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
+	// TODO: do something
+}
+
+
+StreakLine::StreakLine(const multi_real_t& pos) {
+	// TODO: do something
+}
+
+StreakLine::~StreakLine() {}
+
+void StreakLine::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
+	// TODO: do something
+}
 
 
 //------------------------------------------------------------------------------
