@@ -208,12 +208,50 @@ void Geometry::Update_U(Grid * u) const {
                         u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
                         break;
                     case boudaryRight :
+                        u->Cell(it) = _velocity[0];
+                        u->Cell(it.Left()) = _velocity[0];
+                        break;
+                    case boudaryLeft :
+                        u->Cell(it) = _velocity[0];
+                        break;
+                    case cornerTopRight :
+                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+                        u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Left().Down()) ;
+                        break;
+                    case cornerTopLeft :
+                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+                        break;
+                    case cornerBottomLeft :
+                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+                        break;
+                    case cornerBottomRight :
+                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+                        u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Left().Top());
+                        break;
+                    case inner :
+                        u->Cell(it) = _velocity[0];
+                        break;
+                    default :
+                        break;
+                }
+                break;
+            case 'V' :
+                switch(_type[it.Value()]) {
+                    case boudaryBottom :
+                        u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Top());
+                        break;
+                    case boudaryTop :
+                        u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Down());
+                        break;
+                    case boudaryRight :
+                        u->Cell(it) = _value[it.Value()];
                         u->Cell(it.Left()) = _value[it.Value()];
                         break;
                     case boudaryLeft :
                         u->Cell(it) = _value[it.Value()];
                         break;
                     case cornerTopRight :
+                        u->Cell(it) = _value[it.Value()] ;
                         u->Cell(it.Left()) = _value[it.Value()] ;
                         break;
                     case cornerTopLeft :
@@ -223,35 +261,11 @@ void Geometry::Update_U(Grid * u) const {
                         u->Cell(it) = _value[it.Value()];
                         break;
                     case cornerBottomRight :
+                        u->Cell(it) = _value[it.Value()];
                         u->Cell(it.Left()) = _value[it.Value()];
                         break;
-                }
-                break;
-            case 'V' :
-                switch(_type[it.Value()]) {
-                    case boudaryBottom :
-                        u->Cell(it) = - u->Cell(it.Top());
-                        break;
-                    case boudaryTop :
-                        u->Cell(it) = - u->Cell(it.Down());
-                        break;
-                    case boudaryRight :
-                        u->Cell(it.Left()) = 0;
-                        break;
-                    case boudaryLeft :
-                        u->Cell(it) = 0;
-                        break;
-                    case cornerTopRight :
-                        u->Cell(it.Left()) = 0 ;
-                        break;
-                    case cornerTopLeft :
-                        u->Cell(it) = 0;
-                        break;
-                    case cornerBottomLeft :
-                        u->Cell(it) = 0;
-                        break;
-                    case cornerBottomRight :
-                        u->Cell(it.Left()) = 0;
+                    case inner :
+                        u->Cell(it) = _value[it.Value()];
                         break;
                 }
                 break; 
@@ -264,13 +278,15 @@ void Geometry::Update_U(Grid * u) const {
                         u->Cell(it) = u->Cell(it.Down());
                         break;
                     case boudaryRight :
+                        u->Cell(it.Left()) = u->Cell(it.Left().Left());
                         u->Cell(it) = u->Cell(it.Left());
                         break;
                     case boudaryLeft :
                         u->Cell(it) = u->Cell(it.Right());
                         break;
                     case cornerTopRight :
-                        u->Cell(it) = u->Cell(it.Left()) ;
+                        u->Cell(it.Left()) = u->Cell(it.Left().Left());
+                        u->Cell(it) = u->Cell(it.Left());
                         break;
                     case cornerTopLeft :
                         u->Cell(it) = u_Cell(it.Right());
@@ -279,6 +295,7 @@ void Geometry::Update_U(Grid * u) const {
                         u->Cell(it) = u_Cell(it.Right());
                         break;
                     case cornerBottomRight :
+                        u->Cell(it.Left()) = u->Cell(it.Left().Left());
                         u->Cell(it) = u->Cell(it.Left());
                         break;
                 }
@@ -293,22 +310,30 @@ void Geometry::Update_U(Grid * u) const {
                         u->Cell(it) = - u->Cell(it.Down());
                         break;
                     case boudaryRight :
+                        u->Cell(it) = 0;
                         u->Cell(it.Left()) = 0;
                         break;
                     case boudaryLeft :
                         u->Cell(it) = 0;
                         break;
                     case cornerTopRight :
-                        u->Cell(it.Left()) = 0 ;
+                        u->Cell(it) = - u->Cell(it.Down());
+                        u->Cell(it.Left()) = - u->Cell(it.Left().Down());
                         break;
                     case cornerTopLeft :
-                        u->Cell(it) = 0;
+                        u->Cell(it) = - u->Cell(it.Down());
                         break;
                     case cornerBottomLeft :
-                        u->Cell(it) = 0;
+                        u->Cell(it) = - u->Cell(it.Top());
                         break;
                     case cornerBottomRight :
-                        u->Cell(it.Left()) = 0;
+                        u->Cell(it) = - u->Cell(it.Top());
+                        u->Cell(it.Left()) = - u->Cell(it.Left().Top());
+                        break;
+                    case inner:
+                        u->Cell(it) = 0;
+                        break;
+                    default :
                         break;
                 }
                 
@@ -322,12 +347,14 @@ void Geometry::Update_U(Grid * u) const {
                         u->Cell(it) = - u->Cell(it.Down());
                         break;
                     case boudaryRight :
+                        u->Cell(it) = 0;
                         u->Cell(it.Left()) = 0;
                         break;
                     case boudaryLeft :
                         u->Cell(it) = 0;
                         break;
                     case cornerTopRight :
+                        u->Cell(it) = 0;
                         u->Cell(it.Left()) = 0;
                         break;
                     case cornerTopLeft :
@@ -337,13 +364,50 @@ void Geometry::Update_U(Grid * u) const {
                         u->Cell(it) = 0;
                         break;
                     case cornerBottomRight :
+                        u->Cell(it) = 0;
                         u->Cell(it.Left()) = 0;
+                        break;
+                    case inner :
+                        u->Cell(it) = 0;
+                        break;
+                    default :
                         break;
                 }
                 break; 
             
             case 'O' :
-                
+                switch(_type[it.Value()]) {
+                    case boudaryBottom :
+                        u->Cell(it) = u->Cell(it.Top());
+                        break;
+                    case boudaryTop :
+                        u->Cell(it) = u->Cell(it.Down());
+                        break;
+                    case boudaryRight :
+                        u->Cell(it.Left()) = u->Cell(it.Left().Left())
+                        u->Cell(it) = u->Cell(it.Left());
+                        break;
+                    case boudaryLeft :
+                        u->Cell(it) = u->Cell(it.Right());
+                        break;
+                    case cornerTopRight :
+                        u->Cell(it.Left()) = u->Cell(it.Left().Left())
+                        u->Cell(it) = u->Cell(it.Left());
+                        break;
+                    case cornerTopLeft :
+                        u->Cell(it) = u->Cell(it.Right());
+                        break;
+                    case cornerBottomLeft :
+                        u->Cell(it) = u->Cell(it.Right());
+                        break;
+                    case cornerBottomRight :
+                        u->Cell(it.Left()) = u->Cell(it.Left().Left())
+                        u->Cell(it) = u->Cell(it.Left());
+                        break;
+                    case inner :
+                        break;
+                    default :
+                        break;
                 break; 
             case ' ' :
                 
