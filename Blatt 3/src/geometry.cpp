@@ -562,8 +562,10 @@ void Geometry::Update_V(Grid * v) const {
 				break;
 			}
 		case 'V': // Vertical INFLOW
+			v->Cell(it) = 0.0;
 			break;
 		case 'H': // Horizontal INFLOW
+			if(_type[it.Value()] == boundaryTop) v->Cell(it.Down()) = _value[it.Value()];
 			v->Cell(it) = _value[it.Value()];
 			break;
 		default:
