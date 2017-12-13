@@ -196,230 +196,228 @@ const real_t & Geometry::Pressure() const {
 void Geometry::Update_U(Grid * u) const {
 	// see script, p. 17
 	Iterator it = Iterator(this);
-    
-    for(it.First(); it.Valid(); it.Next()) {
-        switch(_flag[it.Value()]) {
-            case 'H' :
-                switch(_type[it.Value()]) {
-                    case boundaryBottom :
-                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
-                        break;
-                    case boundaryTop :
-                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
-                        break;
-                    case boundaryRight :
-                        u->Cell(it) = _velocity[0];
-                        u->Cell(it.Left()) = _velocity[0];
-                        break;
-                    case boundaryLeft :
-                        u->Cell(it) = _velocity[0];
-                        break;
-                    case cornerTopRight :
-                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
-                        u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Left().Down()) ;
-                        break;
-                    case cornerTopLeft :
-                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
-                        break;
-                    case cornerBottomLeft :
-                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
-                        break;
-                    case cornerBottomRight :
-                        u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
-                        u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Left().Top());
-                        break;
-                    case inner :
-                        u->Cell(it) = _velocity[0];
-                        break;
-                    default :
-                        break;
-                }
-                break;
-            case 'V' :
-                switch(_type[it.Value()]) {
-                    case boundaryBottom :
-                        u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Top());
-                        break;
-                    case boundaryTop :
-                        u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Down());
-                        break;
-                    case boundaryRight :
-                        u->Cell(it) = _value[it.Value()];
-                        u->Cell(it.Left()) = _value[it.Value()];
-                        break;
-                    case boundaryLeft :
-                        u->Cell(it) = _value[it.Value()];
-                        break;
-                    case cornerTopRight :
-                        u->Cell(it) = _value[it.Value()] ;
-                        u->Cell(it.Left()) = _value[it.Value()] ;
-                        break;
-                    case cornerTopLeft :
-                        u->Cell(it) = _value[it.Value()];
-                        break;
-                    case cornerBottomLeft :
-                        u->Cell(it) = _value[it.Value()];
-                        break;
-                    case cornerBottomRight :
-                        u->Cell(it) = _value[it.Value()];
-                        u->Cell(it.Left()) = _value[it.Value()];
-                        break;
-                    case inner :
-                        u->Cell(it) = _value[it.Value()];
-                        break;
-                }
-                break; 
-            case '-' :
-                switch(_type[it.Value()]) {
-                    case boundaryBottom :
-                        u->Cell(it) = u->Cell(it.Top());
-                        break;
-                    case boundaryTop :
-                        u->Cell(it) = u->Cell(it.Down());
-                        break;
-                    case boundaryRight :
-                        u->Cell(it.Left()) = u->Cell(it.Left().Left());
-                        u->Cell(it) = u->Cell(it.Left());
-                        break;
-                    case boundaryLeft :
-                        u->Cell(it) = u->Cell(it.Right());
-                        break;
-                    case cornerTopRight :
-                        u->Cell(it.Left()) = u->Cell(it.Left().Left());
-                        u->Cell(it) = u->Cell(it.Left());
-                        break;
-                    case cornerTopLeft :
-                        u->Cell(it) = u_Cell(it.Right());
-                        break;
-                    case cornerBottomLeft :
-                        u->Cell(it) = u_Cell(it.Right());
-                        break;
-                    case cornerBottomRight :
-                        u->Cell(it.Left()) = u->Cell(it.Left().Left());
-                        u->Cell(it) = u->Cell(it.Left());
-                        break;
-                }
-                break; 
-                
-            case '|' :
-                switch(_type[it.Value()]) {
-                    case boundaryBottom :
-                        u->Cell(it) = - u->Cell(it.Top());
-                        break;
-                    case boundaryTop :
-                        u->Cell(it) = - u->Cell(it.Down());
-                        break;
-                    case boundaryRight :
-                        u->Cell(it) = 0;
-                        u->Cell(it.Left()) = 0;
-                        break;
-                    case boundaryLeft :
-                        u->Cell(it) = 0;
-                        break;
-                    case cornerTopRight :
-                        u->Cell(it) = - u->Cell(it.Down());
-                        u->Cell(it.Left()) = - u->Cell(it.Left().Down());
-                        break;
-                    case cornerTopLeft :
-                        u->Cell(it) = - u->Cell(it.Down());
-                        break;
-                    case cornerBottomLeft :
-                        u->Cell(it) = - u->Cell(it.Top());
-                        break;
-                    case cornerBottomRight :
-                        u->Cell(it) = - u->Cell(it.Top());
-                        u->Cell(it.Left()) = - u->Cell(it.Left().Top());
-                        break;
-                    case inner:
-                        u->Cell(it) = 0;
-                        break;
-                    default :
-                        break;
-                }
-                
-                break; 
-            case '#' :
-                switch(_type[it.Value()]) {
-                    case boundaryBottom :
-                        u->Cell(it) =  - u->Cell(it.Top());
-                        break;
-                    case boundaryTop :
-                        u->Cell(it) = - u->Cell(it.Down());
-                        break;
-                    case boundaryRight :
-                        u->Cell(it) = 0;
-                        u->Cell(it.Left()) = 0;
-                        break;
-                    case boundaryLeft :
-                        u->Cell(it) = 0;
-                        break;
-                    case cornerTopRight :
-                        u->Cell(it) = 0;
-                        u->Cell(it.Left()) = 0;
-                        break;
-                    case cornerTopLeft :
-                        u->Cell(it) = 0;
-                        break;
-                    case cornerBottomLeft :
-                        u->Cell(it) = 0;
-                        break;
-                    case cornerBottomRight :
-                        u->Cell(it) = 0;
-                        u->Cell(it.Left()) = 0;
-                        break;
-                    case inner :
-                        u->Cell(it) = 0;
-                        break;
-                    default :
-                        break;
-                }
-                break; 
-            
-            case 'O' :
-                switch(_type[it.Value()]) {
-                    case boundaryBottom :
-                        u->Cell(it) = u->Cell(it.Top());
-                        break;
-                    case boundaryTop :
-                        u->Cell(it) = u->Cell(it.Down());
-                        break;
-                    case boundaryRight :
-                        u->Cell(it.Left()) = u->Cell(it.Left().Left())
-                        u->Cell(it) = u->Cell(it.Left());
-                        break;
-                    case boundaryLeft :
-                        u->Cell(it) = u->Cell(it.Right());
-                        break;
-                    case cornerTopRight :
-                        u->Cell(it.Left()) = u->Cell(it.Left().Left())
-                        u->Cell(it) = u->Cell(it.Left());
-                        break;
-                    case cornerTopLeft :
-                        u->Cell(it) = u->Cell(it.Right());
-                        break;
-                    case cornerBottomLeft :
-                        u->Cell(it) = u->Cell(it.Right());
-                        break;
-                    case cornerBottomRight :
-                        u->Cell(it.Left()) = u->Cell(it.Left().Left())
-                        u->Cell(it) = u->Cell(it.Left());
-                        break;
-                    case inner :
-                        break;
-                    default :
-                        break;
-                break; 
-            case ' ' :
-                
-                break; 
-            case 'I' :
-                
-                break; 
-        }
-            
-        
-    }
-	
+
+	for (it.First(); it.Valid(); it.Next()) {
+		switch (_flag[it.Value()]) {
+		case 'H':
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it) = _velocity[0];
+				u->Cell(it.Left()) = _velocity[0];
+				break;
+			case boundaryLeft:
+				u->Cell(it) = _velocity[0];
+				break;
+			case cornerTopRight:
+				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+				u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Left().Down());
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+				break;
+			case cornerBottomRight:
+				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+				u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Left().Top());
+				break;
+			case inner:
+				u->Cell(it) = _velocity[0];
+				break;
+			default:
+				break;
+			}
+			break;
+		case 'V':
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it) = _value[it.Value()];
+				u->Cell(it.Left()) = _value[it.Value()];
+				break;
+			case boundaryLeft:
+				u->Cell(it) = _value[it.Value()];
+				break;
+			case cornerTopRight:
+				u->Cell(it) = _value[it.Value()];
+				u->Cell(it.Left()) = _value[it.Value()];
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = _value[it.Value()];
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = _value[it.Value()];
+				break;
+			case cornerBottomRight:
+				u->Cell(it) = _value[it.Value()];
+				u->Cell(it.Left()) = _value[it.Value()];
+				break;
+			case inner:
+				u->Cell(it) = _value[it.Value()];
+				break;
+			}
+			break;
+		case '-':
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Left());
+				break;
+			case boundaryLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerTopRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Left());
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerBottomRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Left());
+				break;
+			}
+			break;
+
+		case '|':
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = -u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = -u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it) = 0;
+				u->Cell(it.Left()) = 0;
+				break;
+			case boundaryLeft:
+				u->Cell(it) = 0;
+				break;
+			case cornerTopRight:
+				u->Cell(it) = -u->Cell(it.Down());
+				u->Cell(it.Left()) = -u->Cell(it.Left().Down());
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = -u->Cell(it.Down());
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = -u->Cell(it.Top());
+				break;
+			case cornerBottomRight:
+				u->Cell(it) = -u->Cell(it.Top());
+				u->Cell(it.Left()) = -u->Cell(it.Left().Top());
+				break;
+			case inner:
+				u->Cell(it) = 0;
+				break;
+			default:
+				break;
+			}
+
+			break;
+		case '#':
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = -u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = -u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it) = 0;
+				u->Cell(it.Left()) = 0;
+				break;
+			case boundaryLeft:
+				u->Cell(it) = 0;
+				break;
+			case cornerTopRight:
+				u->Cell(it) = 0;
+				u->Cell(it.Left()) = 0;
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = 0;
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = 0;
+				break;
+			case cornerBottomRight:
+				u->Cell(it) = 0;
+				u->Cell(it.Left()) = 0;
+				break;
+			case inner:
+				u->Cell(it) = 0;
+				break;
+			default:
+				break;
+			}
+			break;
+
+		case 'O':
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Left());
+				break;
+			case boundaryLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerTopRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Left());
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerBottomRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Left());
+				break;
+			case inner:
+				break;
+			default:
+				break;
+				break;
+			case ' ':
+
+				break;
+			case 'I':
+
+				break;
+			}
+		}
+	}	
 }
 
 /// Updates the velocity field v
