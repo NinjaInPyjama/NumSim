@@ -201,17 +201,17 @@ void Geometry::Update_U(Grid * u) const {
         switch(_flag[it.Value()]) {
             case 'H' :
                 switch(_type[it.Value()]) {
-                    case boudaryBottom :
+                    case boundaryBottom :
                         u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
                         break;
-                    case boudaryTop :
+                    case boundaryTop :
                         u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
                         break;
-                    case boudaryRight :
+                    case boundaryRight :
                         u->Cell(it) = _velocity[0];
                         u->Cell(it.Left()) = _velocity[0];
                         break;
-                    case boudaryLeft :
+                    case boundaryLeft :
                         u->Cell(it) = _velocity[0];
                         break;
                     case cornerTopRight :
@@ -237,17 +237,17 @@ void Geometry::Update_U(Grid * u) const {
                 break;
             case 'V' :
                 switch(_type[it.Value()]) {
-                    case boudaryBottom :
+                    case boundaryBottom :
                         u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Top());
                         break;
-                    case boudaryTop :
+                    case boundaryTop :
                         u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Down());
                         break;
-                    case boudaryRight :
+                    case boundaryRight :
                         u->Cell(it) = _value[it.Value()];
                         u->Cell(it.Left()) = _value[it.Value()];
                         break;
-                    case boudaryLeft :
+                    case boundaryLeft :
                         u->Cell(it) = _value[it.Value()];
                         break;
                     case cornerTopRight :
@@ -271,17 +271,17 @@ void Geometry::Update_U(Grid * u) const {
                 break; 
             case '-' :
                 switch(_type[it.Value()]) {
-                    case boudaryBottom :
+                    case boundaryBottom :
                         u->Cell(it) = u->Cell(it.Top());
                         break;
-                    case boudaryTop :
+                    case boundaryTop :
                         u->Cell(it) = u->Cell(it.Down());
                         break;
-                    case boudaryRight :
+                    case boundaryRight :
                         u->Cell(it.Left()) = u->Cell(it.Left().Left());
                         u->Cell(it) = u->Cell(it.Left());
                         break;
-                    case boudaryLeft :
+                    case boundaryLeft :
                         u->Cell(it) = u->Cell(it.Right());
                         break;
                     case cornerTopRight :
@@ -303,17 +303,17 @@ void Geometry::Update_U(Grid * u) const {
                 
             case '|' :
                 switch(_type[it.Value()]) {
-                    case boudaryBottom :
+                    case boundaryBottom :
                         u->Cell(it) = - u->Cell(it.Top());
                         break;
-                    case boudaryTop :
+                    case boundaryTop :
                         u->Cell(it) = - u->Cell(it.Down());
                         break;
-                    case boudaryRight :
+                    case boundaryRight :
                         u->Cell(it) = 0;
                         u->Cell(it.Left()) = 0;
                         break;
-                    case boudaryLeft :
+                    case boundaryLeft :
                         u->Cell(it) = 0;
                         break;
                     case cornerTopRight :
@@ -340,17 +340,17 @@ void Geometry::Update_U(Grid * u) const {
                 break; 
             case '#' :
                 switch(_type[it.Value()]) {
-                    case boudaryBottom :
+                    case boundaryBottom :
                         u->Cell(it) =  - u->Cell(it.Top());
                         break;
-                    case boudaryTop :
+                    case boundaryTop :
                         u->Cell(it) = - u->Cell(it.Down());
                         break;
-                    case boudaryRight :
+                    case boundaryRight :
                         u->Cell(it) = 0;
                         u->Cell(it.Left()) = 0;
                         break;
-                    case boudaryLeft :
+                    case boundaryLeft :
                         u->Cell(it) = 0;
                         break;
                     case cornerTopRight :
@@ -377,17 +377,17 @@ void Geometry::Update_U(Grid * u) const {
             
             case 'O' :
                 switch(_type[it.Value()]) {
-                    case boudaryBottom :
+                    case boundaryBottom :
                         u->Cell(it) = u->Cell(it.Top());
                         break;
-                    case boudaryTop :
+                    case boundaryTop :
                         u->Cell(it) = u->Cell(it.Down());
                         break;
-                    case boudaryRight :
+                    case boundaryRight :
                         u->Cell(it.Left()) = u->Cell(it.Left().Left())
                         u->Cell(it) = u->Cell(it.Left());
                         break;
-                    case boudaryLeft :
+                    case boundaryLeft :
                         u->Cell(it) = u->Cell(it.Right());
                         break;
                     case cornerTopRight :
