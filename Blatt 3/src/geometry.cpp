@@ -344,10 +344,9 @@ void Geometry::Update_U(Grid * u) const {
 			case boundaryLeft:
 				u->Cell(it) = _value[it.Value()];
 				break;
-			// TODO: AB HIER WEITER UPDATEN!!!
 			case cornerTopRight:
-				u->Cell(it) = _value[it.Value()];
-				u->Cell(it.Left()) = _value[it.Value()];
+				if (_flag[it.Left().Value()] == ' ') u->Cell(it.Left()) = _value[it.Value()];
+				u->Cell(it) = 2.0 * _velocity[1] - u->Cell(it.Down());
 				break;
 			case cornerTopLeft:
 				u->Cell(it) = _value[it.Value()];
@@ -356,8 +355,8 @@ void Geometry::Update_U(Grid * u) const {
 				u->Cell(it) = _value[it.Value()];
 				break;
 			case cornerBottomRight:
-				u->Cell(it) = _value[it.Value()];
-				u->Cell(it.Left()) = _value[it.Value()];
+				if (_flag[it.Left().Value()] == ' ') u->Cell(it.Left()) = _value[it.Value()];
+				u->Cell(it) = 2.0 * _velocity[1] - u->Cell(it.Top());
 				break;
 			case inner:
 				u->Cell(it) = _value[it.Value()];
@@ -367,34 +366,34 @@ void Geometry::Update_U(Grid * u) const {
 		case 'H':
 			switch (_type[it.Value()]) {
 			case boundaryBottom:
-				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+				u->Cell(it) = - u->Cell(it.Top());
 				break;
 			case boundaryTop:
-				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+				u->Cell(it) = -u->Cell(it.Down());
 				break;
 			case boundaryRight:
-				u->Cell(it) = _velocity[0];
-				u->Cell(it.Left()) = _velocity[0];
+				u->Cell(it) = 0.0;
+				u->Cell(it.Left()) = 0.0;
 				break;
 			case boundaryLeft:
-				u->Cell(it) = _velocity[0];
+				u->Cell(it) = 0.0;
 				break;
 			case cornerTopRight:
-				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
-				u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Left().Down());
+				u->Cell(it) = -u->Cell(it.Down());
 				break;
 			case cornerTopLeft:
-				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+				u->Cell(it.Left()) = 0.0;
+				u->Cell(it) = - u->Cell(it.Down());
 				break;
 			case cornerBottomLeft:
-				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+				u->Cell(it.Left()) = 0.0;
+				u->Cell(it) = -u->Cell(it.Top());
 				break;
 			case cornerBottomRight:
-				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
-				u->Cell(it.Left()) = 2.0*_velocity[0] - u->Cell(it.Left().Top());
+				u->Cell(it) = -u->Cell(it.Down());
 				break;
 			case inner:
-				u->Cell(it) = _velocity[0];
+				u->Cell(it) = 0.0;
 				break;
 			default:
 				break;
@@ -703,13 +702,13 @@ void Geometry::Update_P(Grid * p) const {
 		case '|': // Vertical SLIP
 			switch (_type[it.Value()]) {
 			case boundaryTop:
-				p->Cell(it) = 2 * _pressure - p->Cell(it.Down());
+				p->Cell(it) = 2.0 * _pressure - p->Cell(it.Down());
 				break;
 			case boundaryRight:
 				p->Cell(it) = p->Cell(it.Left());
 				break;
 			case boundaryBottom:
-				p->Cell(it) = 2 * _pressure - p->Cell(it.Top());
+				p->Cell(it) = 2.0 * _pressure - p->Cell(it.Top());
 				break;
 			case boundaryLeft:
 				p->Cell(it) = p->Cell(it.Right());
@@ -733,7 +732,41 @@ void Geometry::Update_P(Grid * p) const {
 				break;
 			}
 		case 'O': // OUTFLOW
-			p->Cell(it) = 0.0;
+			switch (_type[it.Value()]) {
+			case boundaryTop:
+				p->Cell(it) = - p->Cell(it.Down());
+				break;
+			case boundaryRight:
+				p->Cell(it) = - p->Cell(it.Left());
+				break;
+			case boundaryBottom:
+				p->Cell(it) = - p->Cell(it.Top());
+				break;
+			case boundaryLeft:
+				p->Cell(it) = p->Cell(it.Right());
+				break;
+			case cornerTopRight:
+				if (_flag[it.Down().Value()] == ' ') p->Cell(it) = p->Cell(it.Down());
+				else p->Cell(it) = p->Cell(it.Left());
+				break;
+			case cornerBottomRight:
+				if (_flag[it.Top().Value()] == ' ') p->Cell(it) = p->Cell(it.Top());
+				else p->Cell(it) = p->Cell(it.Left());
+				break;
+			case cornerBottomLeft:
+				if (_flag[it.Top().Value()] == ' ') p->Cell(it) = p->Cell(it.Top());
+				else p->Cell(it) = p->Cell(it.Right());
+				break;
+			case cornerTopLeft:
+				if (_flag[it.Down().Value()] == ' ') p->Cell(it) = p->Cell(it.Down());
+				else p->Cell(it) = p->Cell(it.Right());
+				break;
+			case inner:
+				p->Cell(it) = 0.0;
+				break;
+			default:
+			break;
+		}
 		case 'V': // Vertical INFLOW
 			break;
 		case 'H': // Horizontal INFLOW
