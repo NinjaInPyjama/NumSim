@@ -408,7 +408,6 @@ void Geometry::Update_U(Grid * u) const {
 				break;
 			default:
 				break;
-				break;
 			case ' ':
 
 				break;
