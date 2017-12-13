@@ -469,17 +469,17 @@ void Geometry::Update_V(Grid * v) const {
 				v->Cell(it.Down()) = 0.0;
 				break;
 			case boundaryRight:
-				v->Cell(it) = -v->Cell(it.Left());
+				v->Cell(it) = - v->Cell(it.Left());
 				break;
 			case boundaryBottom:
 				v->Cell(it) = 0.0;
 				break;
 			case boundaryLeft:
-				v->Cell(it) = -v->Cell(it.Right());
+				v->Cell(it) = - v->Cell(it.Right());
 				break;
 			case cornerTopRight:
 				v->Cell(it.Down()) = 0.0;
-				v->Cell(it) = -v->Cell(it.Left());
+				v->Cell(it) = - v->Cell(it.Left());
 				break;
 			case cornerBottomRight:
 				v->Cell(it) = 0.0;
@@ -501,31 +501,31 @@ void Geometry::Update_V(Grid * v) const {
 		case '|': // Vertical SLIP
 			switch (_type[it.Value()]) {
 			case boundaryTop:
-				v->Cell(it) = v->Cell(it.Left());
-				v->Cell(it.Down()) = v->Cell(it.Down().Left());
+				v->Cell(it.Down()) = v->Cell(it.Down().Down());
+				v->Cell(it) = v->Cell(it.Down());
 				break;
 			case boundaryRight:
 				v->Cell(it) = v->Cell(it.Left());
 				break;
 			case boundaryBottom:
-				v->Cell(it) = v->Cell(it.Left());
+				v->Cell(it) = v->Cell(it.Top());
 				break;
 			case boundaryLeft:
 				v->Cell(it) = v->Cell(it.Right());
 				break;
 			case cornerTopRight:
+				v->Cell(it.Down()) = v->Cell(it.Down().Down());
 				v->Cell(it) = v->Cell(it.Left());
-				v->Cell(it.Down()) = v->Cell(it.Down().Left());
 				break;
 			case cornerBottomRight:
-				v->Cell(it) = v->Cell(it.Left());
+				v->Cell(it) = v->Cell(it.Top());
 				break;
 			case cornerBottomLeft:
-				v->Cell(it) = v->Cell(it.Right());
+				v->Cell(it) = v->Cell(it.Top());
 				break;
 			case cornerTopLeft:
 				v->Cell(it) = v->Cell(it.Right());
-				v->Cell(it.Down()) = v->Cell(it.Down().Right());
+				v->Cell(it.Down()) = v->Cell(it.Down().Down());
 				break;
 			case inner:
 				v->Cell(it) = 0.0;
@@ -533,6 +533,7 @@ void Geometry::Update_V(Grid * v) const {
 			default:
 				break;
 			}
+			break;
 		case 'O': // OUTFLOW
 			switch (_type[it.Value()]) {
 			case boundaryTop:
@@ -549,24 +550,90 @@ void Geometry::Update_V(Grid * v) const {
 				v->Cell(it) = v->Cell(it.Right());
 				break;
 			case cornerTopRight:
+				v->Cell(it) = v->Cell(it.Down()) + v->Cell(it.Left());
 				break;
 			case cornerBottomRight:
+				v->Cell(it) = v->Cell(it.Top()) + v->Cell(it.Left());
 				break;
 			case cornerBottomLeft:
+				v->Cell(it) = v->Cell(it.Top()) + v->Cell(it.Right());
 				break;
 			case cornerTopLeft:
+				v->Cell(it) = v->Cell(it.Down()) + v->Cell(it.Right());
 				break;
 			case inner:
 				break;
 			default:
 				break;
 			}
+			break;
 		case 'V': // Vertical INFLOW
-			v->Cell(it) = 0.0;
+			switch (_type[it.Value()]) {
+			case boundaryTop:
+				v->Cell(it.Down()) = _value[it.Value()];
+				break;
+			case boundaryRight:
+				v->Cell(it) = - v->Cell(it.Left());
+				break;
+			case boundaryBottom:
+				v->Cell(it) = _value[it.Value()];
+				break;
+			case boundaryLeft:
+				v->Cell(it) = - v->Cell(it.Right());
+				break;
+			case cornerTopRight:
+				v->Cell(it) = - v->Cell(it.Left());
+				v->Cell(it.Down()) = 0.0;
+				break;
+			case cornerBottomRight:
+				v->Cell(it) = - v->Cell(it.Left());
+				break;
+			case cornerBottomLeft:
+				v->Cell(it) = - v->Cell(it.Right());
+				break;
+			case cornerTopLeft:
+				v->Cell(it) = - v->Cell(it.Right());
+				v->Cell(it.Down()) = 0.0;
+				break;
+			case inner:
+				break;
+			default:
+				break;
+			}
 			break;
 		case 'H': // Horizontal INFLOW
-			if(_type[it.Value()] == boundaryTop) v->Cell(it.Down()) = _value[it.Value()];
-			v->Cell(it) = _value[it.Value()];
+			switch (_type[it.Value()]) {
+			case boundaryTop:
+				v->Cell(it.Down()) = _value[it.Value()];
+				break;
+			case boundaryRight:
+				v->Cell(it) = 2.0 * _velocity[1] - v->Cell(it.Left());
+				break;
+			case boundaryBottom:
+				v->Cell(it) = _value[it.Value()];
+				break;
+			case boundaryLeft:
+				v->Cell(it) = 2.0 * _velocity[1] - v->Cell(it.Right());
+				break;
+			case cornerTopRight:
+				if(_flag[it.Down().Value()] == ' ') v->Cell(it.Down()) = _value[it.Value()]; 
+				v->Cell(it) = 2.0 * _velocity[1] - v->Cell(it.Left());
+				break;
+			case cornerBottomRight:
+				v->Cell(it) = _value[it.Value()];
+				break;
+			case cornerBottomLeft:
+				v->Cell(it) = _value[it.Value()];
+				break;
+			case cornerTopLeft:
+				if (_flag[it.Down().Value()] == ' ') v->Cell(it.Down()) = _value[it.Value()];
+				v->Cell(it) = 2.0 * _velocity[1] - v->Cell(it.Right());
+				break;
+			case inner:
+				break;
+			default:
+				break;
+			}
 			break;
 		default:
 			break;
@@ -595,16 +662,16 @@ void Geometry::Update_P(Grid * p) const {
 				p->Cell(it) = p->Cell(it.Right());
 				break;
 			case cornerTopRight:
-				p->Cell(it) = 0.5*(p->Cell(it.Left()) + p->Cell(it.Down()));
+				p->Cell(it) = 0.5 * (p->Cell(it.Left()) + p->Cell(it.Down()));
 				break;
 			case cornerBottomRight:
-				p->Cell(it) = 0.5*(p->Cell(it.Left()) + p->Cell(it.Top()));
+				p->Cell(it) = 0.5 * (p->Cell(it.Left()) + p->Cell(it.Top()));
 				break;
 			case cornerBottomLeft:
-				p->Cell(it) = 0.5*(p->Cell(it.Right()) + p->Cell(it.Top()));
+				p->Cell(it) = 0.5 * (p->Cell(it.Right()) + p->Cell(it.Top()));
 				break;
 			case cornerTopLeft:
-				p->Cell(it) = 0.5*(p->Cell(it.Right()) + p->Cell(it.Down()));
+				p->Cell(it) = 0.5 * (p->Cell(it.Right()) + p->Cell(it.Down()));
 				break;
 			case inner:
 				p->Cell(it) = 0.0;
@@ -619,13 +686,13 @@ void Geometry::Update_P(Grid * p) const {
 				p->Cell(it) = p->Cell(it.Down());
 				break;
 			case boundaryRight:
-				p->Cell(it) = 2 * _pressure - p->Cell(it.Left());
+				p->Cell(it) = 2.0 * _pressure - p->Cell(it.Left());
 				break;
 			case boundaryBottom:
 				p->Cell(it) = p->Cell(it.Top());
 				break;
 			case boundaryLeft:
-				p->Cell(it) = 2 * _pressure - p->Cell(it.Right());
+				p->Cell(it) = 2.0 * _pressure - p->Cell(it.Right());
 				break;
 			case cornerTopRight:
 				p->Cell(it) = 0.5*(p->Cell(it.Left()) + p->Cell(it.Down()));
