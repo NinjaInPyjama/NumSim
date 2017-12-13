@@ -199,6 +199,171 @@ void Geometry::Update_U(Grid * u) const {
 
 	for (it.First(); it.Valid(); it.Next()) {
 		switch (_flag[it.Value()]) {
+		case '#': // NOSLIP
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = - u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = - u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it) = 0.0;
+				u->Cell(it.Left()) = 0.0;
+				break;
+			case boundaryLeft:
+				u->Cell(it) = 0.0;
+				break;
+			case cornerTopRight:
+				u->Cell(it) = - u->Cell(it.Down());
+				u->Cell(it.Left()) = 0.0;
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = 0.0;
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = 0.0;
+				break;
+			case cornerBottomRight:
+				u->Cell(it) = - u->Cell(it.Top());
+				u->Cell(it.Left()) = 0;
+				break;
+			case inner:
+				u->Cell(it) = 0.0;
+				break;
+			default:
+				break;
+			}
+			break;
+		case '-': // Horizontal SLIP 
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Left());
+				break;
+			case boundaryLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerTopRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Down());
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerBottomRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Top());
+				break;
+			}
+			break;
+		case '|': // Vertical SLIP 
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = - u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = - u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it.Left()) = 0.0;
+				u->Cell(it) = 0.0;
+				break;
+			case boundaryLeft:
+				u->Cell(it) = 0.0;
+				break;
+			case cornerTopRight:
+				u->Cell(it.Left()) = 0.0;
+				u->Cell(it) = - u->Cell(it.Down());
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = 0.0;
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = 0.0;
+				break;
+			case cornerBottomRight:
+				u->Cell(it.Left()) = 0.0;
+				u->Cell(it) = -u->Cell(it.Top());
+				break;
+			}
+			break;
+		case 'O': //OUTFLOW
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it.Left()) = u->Cell(it.Left().Left());
+				u->Cell(it) = u->Cell(it.Left());
+				break;
+			case boundaryLeft:
+				u->Cell(it) = u->Cell(it.Right());
+				break;
+			case cornerTopRight:
+				u->Cell(it) = u->Cell(it.Down()) + u->Cell(it.Left());
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = u->Cell(it.Down()) + u->Cell(it.Right());
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = u->Cell(it.Top()) + u->Cell(it.Right());
+				break;
+			case cornerBottomRight:
+				u->Cell(it) = u->Cell(it.Top()) + u->Cell(it.Left());
+				break;
+			case inner:
+				break;
+			default:
+				break;
+			}
+		case 'V': // Vertical INFLOW
+			switch (_type[it.Value()]) {
+			case boundaryBottom:
+				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Top());
+				break;
+			case boundaryTop:
+				u->Cell(it) = 2.0*_velocity[0] - u->Cell(it.Down());
+				break;
+			case boundaryRight:
+				u->Cell(it) = _value[it.Value()];
+				u->Cell(it.Left()) = _value[it.Value()];
+				break;
+			case boundaryLeft:
+				u->Cell(it) = _value[it.Value()];
+				break;
+			// TODO: AB HIER WEITER UPDATEN!!!
+			case cornerTopRight:
+				u->Cell(it) = _value[it.Value()];
+				u->Cell(it.Left()) = _value[it.Value()];
+				break;
+			case cornerTopLeft:
+				u->Cell(it) = _value[it.Value()];
+				break;
+			case cornerBottomLeft:
+				u->Cell(it) = _value[it.Value()];
+				break;
+			case cornerBottomRight:
+				u->Cell(it) = _value[it.Value()];
+				u->Cell(it.Left()) = _value[it.Value()];
+				break;
+			case inner:
+				u->Cell(it) = _value[it.Value()];
+				break;
+			}
+			break;
 		case 'H':
 			switch (_type[it.Value()]) {
 			case boundaryBottom:
@@ -235,186 +400,6 @@ void Geometry::Update_U(Grid * u) const {
 				break;
 			}
 			break;
-		case 'V':
-			switch (_type[it.Value()]) {
-			case boundaryBottom:
-				u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Top());
-				break;
-			case boundaryTop:
-				u->Cell(it) = 2.0*_value[it.Value()] - u->Cell(it.Down());
-				break;
-			case boundaryRight:
-				u->Cell(it) = _value[it.Value()];
-				u->Cell(it.Left()) = _value[it.Value()];
-				break;
-			case boundaryLeft:
-				u->Cell(it) = _value[it.Value()];
-				break;
-			case cornerTopRight:
-				u->Cell(it) = _value[it.Value()];
-				u->Cell(it.Left()) = _value[it.Value()];
-				break;
-			case cornerTopLeft:
-				u->Cell(it) = _value[it.Value()];
-				break;
-			case cornerBottomLeft:
-				u->Cell(it) = _value[it.Value()];
-				break;
-			case cornerBottomRight:
-				u->Cell(it) = _value[it.Value()];
-				u->Cell(it.Left()) = _value[it.Value()];
-				break;
-			case inner:
-				u->Cell(it) = _value[it.Value()];
-				break;
-			}
-			break;
-		case '-':
-			switch (_type[it.Value()]) {
-			case boundaryBottom:
-				u->Cell(it) = u->Cell(it.Top());
-				break;
-			case boundaryTop:
-				u->Cell(it) = u->Cell(it.Down());
-				break;
-			case boundaryRight:
-				u->Cell(it.Left()) = u->Cell(it.Left().Left());
-				u->Cell(it) = u->Cell(it.Left());
-				break;
-			case boundaryLeft:
-				u->Cell(it) = u->Cell(it.Right());
-				break;
-			case cornerTopRight:
-				u->Cell(it.Left()) = u->Cell(it.Left().Left());
-				u->Cell(it) = u->Cell(it.Left());
-				break;
-			case cornerTopLeft:
-				u->Cell(it) = u->Cell(it.Right());
-				break;
-			case cornerBottomLeft:
-				u->Cell(it) = u->Cell(it.Right());
-				break;
-			case cornerBottomRight:
-				u->Cell(it.Left()) = u->Cell(it.Left().Left());
-				u->Cell(it) = u->Cell(it.Left());
-				break;
-			}
-			break;
-
-		case '|':
-			switch (_type[it.Value()]) {
-			case boundaryBottom:
-				u->Cell(it) = -u->Cell(it.Top());
-				break;
-			case boundaryTop:
-				u->Cell(it) = -u->Cell(it.Down());
-				break;
-			case boundaryRight:
-				u->Cell(it) = 0;
-				u->Cell(it.Left()) = 0;
-				break;
-			case boundaryLeft:
-				u->Cell(it) = 0;
-				break;
-			case cornerTopRight:
-				u->Cell(it) = -u->Cell(it.Down());
-				u->Cell(it.Left()) = -u->Cell(it.Left().Down());
-				break;
-			case cornerTopLeft:
-				u->Cell(it) = -u->Cell(it.Down());
-				break;
-			case cornerBottomLeft:
-				u->Cell(it) = -u->Cell(it.Top());
-				break;
-			case cornerBottomRight:
-				u->Cell(it) = -u->Cell(it.Top());
-				u->Cell(it.Left()) = -u->Cell(it.Left().Top());
-				break;
-			case inner:
-				u->Cell(it) = 0;
-				break;
-			default:
-				break;
-			}
-
-			break;
-		case '#':
-			switch (_type[it.Value()]) {
-			case boundaryBottom:
-				u->Cell(it) = -u->Cell(it.Top());
-				break;
-			case boundaryTop:
-				u->Cell(it) = -u->Cell(it.Down());
-				break;
-			case boundaryRight:
-				u->Cell(it) = 0;
-				u->Cell(it.Left()) = 0;
-				break;
-			case boundaryLeft:
-				u->Cell(it) = 0;
-				break;
-			case cornerTopRight:
-				u->Cell(it) = 0;
-				u->Cell(it.Left()) = 0;
-				break;
-			case cornerTopLeft:
-				u->Cell(it) = 0;
-				break;
-			case cornerBottomLeft:
-				u->Cell(it) = 0;
-				break;
-			case cornerBottomRight:
-				u->Cell(it) = 0;
-				u->Cell(it.Left()) = 0;
-				break;
-			case inner:
-				u->Cell(it) = 0;
-				break;
-			default:
-				break;
-			}
-			break;
-
-		case 'O':
-			switch (_type[it.Value()]) {
-			case boundaryBottom:
-				u->Cell(it) = u->Cell(it.Top());
-				break;
-			case boundaryTop:
-				u->Cell(it) = u->Cell(it.Down());
-				break;
-			case boundaryRight:
-				u->Cell(it.Left()) = u->Cell(it.Left().Left());
-				u->Cell(it) = u->Cell(it.Left());
-				break;
-			case boundaryLeft:
-				u->Cell(it) = u->Cell(it.Right());
-				break;
-			case cornerTopRight:
-				u->Cell(it.Left()) = u->Cell(it.Left().Left());
-				u->Cell(it) = u->Cell(it.Left());
-				break;
-			case cornerTopLeft:
-				u->Cell(it) = u->Cell(it.Right());
-				break;
-			case cornerBottomLeft:
-				u->Cell(it) = u->Cell(it.Right());
-				break;
-			case cornerBottomRight:
-				u->Cell(it.Left()) = u->Cell(it.Left().Left());
-				u->Cell(it) = u->Cell(it.Left());
-				break;
-			case inner:
-				break;
-			default:
-				break;
-			case ' ':
-
-				break;
-			case 'I':
-
-				break;
-			}
 		}
 	}	
 }
@@ -570,13 +555,14 @@ void Geometry::Update_V(Grid * v) const {
 		case 'V': // Vertical INFLOW
 			switch (_type[it.Value()]) {
 			case boundaryTop:
-				v->Cell(it.Down()) = _value[it.Value()];
+				v->Cell(it) = 0.0;
+				v->Cell(it.Down()) = 0.0;
 				break;
 			case boundaryRight:
 				v->Cell(it) = - v->Cell(it.Left());
 				break;
 			case boundaryBottom:
-				v->Cell(it) = _value[it.Value()];
+				v->Cell(it) = 0.0;
 				break;
 			case boundaryLeft:
 				v->Cell(it) = - v->Cell(it.Right());
@@ -604,6 +590,7 @@ void Geometry::Update_V(Grid * v) const {
 		case 'H': // Horizontal INFLOW
 			switch (_type[it.Value()]) {
 			case boundaryTop:
+				v->Cell(it) = _value[it.Value()];
 				v->Cell(it.Down()) = _value[it.Value()];
 				break;
 			case boundaryRight:
