@@ -52,7 +52,7 @@ public:
   ~StreakLine ();
   void TimeStep(const real_t& dt, const Grid* u, const Grid* v);
 private:
-  const multi_real_t& _org;
+  multi_real_t _org;
 };
 //------------------------------------------------------------------------------
 #endif  // __PARTICLE_HPP

@@ -22,13 +22,16 @@ Geometry::Geometry() {
 
 
 Geometry::Geometry(const Communicator *comm) {
+    
+    std::cout << "Hallo3.1" << std::endl;
     Load("default.geom");
     _comm = comm;
-    const multi_index_t real_size = multi_index_t((_bsize[0]-2)/_comm->ThreadDim()[0],(_bsize[1]-2)/_comm->ThreadDim()[1]) ;
+    std::cout << "Halloooo" << std::endl;
+    const multi_index_t real_size = multi_index_t((_bsize[0])/_comm->ThreadDim()[0],(_bsize[1])/_comm->ThreadDim()[1]) ;
     
     _redblack = (_comm->ThreadIdx()[0]*real_size[0]+_comm->ThreadIdx()[1]*real_size[1])%2 == 0;
     
-    _size = multi_index_t(real_size[0]+2,real_size[1]+2);
+    _size = multi_index_t(real_size[0],real_size[1]);
     
     if ( _comm->isRight() ){
         _size[0] = _bsize[0] - (_comm->ThreadDim()[0]-1)*real_size[0];
@@ -51,6 +54,7 @@ void Geometry::Load(const char * file) {
     char name[20];
     multi_real_t inval_real;
     multi_index_t inval_index;
+    std::cout << "Hallo3.2" << std::endl;
     while (!feof(handle)) {
         
         
@@ -59,9 +63,10 @@ void Geometry::Load(const char * file) {
         
         if (strcmp(name,"size") == 0) {
             if (fscanf(handle," %i %i\n",&inval_index[0],&inval_index[1])) {
-                _bsize[0] = inval_index[0]+2;
-                _bsize[1] = inval_index[1]+2;
+                _bsize[0] = inval_index[0];
+                _bsize[1] = inval_index[1];
             }
+            std::cout << "Hallo3.3" << std::endl;
             continue;
         }
         
@@ -70,33 +75,55 @@ void Geometry::Load(const char * file) {
                 _blength[0] = inval_real[0];
                 _blength[1] = inval_real[1];
             }
+            std::cout << "Hallo3.4" << std::endl;
             continue;
         }
         if (strcmp(name,"velocity") == 0) {
             if (fscanf(handle," %lf %lf\n",&inval_real[0],&inval_real[1])) {
                 _velocity[0] = inval_real[0];
                 _velocity[1] = inval_real[1];
+                std::cout << "Hallo3.5" << std::endl;
             }
             continue;
         }
         if (strcmp(name,"pressure") == 0) {
             if (fscanf(handle," %lf\n",&inval_real[0]))
                 _pressure = inval_real[0];
+            std::cout << "Hallo3.6" << std::endl;
             continue;
         }
 
         if (strcmp(name,"geometry") == 0) {
-            if (fscanf(handle," %s\n"),&name)
+            if (fscanf(handle," %s\n", name))
+                std::cout << "Hallo3.7  " << name << std::endl;
                 if(strcmp(name,"free") == 0) {
+                    
+                    std::cout << "Hallo3.8" << std::endl;
+                    
 					_flag = new char[_bsize[1]*_bsize[0]];
+                    _type = new int[_bsize[1]*_bsize[0]];
+                    _value = new real_t[_bsize[1]*_bsize[0]];
+                    
+                    char* line = new char[_bsize[0]];
+                    std::cout << "Hallo3.8.1 " << _flag[1] << "k" << std::endl;
                     for (int i = _bsize[1] - 1; i >= 0; i--) {
-						char* line = new char[_bsize[0]];
-						fscanf(handle, " %s\n", line);
-						// std::cout << line << std::endl;
+						
+//                         for(int k = 0; k<_bsize[0]-1; k++) {
+//                             fscanf(handle, "%c[1]", &line[k]);
+//                             //std::cout << line[k] << std::endl;
+//                         }
+//                         fscanf(handle, "%c[1]\n", &line[_bsize[0]-1]);
+                        fscanf(handle, "%[-HV| #IO]\n", line);
+                        std::cout << "Hallo3.8.2 " << i << line << std::endl;
+                        //std::cout << line << std::endl;
 						for (int j = 0; j < _bsize[0]; j++) {
 							_flag[i*_bsize[0] + j] = line[j];
+                            _type [i*_bsize[0] + j] = 0;
+                            _value [i*_bsize[0] + j] = 0.0;
 						}
+						
                     }
+                    std::cout << "Hallo3.8.3 " << _flag[160-1] << std::endl;
                 }
             continue;
             break;
@@ -109,7 +136,9 @@ void Geometry::Load(const char * file) {
 void Geometry::InitializeFlags() const {
 
 	Iterator it = Iterator(this);
+    std::cout << "Hallo4.1" << std::endl;
 	index_t type_id = 0;
+    
     for(it.First(); it.Valid(); it.Next()) {
 		if (_flag[it.Value()] != ' ') {
 			type_id = 0;
@@ -117,39 +146,75 @@ void Geometry::InitializeFlags() const {
 			type_id += _flag[it.Right().Value()] == _flag[it.Value()] ? 2 : 0;
 			type_id += _flag[it.Down().Value()] == _flag[it.Value()] ? 4 : 0;
 			type_id += _flag[it.Left().Value()] == _flag[it.Value()] ? 8 : 0;
-			_type[it.Value()] = type_id;
+			
+            
+            _type[it.Value()] = type_id;
+            
 		}
 		else _type[it.Value()] = 0.0;
     }
-
+    
     BoundaryIterator bit = BoundaryIterator(this);
     
     for(int i = 0 ; i < 4 ; i++) {
         bit.SetBoundary(i);
         int start_idx = -1; // saves first position of 'V' or 'H'
+        int end_idx = -1;
         for(bit.First(); bit.Valid(); bit.Next()) {
             if(start_idx == -1 && (_flag[bit.Value()] == 'H' || _flag[bit.Value()] == 'V')) {
                 start_idx = bit.Value();
             }
-            else if(start_idx != -1 && (_flag[bit.Value()] != 'H' || _flag[bit.Value()] != 'V')){
-                int end_idx = bit.Value();
-				end_idx -= (i == bit.boundaryTop || i == bit.boundaryBottom) ? 1 : _size[0];
+            else if(start_idx != -1 && (_flag[bit.Value()] != 'H' && _flag[bit.Value()] != 'V')){
+                end_idx = bit.Value();
+				end_idx -= (i == bit.boundaryTop || i == bit.boundaryBottom) ? 1 : -_size[0];
 
 				//-4.0/(end_idx-start_idx+1.0)/(end_idx-start_idx+1.0)*velocity[1]*(y-start_idx+1.0/2.0)*(y-end_idx-1.0/2.0)
             
                 BoundaryIterator bit_intern = BoundaryIterator(this);
                 bit_intern.SetBoundary(i);
+                std::cout << start_idx << "  " << end_idx << std::endl;
+                
                 for(bit_intern.First(); bit_intern.Valid(); bit_intern.Next()){
                     if(bit_intern.Value() <= end_idx && bit_intern.Value() >= start_idx){
-                        _value[bit_intern.Value()] = -4.0/(end_idx-start_idx+1.0)/(end_idx-start_idx+1.0)*_velocity[(i+1)%2]*(bit.Value()-start_idx+1.0/2.0)*(bit.Value()-end_idx-1.0/2.0);
+                        _value[bit_intern.Value()] = -4.0/((end_idx-start_idx+1.0)*(end_idx-start_idx+1.0))*_velocity[(i+1)%2]*(real_t(bit_intern.Value())-real_t(start_idx)+1.0/2.0)*(real_t(bit_intern.Value())-real_t(end_idx)-1.0/2.0);
                     }
                 }
                 start_idx = -1;
+                end_idx = -1;
             }
         }
     }
+    
 }
 
+
+/// Prints the values of grid
+void Geometry::print(const char & c) const {
+	std::cout.precision(2);
+    if(c == 'v') {
+	for (int i = _size[1] - 1; i >= 0; i--) {
+		for (int j = 0; j < _size[0]; j++) {
+			std::cout  << " " << _value[i*_size[0] + j] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+    }else if(c == 'f') {
+    for (int i = _size[1] - 1; i >= 0; i--) {
+		for (int j = 0; j < _size[0]; j++) {
+			std::cout  << _flag[i*_size[0] + j] ;
+		}
+		std::cout << std::endl;
+	}
+    }else if(c == 't') {
+    for (int i = _size[1] - 1; i >= 0; i--) {
+		for (int j = 0; j < _size[0]; j++) {
+			std::cout <<  _type[i*_size[0] + j] ;
+		}
+		std::cout << std::endl;
+	}
+    }
+}
 
 /// Returns whether the lower left corner is red or black
 const bool & Geometry::RedBlack() const {

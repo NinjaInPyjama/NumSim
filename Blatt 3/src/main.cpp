@@ -23,26 +23,33 @@
 #include "parameter.hpp"
 #include "visu.hpp"
 #include "vtk.hpp"
-#include "zeitgeist.hpp"
+//#include "zeitgeist.hpp"
 
 #include <iostream>
 #include <sys/stat.h>
 
 int main(int argc, char **argv) {
+    
+  std::cout << "Hallo1" << std::endl;
 
   // Create parameter and geometry instances with default values
   Communicator comm(&argc, &argv);
     
-  Zeitgeist zeit;
-  zeit.Tic();
+  std::cout << "Hallo2" << std::endl;
+  //Zeitgeist zeit;
+  //zeit.Tic();
   
   
   Parameter param;
+  
+  std::cout << "Hallo3" << std::endl;
   Geometry geom(&comm);
+  std::cout << "Hallo4" << std::endl;
+  geom.InitializeFlags();
+  
   
   // Create the fluid solver
   Compute comp(&geom, &param, &comm);
-  
   
 
   
@@ -127,8 +134,8 @@ int main(int argc, char **argv) {
     bool printOnlyOnMaster = !comm.getRank();
     comp.TimeStep(printOnlyOnMaster);
   }
-    zeit.Tac();
+    //zeit.Tac();
     
-    if(comm.getRank()==0) std::cout << "Gesamtzeit: " << zeit.Toc() << std::endl;
+    //if(comm.getRank()==0) std::cout << "Gesamtzeit: " << zeit.Toc() << std::endl;
   return 0;
 }

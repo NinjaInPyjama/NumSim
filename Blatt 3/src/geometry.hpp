@@ -91,6 +91,9 @@ public:
   void Update_V(Grid *v) const;
   /// Updates the pressure field p
   void Update_P(Grid *p) const;
+  
+  /// prints the grid 'f' _flags, 'v' _value, 't' _type
+  void print(const char& c) const;
 
 private:
   const Communicator *_comm;
@@ -106,8 +109,8 @@ private:
   real_t _pressure;
 
   char * _flag;
-  char * _type;
-  char * _value;
+  int * _type;
+  real_t * _value;
 
   
 };

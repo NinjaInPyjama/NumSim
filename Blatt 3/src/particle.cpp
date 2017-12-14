@@ -90,6 +90,7 @@ void ParticleLine::SaveVTK (const index_t& rank, const index_t& nump, const char
 
 
 PathLine::PathLine(const multi_real_t& pos) {
+    //_part = {Particle(multi_real_t(1.0,2.0))};
 	// TODO: do something
 }
 PathLine::~PathLine() {}
@@ -100,8 +101,8 @@ void PathLine::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
 
 
 StreakLine::StreakLine(const multi_real_t& pos) {
-	// TODO: do something
-	// init 'org'
+	_org = pos;
+    //_part = {Particle(multi_real_t(1.0,2.0))};
 }
 
 StreakLine::~StreakLine() {}
