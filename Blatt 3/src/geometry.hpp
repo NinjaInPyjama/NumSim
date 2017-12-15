@@ -33,6 +33,18 @@
 //------------------------------------------------------------------------------
 class Geometry {
 public:
+    enum {
+    boundaryBottom = 14,
+    boundaryLeft = 13,
+    boundaryTop = 11,
+    boundaryRight = 7,
+    cornerTopRight = 3,
+    cornerBottomRight = 6,
+    cornerBottomLeft = 12,
+    cornerTopLeft = 9,
+    inner = 15
+  };
+    
   /// Constructs a default geometry:
   // driven cavity with 128 x 128 grid, no-slip boundary conditions
   // as shown below
@@ -51,6 +63,9 @@ public:
 
   /// Loads a geometry from a file
   void Load(const char *file);
+
+  /// Sets the flags, types and values
+  void InitializeFlags() const;
 
   /// Returns the number of cells in each dimension
   const multi_index_t &Size() const;
@@ -76,6 +91,12 @@ public:
   void Update_V(Grid *v) const;
   /// Updates the pressure field p
   void Update_P(Grid *p) const;
+  
+  /// prints the grid 'f' _flags, 'v' _value, 't' _type
+  void print(const char& c) const;
+  
+  /// Returns the total length of the domain
+  const char* Flag() const ;    
 
 private:
   const Communicator *_comm;
@@ -89,6 +110,12 @@ private:
 
   multi_real_t _velocity;
   real_t _pressure;
+
+  char * _flag;
+  int * _type;
+  real_t * _value;
+
+  
 };
 //------------------------------------------------------------------------------
 #endif // __GEOMETRY_HPP

@@ -63,6 +63,8 @@ public:
   /// Default constructor
   SOR();
   /// Constructs an actual SOR solver
+  SOR(const Geometry * geom) ;
+  /// Constructs an actual SOR solver
   SOR(const Geometry *geom, const real_t &omega);
   /// Destructor
   ~SOR();

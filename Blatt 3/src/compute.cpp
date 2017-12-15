@@ -16,35 +16,41 @@ Compute::Compute(const Geometry * geom, const Parameter * param, const Communica
     _zeit_res = new Zeitgeist();
     
     
-    
     _tmp = new Grid(_geom);
+    
+    
     
     _F = new Grid(_geom, multi_real_t(1.0, 0.5));
 	_F->Initialize(0.0);
     _G = new Grid(_geom, multi_real_t(0.5, 1.0));
 	_G->Initialize(0.0);
+    
 
 	_u = new Grid(_geom, multi_real_t(1.0, 0.5));
-	_u->Initialize(_geom->Velocity()[0]);
-	_v = new Grid(_geom, multi_real_t(0.5, 1.0));
-	_v->Initialize(_geom->Velocity()[1]);
+	_u->Initialize(0);
+    _v = new Grid(_geom, multi_real_t(0.5, 1.0));
+    _v->Initialize(0);
     _p = new Grid(_geom, multi_real_t(0.5, 0.5));
-    _p->Initialize(_geom->Pressure());
+    _p->Initialize(0.0);
 
+    
 	_geom->Update_U(_u);
 	_geom->Update_V(_v);
 	_geom->Update_P(_p);
+    
 
 	_rhs = new Grid(_geom, multi_real_t(0.5, 0.5));
 	_rhs->Initialize(0.0);
 
 	//_solver = new RedOrBlackSOR(_geom,_param->Omega());
-	_solver = new RedOrBlackSOR(_geom);
+	_solver = new SOR(_geom);
       
         
     _t = 0.0;
     _dtlimit = _param->Dt();
     _epslimit = _param->Eps();
+    
+    
 }
 
 /// Deletes all grids
@@ -60,6 +66,8 @@ void Compute::TimeStep(bool printInfo) {
     // stability  condition induced by the diffusion operator
     
     //_zeit_dt->Tic();
+    
+    
     
     real_t dtlimit_diff = _param->Re()/2.0 * (_geom->Mesh()[0]*_geom->Mesh()[0]*_geom->Mesh()[1]*_geom->Mesh()[1])/(_geom->Mesh()[0]*_geom->Mesh()[0]+_geom->Mesh()[1]*_geom->Mesh()[1]);
     // stability  condition induced by the convection operator
@@ -81,12 +89,19 @@ void Compute::TimeStep(bool printInfo) {
     //_zeit_dt->Tac();
     
     
-    
 	// update boundary values
 	_geom->Update_U(_u);
 	_geom->Update_V(_v);
 	_geom->Update_P(_p);
     
+    std::cout << "u" << std::endl;
+    _u->print();
+    
+    std::cout << "v" << std::endl;
+    _v->print();
+    
+    std::cout << "p" << std::endl;
+    _p->print();
     
     // compute 'preliminary' velocities and setting boundary values
     MomentumEqu(dt);
@@ -106,6 +121,7 @@ void Compute::TimeStep(bool printInfo) {
     real_t res = 0.0;
     
     _comm->copyBoundary(_p);
+    _geom->Update_P(_p);
     
     real_t zahl = 0.0;
     
@@ -113,18 +129,19 @@ void Compute::TimeStep(bool printInfo) {
     do {
         it++;
         //_zeit_comp->Tic();
-        zahl = _solver->RedCycle(_p, _rhs);
+        //zahl = _solver->RedCycle(_p, _rhs);
+        //_zeit_comp->Tac();
+        //_zeit_comm->Tic();
+        //res = _comm->gatherSum(zahl);
+        //_comm->copyBoundary(_p);
+        //_zeit_comm->Tac();
+        //_zeit_comp->Tic();
+        zahl = _solver->Cycle(_p, _rhs);
         //_zeit_comp->Tac();
         //_zeit_comm->Tic();
         res = _comm->gatherSum(zahl);
         _comm->copyBoundary(_p);
-        //_zeit_comm->Tac();
-        //_zeit_comp->Tic();
-        zahl = _solver->BlackCycle(_p, _rhs);
-        //_zeit_comp->Tac();
-        //_zeit_comm->Tic();
-        res += _comm->gatherSum(zahl);
-        _comm->copyBoundary(_p);
+        _geom->Update_P(_p);
         //_zeit_comm->Tac();
         
         // printTimes();
@@ -201,61 +218,61 @@ const Grid * Compute::GetVelocity() {
   }
 
   bit.SetBoundary(bit.boundaryTop);
-  if(_comm->isTop()) {
-    for (bit.First(); bit.Valid(); bit.Next()) {
-      abs_vel->Cell(bit) = 2.0 - abs_vel->Cell(bit.Down());
-    }
-  }
-  else{
+//   if(_comm->isTop()) {
+//     for (bit.First(); bit.Valid(); bit.Next()) {
+//       abs_vel->Cell(bit) = 2.0 - abs_vel->Cell(bit.Down());
+//     }
+//   }
+//   else{
     for (bit.First(); bit.Valid(); bit.Next()) {
       v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
       u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
       abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-  }
+//   }
 
   bit.SetBoundary(bit.boundaryBottom);
-  if(_comm->isBottom()) {
-    for (bit.First(); bit.Valid(); bit.Next()) {
-      abs_vel->Cell(bit) = - abs_vel->Cell(bit.Top());
-    }
-  }
-  else {
+//   if(_comm->isBottom()) {
+//     for (bit.First(); bit.Valid(); bit.Next()) {
+//       abs_vel->Cell(bit) = - abs_vel->Cell(bit.Top());
+//     }
+//   }
+//   else {
     for (bit.First(); bit.Valid(); bit.Next()) {
       v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
       u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
       abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-  }
+//   }
 
   bit.SetBoundary(bit.boundaryRight);
-  if(_comm->isRight()) {
-    for (bit.First(); bit.Valid(); bit.Next()) {
-      abs_vel->Cell(bit) = - abs_vel->Cell(bit.Left());
-    }
-  }
-  else {
+//   if(_comm->isRight()) {
+//     for (bit.First(); bit.Valid(); bit.Next()) {
+//       abs_vel->Cell(bit) = - abs_vel->Cell(bit.Left());
+//     }
+//   }
+//   else {
     for (bit.First(); bit.Valid(); bit.Next()) {
       v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
       u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
       abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-  }
+//   }
 
 
   bit.SetBoundary(bit.boundaryLeft);
-  if(_comm->isLeft()) {
-    for (bit.First(); bit.Valid(); bit.Next()) {
-      abs_vel->Cell(bit) = - abs_vel->Cell(bit.Right());
-    }
-  }
-  else {
+//   if(_comm->isLeft()) {
+//     for (bit.First(); bit.Valid(); bit.Next()) {
+//       abs_vel->Cell(bit) = - abs_vel->Cell(bit.Right());
+//     }
+//   }
+//   else {
     for (bit.First(); bit.Valid(); bit.Next()) {
       v_ip = (_v->Cell(bit.Down()) + _v->Cell(bit)) / 2.0;
       u_ip = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
       abs_vel->Cell(bit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
-  }
+//   }
 
   return abs_vel;
 }
