@@ -29,7 +29,8 @@ Particle::Particle(const multi_real_t& pos) {
 Particle::~Particle() {}
 
 void Particle::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
-	// TODO: do something
+    _pos[0] = _pos[0] + dt*u->Interpolate(_pos);
+    _pos[1] = _pos[1] + dt*v->Interpolate(_pos);
 }
 
 const multi_real_t& Particle::Pos() const {
@@ -90,25 +91,28 @@ void ParticleLine::SaveVTK (const index_t& rank, const index_t& nump, const char
 
 
 PathLine::PathLine(const multi_real_t& pos) {
-    //_part = {Particle(multi_real_t(1.0,2.0))};
-	// TODO: do something
+    _part = {Particle(pos)};
 }
 PathLine::~PathLine() {}
 
 void PathLine::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
-	// TODO: do something
+    _part.push_back(Particle(_part.back().Pos()));
+    _part.back().TimeStep(dt,u,v);
 }
 
 
 StreakLine::StreakLine(const multi_real_t& pos) {
-	_org = pos;
-    //_part = {Particle(multi_real_t(1.0,2.0))};
+	_part = {Particle(pos)};
+    _org = pos;
 }
 
 StreakLine::~StreakLine() {}
 
 void StreakLine::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
-	// TODO: do something
+    for(Particle p : _part){
+        p.TimeStep(dt,u,v);
+    }
+    _part.insert(_part.begin(), Particle(_org));
 }
 
 
