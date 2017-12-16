@@ -41,30 +41,48 @@ int main(int argc, char **argv) {
 //   VTK vtk(geom.Mesh(), geom.Size());
 
   const Grid *visugrid;
+  const ParticleLine *line;
   bool run = true;
 
   visugrid = comp.GetVelocity();
+  line = comp.GetPathLine();
+  bool showlines = true;
 
   // Run the time steps until the end is reached
   while (comp.GetTime() < param.Tend() && run) {
 #ifdef USE_DEBUG_VISU
     // Render and check if window is closed
-    switch (visu.Render(visugrid)) {
+    switch (visu.Render(visugrid,line,showlines)) {
     case -1:
       run = false;
       break;
     case 0:
       visugrid = comp.GetVelocity();
+      showlines = false;
       break;
     case 1:
       visugrid = comp.GetU();
+      showlines = false;
       break;
     case 2:
       visugrid = comp.GetV();
+      showlines = false;
       break;
     case 3:
       visugrid = comp.GetP();
+      showlines = false;
       break;
+    case 4:
+      visugrid = comp.GetVelocity();
+      line = comp.GetPathLine();
+      showlines = true;
+      break;
+    case 5:
+      visugrid = comp.GetVelocity();
+      line = comp.GetStreakLine();
+      showlines = true;
+      break;
+      
     default:
       break;
     };

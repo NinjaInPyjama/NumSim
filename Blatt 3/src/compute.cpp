@@ -34,6 +34,8 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     _t = 0.0;
     _dtlimit = _param->Dt();
     _epslimit = _param->Eps();
+    _pathline = new PathLine(multi_real_t( 0.2, 0.9));
+    _streakline = new StreakLine(multi_real_t( 0.2, 0.8));
 }
 
 /// Deletes all grids
@@ -97,7 +99,12 @@ void Compute::TimeStep(bool printInfo) {
 	_geom->Update_U(_u);
 	_geom->Update_V(_v);
 	_geom->Update_P(_p);
-	
+    
+    _pathline->TimeStep(dt, _u, _v);
+    _streakline->TimeStep(dt, _u, _v);
+    
+    //_pathline->print();
+	//_streakline->print();
 	// save timestep
     _t += dt;
 }
@@ -105,6 +112,16 @@ void Compute::TimeStep(bool printInfo) {
 /// Returns the simulated time in total
 const real_t & Compute::GetTime() const {
 	return _t;
+}
+
+/// Returns the simulated PathLine
+const PathLine * Compute::GetPathLine() const {
+	return _pathline;
+}
+
+/// Returns the simulated StreakLines
+const StreakLine * Compute::GetStreakLine() const {
+	return _streakline;
 }
 
 

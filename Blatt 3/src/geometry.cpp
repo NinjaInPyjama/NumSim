@@ -159,10 +159,114 @@ const char * Geometry::Flag() const {
 	return _flag;
 }
 
+// /// Updates the velocity field u
+// void Geometry::Update_U(Grid * u) const {
+// 	// see script, p. 17
+// 	BoundaryIterator bit = BoundaryIterator(this);
+//     
+//     // Iteration over right boundary
+//     bit.SetBoundary(1);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		u->Cell(bit) = u->Cell(bit.Left());
+// 	}
+//     
+//     // Iteration over left boundary
+// 	bit.SetBoundary(3);
+//     for(bit.First(); bit.Valid(); bit.Next()) {
+// 		u->Cell(bit) = u->Cell(bit.Right());
+// 	}
+//     
+//     // Iteration over upper boundary
+//     bit.SetBoundary(0);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		u->Cell(bit) = - u->Cell(bit.Down()); //2.0
+// 	}
+// 	
+//     // Iteration over lower boundary
+// 	bit.SetBoundary(2);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		u->Cell(bit) = - u->Cell(bit.Top());
+// 	}
+// 	
+// }
+// 
+// 
+// 
+// /// Updates the velocity field v
+// void Geometry::Update_V(Grid * v) const {
+// 	// see script, p. 17	
+// 	BoundaryIterator bit = BoundaryIterator(this);
+//     
+//     // Iteration over right boundary
+// 	bit.SetBoundary(1);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		v->Cell(bit) = v->Cell(bit.Left());
+// 	}
+// 	
+// 	// Iteration over left boundary
+// 	bit.SetBoundary(3);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		v->Cell(bit) = - v->Cell(bit.Right());
+// 	}
+//     
+//     // Iteration over upper boundary
+// 	bit.SetBoundary(0);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		
+//         v->Cell(bit) = 0.0;
+//         v->Cell(bit.Down()) = 0.0;
+// 	}
+//     
+//     // Iteration over lower boundary
+// 	bit.SetBoundary(2); // Lower right corner
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		v->Cell(bit) = 0.0;
+// 	}
+//     
+//     
+//     
+// 	
+// }
+// 
+// /// Updates the pressure field p
+// void Geometry::Update_P(Grid * p) const {
+// 	// see script, p. 20 (p_{0,j} = p{1,j}), ...
+// 	BoundaryIterator bit = BoundaryIterator(this);
+//     
+//     // Iteration over right boundary
+// 	bit.SetBoundary(1);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		p->Cell(bit) = - p->Cell(bit.Left());
+//     }
+//     // Iteration over left boundary
+// 	bit.SetBoundary(3);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		p->Cell(bit) = 2*_pressure - p->Cell(bit.Right());
+// 	}
+// 	
+//     // Iteration over lower boundary
+// 	bit.SetBoundary(2);
+// 	for(bit.First(); bit.Valid(); bit.Next()) {
+// 		p->Cell(bit) = p->Cell(bit.Top());
+//     }
+//     
+// 	// Iteration over upper boundary
+//     bit.SetBoundary(0);
+//     for(bit.First(); bit.Valid(); bit.Next()) {
+// 		p->Cell(bit) = p->Cell(bit.Down());
+//     }
+//     
+//     
+//     
+// }
+
+
+
 /// Updates the velocity field u
 void Geometry::Update_U(Grid * u) const {
 	// see script, p. 17
 	BoundaryIterator bit = BoundaryIterator(this);
+<<<<<<< HEAD
 
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		u->Cell(bit) = 0.0;
@@ -206,17 +310,59 @@ void Geometry::Update_U(Grid * u) const {
 		default:
 			break;
 		}
+=======
+    
+    // Iteration over right boundary
+    bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit.Left()) = 0.0;
+	}
+    
+    // Iteration over left boundary
+	bit.SetBoundary(3);
+    bit.First();
+    u->Cell(bit.Down()) = 0.0; // Lower left corner
+    for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) = 0.0;
+	}
+    
+    // Iteration over upper boundary
+    bit.SetBoundary(0);
+    bit.First();
+	u->Cell(bit.Left()) = 2.0; // Upper left corner
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) = 2.0 - u->Cell(bit.Down()); //2.0
+	}
+	
+    // Iteration over lower boundary
+	bit.SetBoundary(2);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) =  - u->Cell(bit.Top());
+>>>>>>> 2c6697f24cd6e2bc7c0e909e1f78fdb523bed5b9
 	}
 }
-
-
 
 /// Updates the velocity field v
 void Geometry::Update_V(Grid * v) const {
 	// see script, p. 17	
 	BoundaryIterator bit = BoundaryIterator(this);
+<<<<<<< HEAD
 
 	for (bit.First(); bit.Valid(); bit.Next()) {
+=======
+    
+    // Iteration over upper boundary
+	bit.SetBoundary(0);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit.Down()) = 0.0;
+	}
+    
+    // Iteration over lower boundary
+	bit.SetBoundary(2);
+    bit.First();
+    v->Cell(bit.Right()) = 0.0; // Lower right corner
+	for(bit.First(); bit.Valid(); bit.Next()) {
+>>>>>>> 2c6697f24cd6e2bc7c0e909e1f78fdb523bed5b9
 		v->Cell(bit) = 0.0;
 		switch (_flag[bit.Value()]) {
 		case '#': // NOSLIP
@@ -259,12 +405,31 @@ void Geometry::Update_V(Grid * v) const {
 			break;
 		}
 	}
+<<<<<<< HEAD
+=======
+    
+    // Iteration over left boundary
+	bit.SetBoundary(3);
+    bit.First();
+    v->Cell(bit.Down()) = 0.0; // Lower left corner
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit) = - v->Cell(bit.Right());
+	}
+    
+    // Iteration over right boundary
+	bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit) = - v->Cell(bit.Left());
+	}
+	
+>>>>>>> 2c6697f24cd6e2bc7c0e909e1f78fdb523bed5b9
 }
 
 /// Updates the pressure field p
 void Geometry::Update_P(Grid * p) const {
 	// see script, p. 20 (p_{0,j} = p{1,j}), ...
 	BoundaryIterator bit = BoundaryIterator(this);
+<<<<<<< HEAD
 
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		p->Cell(bit) = 0.0;
@@ -361,6 +526,29 @@ void Geometry::Update_P(Grid * p) const {
 		default:
 			break;
 		}
+=======
+    
+	// Iteration over upper boundary
+    bit.SetBoundary(0);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+		p->Cell(bit) = p->Cell(bit.Down());
+    }
+    // Iteration over right boundary
+	bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		p->Cell(bit) = p->Cell(bit.Left());
+    }
+    // Iteration over lower boundary
+	bit.SetBoundary(2);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		p->Cell(bit) = p->Cell(bit.Top());
+    }
+    
+    // Iteration over left boundary
+	bit.SetBoundary(3);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		p->Cell(bit) = p->Cell(bit.Right());
+>>>>>>> 2c6697f24cd6e2bc7c0e909e1f78fdb523bed5b9
 	}
 }
 

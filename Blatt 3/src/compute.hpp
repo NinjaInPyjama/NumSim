@@ -32,6 +32,7 @@
 #include "iterator.hpp"
 #include "parameter.hpp"
 #include "solver.hpp"
+#include "particle.hpp"
 
 //------------------------------------------------------------------------------
 class Compute {
@@ -48,6 +49,13 @@ public:
 
   /// Returns the simulated time in total
   const real_t &GetTime() const;
+  
+  /// Returns the simulated PathLine
+  const PathLine * GetPathLine() const ;
+
+  /// Returns the simulated StreakLine
+  const StreakLine * GetStreakLine() const ;
+
 
   /// Returns the pointer to U
   const Grid *GetU() const;
@@ -96,6 +104,9 @@ private:
 
   const Geometry *_geom;
   const Parameter *_param;
+  
+  PathLine *_pathline;
+  StreakLine *_streakline;
 
   /// Compute the new velocites u,v
   void NewVelocities(const real_t &dt);
