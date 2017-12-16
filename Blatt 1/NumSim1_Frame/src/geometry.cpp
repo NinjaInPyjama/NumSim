@@ -14,7 +14,7 @@
 //    -------------
 //      u=0, v=0
 Geometry::Geometry() {
-    Load("default.geom");
+    Load("DC.geom");
 	// Load("actual.geom");
 
 	_h = multi_real_t(_length[0] / (_size[0] - 2), _length[1] / (_size[1] - 2));
