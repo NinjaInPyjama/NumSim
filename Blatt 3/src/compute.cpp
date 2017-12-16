@@ -149,7 +149,7 @@ const Grid * Compute::GetRHS() const {
 /// Computes and returns the absolute velocity
 const Grid * Compute::GetVelocity() {
     InteriorIterator iit = InteriorIterator(_geom);
-    Grid * abs_vel = new Grid(_geom);
+    Grid * abs_vel = new Grid(_geom,multi_real_t(0.5,0.5));
 	real_t u_ip = 0.0; // storage for interpolated u to center of cells
 	real_t v_ip = 0.0; // storage for interpolated v to center of cells
 

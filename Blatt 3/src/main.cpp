@@ -21,11 +21,13 @@
 #include "parameter.hpp"
 #include "visu.hpp"
 #include "vtk.hpp"
+#include "particle.hpp"
 
 int main(int argc, char **argv) {
   // Create parameter and geometry instances with default values
   Parameter param;
   Geometry geom;
+  geom.InitializeValues();
   // Create the fluid solver
   Compute comp(&geom, &param);
 
