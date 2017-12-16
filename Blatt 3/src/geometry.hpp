@@ -52,6 +52,9 @@ public:
   /// Loads a geometry from a file
   void Load(const char *file);
 
+  /// Initalize parabel values
+  void InitializeValues();
+
   /// Returns the number of cells in each dimension
   const multi_index_t &Size() const;
   /// Returns the length of the domain
@@ -62,6 +65,8 @@ public:
   const multi_real_t &Velocity() const;
   /// Returns the initial pressure
   const real_t &Pressure() const;
+  /// Returns the flag array
+  const char * Flag() const;
 
   /// Updates the velocity field u
   void Update_U(Grid *u) const;
@@ -78,6 +83,9 @@ private:
 
   multi_real_t _velocity;
   real_t _pressure;
+
+  char* _flag;
+  real_t* _value;
 };
 //------------------------------------------------------------------------------
 #endif // __GEOMETRY_HPP

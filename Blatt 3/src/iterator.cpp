@@ -90,29 +90,25 @@ Iterator Iterator::Down() const {
 /// Construct a new InteriorIterator
 InteriorIterator::InteriorIterator(const Geometry * geom) {
 	_geom = geom;
-	First();
 	_valid = true;
+	First();
 }
 
 
 /// Sets the iterator to the first element
 void InteriorIterator::First() {
-	_value = _geom->Size()[0] + 1;
-	_valid = true;
+	_value = -1;
+	Next();
 }
 
 /// Goes to the next element of the iterator, disables it if position is end
-// Iterating over inner cells => has to skip cells when on right border
-// Inner cells (*):
-// 0 0 0 0 0 0
-// 0 * * * * 0
-// 0 * * * * 0
-// 0 * * * * 0
-// 0 * * * * 0
-// 0 0 0 0 0 0
+// Iterating over inner cells
 void InteriorIterator::Next() {
-	_value = ((_value + 2) % _geom->Size()[0] == 0) ? _value + 3 : _value + 1;
-	_valid = _value <= _geom->Size()[0] * (_geom->Size()[1] - 1) - 2;
+	do {
+		_value++;
+	} while (_geom->Flag()[_value] != ' ' && _value < _geom->Size()[0] * _geom->Size()[1]);
+	if (_value < _geom->Size()[0] * _geom->Size()[1]) _valid = true;
+	else _valid = false;
 }
 
 //------------------------------------------------------------------------------
@@ -121,75 +117,23 @@ void InteriorIterator::Next() {
 /// Constructs a new BoundaryIterator
 BoundaryIterator::BoundaryIterator(const Geometry * geom) {
 	_geom = geom;
-	First();
 	_valid = true;
-	_boundary = 0;
-}
-
-
-/// Sets the boundary to iterate
-// boundary = 0 : iterating over upper boundary
-// boundary = 1 : iterating over right boundary
-// boundary = 2 : iterating over lower boundary
-// boundary = 3 : iterating over left boundary
-// every other input will later be treated as 0.
-void BoundaryIterator::SetBoundary(const index_t & boundary) {
-	_boundary = boundary;
+	First();
 }
 
 
 /// Sets the iterator to the first element
 void BoundaryIterator::First() {
-	_valid = true;
-	switch(_boundary) {
-        case 0: // upper boundary
-			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) + 1;
-			break;
-		case 1: // right boundary
-			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) - 1;
-			break;
-		case 2: // lower boundary
-			_value = _geom->Size()[0] - 2;
-			break;
-		case 3: // left boundary
-			_value = _geom->Size()[0];
-			break;
-		default: // simulates top boundary
-			_value = _geom->Size()[0]*(_geom->Size()[1] - 1) + 1;
-			break;
-	}
+	_value = -1;
+	Next();
 }
 
 /// Goes to the next element of the iterator, disables it if position is end
-// Iterating over boundary cells without corners
-// Boundary cells (*):
-// 0 * * * * 0
-// * 0 0 0 0 *
-// * 0 0 0 0 *
-// * 0 0 0 0 *
-// * 0 0 0 0 *
-// 0 * * * * 0
+// Iterating over boundary cells 
 void BoundaryIterator::Next() {
-	switch(_boundary) {
-		case 0: // upper boundary
-			_value++;
-			_valid = (_value < _geom->Size()[0] * _geom->Size()[1] - 1) ? true : false;		
-			break;
-		case 1: // right boundary
-			_value = _value - _geom->Size()[0];
-			_valid = (_value > _geom->Size()[0]) ? true : false;	
-			break;
-		case 2: // lower boundary
-			_value--;
-			_valid = (_value > 0) ? true : false;
-			break;
-		case 3: // left boundary
-			_value = _value + _geom->Size()[0];
-			_valid = (_value < _geom->Size()[0] * (_geom->Size()[1] - 1)) ? true : false;		
-			break;
-		default: // simulates upper boundary
-			_value++;
-			_valid = (_value < _geom->Size()[0]* _geom->Size()[1] - 1) ? true : false;	
-			break;
-	}
+	do {
+		_value++;
+	} while (_geom->Flag()[_value] == ' ' && _value < _geom->Size()[0] * _geom->Size()[1]);
+	if (_value < _geom->Size()[0] * _geom->Size()[1]) _valid = true;
+	else _valid = false;
 }

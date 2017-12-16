@@ -16,9 +16,9 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
 	_G->Initialize(0.0);
 
 	_u = new Grid(_geom, multi_real_t(1.0, 0.5));
-	_u->Initialize(_geom->Velocity()[0]);
+	_u->Initialize(0.0);
 	_v = new Grid(_geom, multi_real_t(0.5, 1.0));
-	_v->Initialize(_geom->Velocity()[1]);
+	_v->Initialize(0.0);
     _p = new Grid(_geom, multi_real_t(0.5, 0.5));
     _p->Initialize(_geom->Pressure());
 
@@ -133,45 +133,73 @@ const Grid * Compute::GetRHS() const {
 const Grid * Compute::GetVelocity() {
     InteriorIterator iit = InteriorIterator(_geom);
     Grid * abs_vel = new Grid(_geom);
-	multi_real_t cell_center = multi_real_t(0.5*_geom->Mesh()[0], 0.5*_geom->Mesh()[1]);
 	real_t u_ip = 0.0; // storage for interpolated u to center of cells
 	real_t v_ip = 0.0; // storage for interpolated v to center of cells
 
 
     for(iit.First(); iit.Valid(); iit.Next()){
         // Interpolating the velocities to center of cells
-        multi_index_t cell_pos = iit.Pos();
 		v_ip = (_v->Cell(iit.Down()) + _v->Cell(iit)) / 2.0;
 		u_ip = (_u->Cell(iit.Left()) + _u->Cell(iit)) / 2.0;
         abs_vel->Cell(iit) = sqrt(v_ip*v_ip + u_ip*u_ip);
     }
 
-	// setting boundary values to 0 (even if probably not necessary)
-	// Iteration over top boundary
 	BoundaryIterator bit = BoundaryIterator(_geom);
-	bit.SetBoundary(0);
-	abs_vel->Cell(bit.Left()) = 0;
-	for (bit.First(); bit.Valid(); bit.Next()) {
-		abs_vel->Cell(bit) = 0.0;
-	}
-	// Iteration over right boundary
-	bit.SetBoundary(1);
-	abs_vel->Cell(bit.Top()) = 0;
-	for (bit.First(); bit.Valid(); bit.Next()) {
-		abs_vel->Cell(bit) = 0.0;
-	}
-	// Iteration over lower boundary
-	bit.SetBoundary(2);
-	abs_vel->Cell(bit.Right()) = 0;
-	for (bit.First(); bit.Valid(); bit.Next()) {
-		abs_vel->Cell(bit) = 0.0;
-	}
 
-	// Iteration over left boundary
-	bit.SetBoundary(3);
-	abs_vel->Cell(bit.Down()) = 0;
 	for (bit.First(); bit.Valid(); bit.Next()) {
 		abs_vel->Cell(bit) = 0.0;
+		switch (_geom->Flag()[bit.Value()]) {
+		case '#': // NOSLIP
+			if (_geom->Flag()[bit.Top().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Top());
+			if (_geom->Flag()[bit.Down().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Down());
+			if (_geom->Flag()[bit.Left().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Left()); 
+			if (_geom->Flag()[bit.Right().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Right());
+			break;
+		case '-': // Horizontal SLIP
+			if (_geom->Flag()[bit.Top().Value()] == '-' || _geom->Flag()[bit.Down().Value()] == '-') {
+				if (_geom->Flag()[bit.Right().Value()] == ' ') abs_vel->Cell(bit) = abs_vel->Cell(bit.Right());
+				else abs_vel->Cell(bit) = abs_vel->Cell(bit.Left());
+			}
+			else {
+				if (_geom->Flag()[bit.Top().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Top());
+				if (_geom->Flag()[bit.Down().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Down());
+				if (_geom->Flag()[bit.Left().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Left());
+				if (_geom->Flag()[bit.Right().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Right());
+			}
+			break;
+		case '|': // Vertical SLIP
+			if (_geom->Flag()[bit.Left().Value()] == '|' || _geom->Flag()[bit.Right().Value()] == '|') {
+				if (_geom->Flag()[bit.Top().Value()] == ' ') abs_vel->Cell(bit) = abs_vel->Cell(bit.Top());
+				else abs_vel->Cell(bit) = abs_vel->Cell(bit.Down());
+			}
+			else {
+				if (_geom->Flag()[bit.Top().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Top());
+				if (_geom->Flag()[bit.Down().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Down());
+				if (_geom->Flag()[bit.Left().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Left());
+				if (_geom->Flag()[bit.Right().Value()] == ' ') abs_vel->Cell(bit) = -abs_vel->Cell(bit.Right());
+			}
+			break;
+		case 'O': // OUTFLOW
+			if (_geom->Flag()[bit.Top().Value()] == ' ') abs_vel->Cell(bit) = abs_vel->Cell(bit.Top());
+			else if (_geom->Flag()[bit.Down().Value()] == ' ') abs_vel->Cell(bit) = abs_vel->Cell(bit.Down());
+			else if (_geom->Flag()[bit.Left().Value()] == ' ') abs_vel->Cell(bit) = abs_vel->Cell(bit.Left());
+			else if (_geom->Flag()[bit.Right().Value()] == ' ') abs_vel->Cell(bit) = abs_vel->Cell(bit.Right());
+			break;
+		case 'V': // Vertical INFLOW
+			if (_geom->Flag()[bit.Top().Value()] == ' ') abs_vel->Cell(bit) = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+			else if (_geom->Flag()[bit.Down().Value()] == ' ') abs_vel->Cell(bit) = (_u->Cell(bit.Left()) + _u->Cell(bit)) / 2.0;
+			else if (_geom->Flag()[bit.Left().Value()] == ' ') abs_vel->Cell(bit) = 2.0 * _u->Cell(bit.Left()) - abs_vel->Cell(bit.Left());
+			else if (_geom->Flag()[bit.Right().Value()] == ' ') abs_vel->Cell(bit) = 2.0 * _u->Cell(bit) - abs_vel->Cell(bit.Right());
+			break;
+		case 'H': // Horizontal INFLOW
+			if (_geom->Flag()[bit.Top().Value()] == ' ') abs_vel->Cell(bit) = 2.0 * _v->Cell(bit) - abs_vel->Cell(bit.Top());
+			else if (_geom->Flag()[bit.Down().Value()] == ' ') abs_vel->Cell(bit) = 2.0 * _v->Cell(bit.Down()) - abs_vel->Cell(bit.Down());
+			else if (_geom->Flag()[bit.Left().Value()] == ' ') abs_vel->Cell(bit) = (_v->Cell(bit.Top()) + _v->Cell(bit)) / 2.0;
+			else if (_geom->Flag()[bit.Right().Value()] == ' ') abs_vel->Cell(bit) = (_v->Cell(bit.Top()) + _v->Cell(bit)) / 2.0;
+			break;
+		default:
+			break;
+		}
 	}
     return abs_vel;
 }
@@ -180,6 +208,7 @@ const Grid * Compute::GetVelocity() {
 const Grid * Compute::GetVorticity() {
     InteriorIterator iit = InteriorIterator(_geom);
     Grid * vort = new Grid(_geom);
+	vort->Initialize(0.0);
     multi_real_t cell_center = multi_real_t(0.5, 0.5);
 
     // Creating grids of derivatives of u (in y-dim) and v (in x-dim) (for interpolation reasons)
