@@ -1,6 +1,8 @@
 #include "visu.hpp"
 #include <cmath>
 #include <limits>
+#include <vector>
+#include <stdio.h>
 //------------------------------------------------------------------------------
 uint8_t HueR (real_t value, real_t min, real_t max) {
   if (value < min) value = min;
@@ -191,11 +193,11 @@ int Renderer::Check () {
 	return _state;
 }
 //------------------------------------------------------------------------------
-int Renderer::Render (const Grid *grid) {
-	return Render(grid, _min, _max);
+int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines) {
+	return Render(grid, line, showlines, _min, _max);
 }
 //------------------------------------------------------------------------------
-int Renderer::Render (const Grid *grid, const real_t& min, const real_t& max) {
+int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines, const real_t& min, const real_t& max) {
 	if (Check() < 0) return -1;
 	real_t treshold[2] = {0,0};
 	real_t value;
@@ -239,6 +241,20 @@ int Renderer::Render (const Grid *grid, const real_t& min, const real_t& max) {
 			treshold[0] += _h[_x];
 		}
 	}
+	if(showlines){
+	for (Particle p : line->GetVec()){
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_width - int(p.Pos()[1]*_width/_length[1])-1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_width - int(p.Pos()[1]*_width/_length[1]),0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_width - int(p.Pos()[1]*_width/_length[1])+1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_width - int(p.Pos()[1]*_width/_length[1])-1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_width - int(p.Pos()[1]*_width/_length[1]),0,0,0);
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_width - int(p.Pos()[1]*_width/_length[1])+1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_width - int(p.Pos()[1]*_width/_length[1])-1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_width - int(p.Pos()[1]*_width/_length[1]),0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_width - int(p.Pos()[1]*_width/_length[1])+1,0,0,0); 
+    }
+    }
+	
 	if(SDL_MUSTLOCK(_screen)) SDL_UnlockSurface(_screen);
 	SDL_UpdateWindowSurface(_window);
 	//SDL_Flip(_screen);
