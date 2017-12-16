@@ -13,29 +13,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-#include "typedef.hpp"
 //------------------------------------------------------------------------------
 #ifndef __COMPUTE_HPP
 #define __COMPUTE_HPP
+
 //------------------------------------------------------------------------------
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif // _USE_MATH_DEFINES
 
 #include <iostream>
 
+#include "typedef.hpp"
 #include "grid.hpp"
-#include "geometry.hpp"
 #include "iterator.hpp"
 #include "parameter.hpp"
 #include "solver.hpp"
-#include "zeitgeist.hpp"
 
 //------------------------------------------------------------------------------
 class Compute {
 public:
   /// Creates a compute instance with given geometry and parameter
-  Compute(const Geometry *geom, const Parameter *param,
-          const Communicator *comm);
+  Compute(const Geometry *geom, const Parameter *param);
   /// Deletes all grids
   ~Compute();
 
@@ -62,8 +64,6 @@ public:
   const Grid *GetVorticity();
   /// Computes and returns the stream line values
   const Grid *GetStream();
-  
-  void  printTimes();
 
 private:
   // current timestep
@@ -88,22 +88,14 @@ private:
 
   // right-hand side
   Grid *_rhs;
-  
-  //Zeitgeist
-  Zeitgeist *_zeit_comm;
-  Zeitgeist *_zeit_comp;
-  Zeitgeist *_zeit_dt;
-  Zeitgeist *_zeit_res;
-  
 
   // container for interpolating whichever values
   Grid *_tmp;
 
-  RedOrBlackSOR *_solver;
+  Solver *_solver;
 
   const Geometry *_geom;
   const Parameter *_param;
-  const Communicator *_comm;
 
   /// Compute the new velocites u,v
   void NewVelocities(const real_t &dt);

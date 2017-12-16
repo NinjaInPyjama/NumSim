@@ -21,33 +21,11 @@ Geometry::Geometry() {
 }
 
 
-Geometry::Geometry(const Communicator *comm) {
-    Load("default.geom");
-    _comm = comm;
-    const multi_index_t real_size = multi_index_t((_bsize[0]-2)/_comm->ThreadDim()[0],(_bsize[1]-2)/_comm->ThreadDim()[1]) ;
-    
-    _redblack = (_comm->ThreadIdx()[0]*real_size[0]+_comm->ThreadIdx()[1]*real_size[1])%2 == 0;
-    
-    _size = multi_index_t(real_size[0]+2,real_size[1]+2);
-    
-    if ( _comm->isRight() ){
-        _size[0] = _bsize[0] - (_comm->ThreadDim()[0]-1)*real_size[0];
-    }
-    if ( _comm->isTop() ){
-        _size[1] = _bsize[1] - (_comm->ThreadDim()[1]-1)*real_size[1];
-    }
-    
-    _h = multi_real_t(_blength[0] / (_bsize[0] - 2), _blength[1] / (_bsize[1] - 2));
-    
-    _length = multi_real_t(real_t(_size[0]-2)/(_bsize[0]-2)*_blength[0], real_t(_size[1]-2)/(_bsize[1]-2)*_blength[1]);
-    
-}
-
 /// Loads a geometry from a file
 void Geometry::Load(const char * file) {
     
     FILE* handle = fopen(file,"r");
-    char name[20];
+	char name[20];
     multi_real_t inval_real;
     multi_index_t inval_index;
     while (!feof(handle)) {
@@ -56,16 +34,16 @@ void Geometry::Load(const char * file) {
         
         if (strcmp(name,"size") == 0) {
             if (fscanf(handle," %i %i\n",&inval_index[0],&inval_index[1])) {
-                _bsize[0] = inval_index[0]+2;
-                _bsize[1] = inval_index[1]+2;
+                _size[0] = inval_index[0]+2;
+                _size[1] = inval_index[1]+2;
             }
             continue;
         }
         
         if (strcmp(name,"length") == 0) {
             if (fscanf(handle," %lf %lf\n",&inval_real[0],&inval_real[1])) {
-                _blength[0] = inval_real[0];
-                _blength[1] = inval_real[1];
+                _length[0] = inval_real[0];
+                _length[1] = inval_real[1];
             }
             continue;
         }
@@ -92,30 +70,15 @@ void Geometry::Load(const char * file) {
 }
 
 
-/// Returns whether the lower left corner is red or black
-const bool & Geometry::RedBlack() const {
-	return _redblack;
-}
-
 /// Returns the number of cells in each dimension
 const multi_index_t & Geometry::Size() const {
 	return _size;
-}
-
-/// Returns the total number of cells in each dimension
-const multi_index_t & Geometry::TotalSize() const {
-        return _bsize;
 }
 
 /// Returns the length of the domain
 const multi_real_t & Geometry::Length() const {
 	return _length;
 }
-
-/// Returns the total length of the domain
-const multi_real_t & Geometry::TotalLength() const {
-        return _blength;
-}    
 
 /// Returns the meshwidth
 const multi_real_t & Geometry::Mesh() const {
@@ -139,113 +102,97 @@ void Geometry::Update_U(Grid * u) const {
 	BoundaryIterator bit = BoundaryIterator(this);
     
     // Iteration over right boundary
-    if(_comm->isRight()) {
-      bit.SetBoundary(bit.boundaryRight);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        u->Cell(bit) = 0.0;
-        u->Cell(bit.Left()) = 0.0;
-      }
-    }
+    bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) = u->Cell(bit.Left());
+	}
     
     // Iteration over left boundary
-    if(_comm->isLeft()) {
-      bit.SetBoundary(bit.boundaryLeft);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        u->Cell(bit) = 0.0;
-      }
-    }
+	bit.SetBoundary(3);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) = u->Cell(bit.Right());
+	}
     
     // Iteration over upper boundary
-    if(_comm->isTop()) {
-      bit.SetBoundary(bit.boundaryTop);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        u->Cell(bit) = 2.0 - u->Cell(bit.Down());
-      }
-    }
+    bit.SetBoundary(0);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) = - u->Cell(bit.Down()); //2.0
+	}
 	
     // Iteration over lower boundary
-    if(_comm->isBottom()){
-      bit.SetBoundary(bit.boundaryBottom);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        u->Cell(bit) =  - u->Cell(bit.Top());
-      }
-    }
+	bit.SetBoundary(2);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		u->Cell(bit) = - u->Cell(bit.Top());
+	}
 	
 }
 
+
+
 /// Updates the velocity field v
 void Geometry::Update_V(Grid * v) const {
-    // see script, p. 17	
-    BoundaryIterator bit = BoundaryIterator(this);
-    
-    // Iteration over upper boundary
-    if(_comm->isTop()) {
-      bit.SetBoundary(bit.boundaryTop);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        v->Cell(bit) = 0.0;
-        v->Cell(bit.Down()) = 0.0;
-      }
-    }
-    
-    // Iteration over lower boundary
-    if(_comm->isBottom()) {
-      bit.SetBoundary(bit.boundaryBottom);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        v->Cell(bit) = 0.0;
-      }
-    }
-    
-    // Iteration over left boundary
-    if(_comm->isLeft()){
-      bit.SetBoundary(bit.boundaryLeft);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        v->Cell(bit) = - v->Cell(bit.Right());
-      }
-    }
+	// see script, p. 17	
+	BoundaryIterator bit = BoundaryIterator(this);
     
     // Iteration over right boundary
-    if(_comm->isRight()){
-      bit.SetBoundary(bit.boundaryRight);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        v->Cell(bit) = - v->Cell(bit.Left());
-      }
-    }
+	bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit) = v->Cell(bit.Left());
+	}
+	
+	// Iteration over left boundary
+	bit.SetBoundary(3);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit) = - v->Cell(bit.Right());
+	}
+    
+    // Iteration over upper boundary
+	bit.SetBoundary(0);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		
+        v->Cell(bit) = 0.0;
+        v->Cell(bit.Down()) = 0.0;
+	}
+    
+    // Iteration over lower boundary
+	bit.SetBoundary(2); // Lower right corner
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		v->Cell(bit) = 0.0;
+	}
+    
+    
+    
+	
 }
 
 /// Updates the pressure field p
 void Geometry::Update_P(Grid * p) const {
-    // see script, p. 20 (p_{0,j} = p{1,j}), ...
-    BoundaryIterator bit = BoundaryIterator(this);
-    
-    // Iteration over upper boundary
-    if(_comm->isTop()){
-      bit.SetBoundary(bit.boundaryTop);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-			  p->Cell(bit) = p->Cell(bit.Down());
-      }
-    }
+	// see script, p. 20 (p_{0,j} = p{1,j}), ...
+	BoundaryIterator bit = BoundaryIterator(this);
     
     // Iteration over right boundary
-    if(_comm->isRight()){
-      bit.SetBoundary(bit.boundaryRight);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        p->Cell(bit) = p->Cell(bit.Left());
-      }
+	bit.SetBoundary(1);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		p->Cell(bit) = - p->Cell(bit.Left());
     }
-    
-    // Iteration over lower boundary
-    if(_comm->isBottom()){
-      bit.SetBoundary(bit.boundaryBottom);
-      for(bit.First(); bit.Valid(); bit.Next()) {
-        p->Cell(bit) = p->Cell(bit.Top());
-      }
-    }
-    
     // Iteration over left boundary
-    if(_comm->isLeft()){
-      bit.SetBoundary(bit.boundaryLeft);
-		  for(bit.First(); bit.Valid(); bit.Next()) {
-			  p->Cell(bit) = p->Cell(bit.Right());
-		  }
+	bit.SetBoundary(3);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		p->Cell(bit) = 2*_pressure - p->Cell(bit.Right());
+	}
+	
+    // Iteration over lower boundary
+	bit.SetBoundary(2);
+	for(bit.First(); bit.Valid(); bit.Next()) {
+		p->Cell(bit) = p->Cell(bit.Top());
     }
+    
+	// Iteration over upper boundary
+    bit.SetBoundary(0);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+		p->Cell(bit) = p->Cell(bit.Down());
+    }
+    
+    
+    
 }

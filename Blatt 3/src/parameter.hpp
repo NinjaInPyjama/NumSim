@@ -13,19 +13,22 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-#include "typedef.hpp"
 //------------------------------------------------------------------------------
 #ifndef __PARAMETER_HPP
 #define __PARAMETER_HPP
-//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
 #define _CRT_SECURE_NO_DEPRECATE
+#include "typedef.hpp"
+
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
-#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 //------------------------------------------------------------------------------
 class Parameter {
