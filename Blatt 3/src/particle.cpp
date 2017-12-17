@@ -22,6 +22,23 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+Particle::Particle(const multi_real_t& pos) {
+	_pos = pos;
+}
+
+Particle::~Particle() {}
+
+void Particle::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
+    _pos[0] = _pos[0] + dt*u->Interpolate(_pos);
+    _pos[1] = _pos[1] + dt*v->Interpolate(_pos);
+}
+
+const multi_real_t& Particle::Pos() const {
+	return _pos;
+}
+
+
+
 void ParticleLine::SaveVTK (const index_t& rank, const index_t& nump, const char* basename, const index_t& idx) const {
   char fname[1000];
   const char *filebase = basename;
@@ -72,5 +89,45 @@ void ParticleLine::SaveVTK (const index_t& rank, const index_t& nump, const char
                   "\t\t</Piece>\n\t</PolyData>\n</VTKFile>\n");
   fclose(handle);
 }
+
+void ParticleLine::print() const {
+    for(Particle p : _part){
+        std::cout << p.Pos()[0] << ";" << p.Pos()[1] << "  ";
+    }
+    std::cout << std::endl;
+}
+
+std::vector<Particle> ParticleLine::GetVec() const {
+    return _part;
+}
+
+PathLine::PathLine(const multi_real_t& pos) {
+    _part = {Particle(pos)};
+}
+PathLine::~PathLine() {}
+
+void PathLine::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
+    _part.push_back(Particle(_part.back().Pos()));
+    _part.back().TimeStep(dt,u,v);
+}
+
+
+
+
+StreakLine::StreakLine(const multi_real_t& pos) {
+	_part = {Particle(pos)};
+    _org = pos;
+}
+
+StreakLine::~StreakLine() {}
+
+void StreakLine::TimeStep(const real_t& dt, const Grid* u, const Grid* v) {
+    for(Particle &p : _part){
+        p.TimeStep(dt,u,v);
+    }
+    _part.insert(_part.begin(), Particle(_org));
+}
+
+
 //------------------------------------------------------------------------------
 

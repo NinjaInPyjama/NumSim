@@ -5,7 +5,6 @@ Grid::Grid(const Geometry * geom) {
 	_data = new real_t[geom->Size()[0] * geom->Size()[1]];
 	_offset = multi_real_t(0.0, 0.0);
 	_geom = geom;
-        _hinv = multi_real_t(1/geom->Mesh()[0], 1/geom->Mesh()[1]);
 }
 
 /// Constructs a grid based on a geometry with an offset
@@ -16,7 +15,6 @@ Grid::Grid(const Geometry * geom, const multi_real_t & offset) {
 	_data = new real_t[geom->Size()[0] * geom->Size()[1]];
 	_offset = offset;
 	_geom = geom;
-        _hinv = multi_real_t(1/geom->Mesh()[0], 1/geom->Mesh()[1]);
 }
 
 
@@ -43,14 +41,6 @@ void Grid::Initialize(const real_t & value) {
 	}
 }
 
-///  Adds a Constant to the values of the grid
-void Grid::AddConstant(const real_t & value) {
-    index_t num_cells = _geom->Size()[0] * _geom->Size()[1];
-    for (index_t i = 0; i < num_cells; i++) {
-		_data[i] += value;
-	}
-}
-
 
 /// Write access to the grid cell at position [it]
 real_t & Grid::Cell(const Iterator & it) {
@@ -65,8 +55,14 @@ const real_t & Grid::Cell(const Iterator & it) const {
 
 /// Interpolate the value at an arbitrary position by bilinear interpolation
 real_t Grid::Interpolate(const multi_real_t & pos) const {
-    real_t pos_x = pos[0] * (_geom->Size()[0] - 2) / _geom->Length()[0] + 1 - _offset[0];
-    real_t pos_y = pos[1] * (_geom->Size()[1] - 2) / _geom->Length()[1] + 1 - _offset[1];
+    multi_real_t newpos = multi_real_t(pos[0], pos[1]);
+    if(pos[0] > _geom->Length()[0]) newpos[0] = _geom->Length()[0];
+    if(pos[0] < 0.0) newpos[0] = 0.0;
+    if(pos[1] > _geom->Length()[1]) newpos[1] = _geom->Length()[1];
+    if(pos[1] < 0.0) newpos[1] = 0.0;
+    
+    real_t pos_x = newpos[0] * (_geom->Size()[0] - 2) / _geom->Length()[0] + 1 - _offset[0];
+    real_t pos_y = newpos[1] * (_geom->Size()[1] - 2) / _geom->Length()[1] + 1 - _offset[1];
 	index_t index_x = (index_t)pos_x;
 	index_t index_y = (index_t)pos_y;
 
@@ -92,42 +88,42 @@ real_t Grid::Interpolate(const multi_real_t & pos) const {
 
 /// Computes the left-sided difference quatient in x-dim at [it]
 real_t Grid::dx_l(const Iterator & it) const {
-	return (Cell(it) - Cell(it.Left()))*_hinv[0];
+	return (Cell(it) - Cell(it.Left()))/_geom->Mesh()[0];
 }
 
 /// Computes the right-sided difference quatient in x-dim at [it]
 real_t Grid::dx_r(const Iterator & it) const {
-	return (Cell(it.Right()) - Cell(it))*_hinv[0];
+	return (Cell(it.Right()) - Cell(it)) / _geom->Mesh()[0];
 }
 
 /// Computes the left-sided difference quatient in y-dim at [it]
 real_t Grid::dy_l(const Iterator & it) const {
-	return (Cell(it) - Cell(it.Down()))*_hinv[1];
+	return (Cell(it) - Cell(it.Down())) / _geom->Mesh()[1];
 }
 
 /// Computes the right-sided difference quatient in x-dim at [it]
 real_t Grid::dy_r(const Iterator & it) const {
-	return (Cell(it.Top()) - Cell(it))*_hinv[1];
+	return (Cell(it.Top()) - Cell(it)) / _geom->Mesh()[1];
 }
 
 /// Computes the central difference quatient of 1st order in x-dim at [it]
 real_t Grid::dx_central(const Iterator & it) const {
-	return (Cell(it.Right()) - Cell(it.Left())) * 0.5 *_hinv[0];
+	return (Cell(it.Right()) - Cell(it.Left())) / (2.0 * _geom->Mesh()[0]);
 }
 
 /// Computes the central difference quatient of 1st order in y-dim at [it]
 real_t Grid::dy_central(const Iterator & it) const {
-	return (Cell(it.Top()) - Cell(it.Down())) * 0.5 *_hinv[1];
+	return (Cell(it.Top()) - Cell(it.Down())) / (2.0 * _geom->Mesh()[1]);
 }
 
 /// Computes the central difference quatient of 2nd order in x-dim at [it]
 real_t Grid::dxx(const Iterator & it) const {
-	return (Cell(it.Right()) - 2.0*Cell(it) + Cell(it.Left())) * _hinv[0] *_hinv[0];
+	return (Cell(it.Right()) - 2.0*Cell(it) + Cell(it.Left())) / (_geom->Mesh()[0] * _geom->Mesh()[0]) ;
 }
 
 /// Computes the central difference quatient of 2nd order in y-dim at [it]
 real_t Grid::dyy(const Iterator & it) const {
-	return (Cell(it.Top()) - 2.0*Cell(it) + Cell(it.Down())) * _hinv[1] *_hinv[1];
+	return (Cell(it.Top()) - 2.0*Cell(it) + Cell(it.Down())) / (_geom->Mesh()[1] * _geom->Mesh()[1]);
 }
 
 
@@ -157,6 +153,8 @@ real_t Grid::DC_vdv_y(const Iterator & it, const real_t & alpha) const {
 real_t Grid::DC_du2_x(const Iterator & it, const real_t & alpha) const {
 	// see script, p.22
 
+	const real_t dx = _geom->Mesh()[0];
+
 	// Value of u at iterator cell (u_{i,j})
 	const real_t val_u = Cell(it);
 	// Value of u at the right neighbor of the iterator cell (u_{i+1,j})
@@ -167,13 +165,15 @@ real_t Grid::DC_du2_x(const Iterator & it, const real_t & alpha) const {
 	const real_t val_u_cr = (val_u_r + val_u) / 2.0;
 	// Interpolated value of u between this and its left neighbor cell (u_{i-1/2,j})
 	const real_t val_u_cl = (val_u + val_u_l) / 2.0;
-	return (val_u_cr * val_u_cr - val_u_cl * val_u_cl) * _hinv[0]
-			+ alpha * (abs(val_u_cr) * (val_u - val_u_r) / 2.0 - abs(val_u_cl) * (val_u_l - val_u) / 2.0) * _hinv[0];
+	return (val_u_cr * val_u_cr - val_u_cl * val_u_cl) / dx
+			+ alpha * (abs(val_u_cr) * (val_u - val_u_r) / 2.0 - abs(val_u_cl) * (val_u_l - val_u) / 2.0) / dx;
 }
 
 /// Computes dv^2/dy with the donor cell method
 real_t Grid::DC_dv2_y(const Iterator & it, const real_t & alpha) const {
 	// see script, p.22
+
+	const real_t dy = _geom->Mesh()[1];
 
 	// Value of v at iterator cell (v_{i,j})
 	const real_t val_v = Cell(it);
@@ -185,13 +185,15 @@ real_t Grid::DC_dv2_y(const Iterator & it, const real_t & alpha) const {
 	const real_t val_v_ct = (val_v_t + val_v) / 2.0;
 	// Interpolated value of v between this and its lower neighbor cell (v_{i,j-1/2})
 	const real_t val_v_cd = (val_v + val_v_d) / 2.0;
-	return (val_v_ct * val_v_ct - val_v_cd * val_v_cd) * _hinv[1]
-			+ alpha * (abs(val_v_ct) * (val_v - val_v_t) / 2.0 - abs(val_v_cd) * (val_v_d - val_v) / 2.0) * _hinv[1];
+	return (val_v_ct * val_v_ct - val_v_cd * val_v_cd) / dy
+			+ alpha * (abs(val_v_ct) * (val_v - val_v_t) / 2.0 - abs(val_v_cd) * (val_v_d - val_v) / 2.0) / dy;
 }
 
 /// Computes d(uv)/dx with the donor cell method
 real_t Grid::DC_duv_x(const Iterator & it, const real_t & alpha, const Grid * u) const {
 	// see script, p.22
+
+	const real_t dx = _geom->Mesh()[0];
 
 	// Value of v at iterator cell (v_{i,j})
 	const real_t val_v = Cell(it);
@@ -205,13 +207,15 @@ real_t Grid::DC_duv_x(const Iterator & it, const real_t & alpha, const Grid * u)
 	// Interpolated value of u between the iterator cell's left and its upper left neighbor cell (u_{i-1,j+1/2})
 	const real_t val_u_ctl = (u->Cell(it.Left().Top()) + u->Cell(it.Left())) / 2.0;
 
-	return (val_u_ct * (val_v + val_v_r) / 2.0 - val_u_ctl * (val_v_l + val_v) / 2.0) * _hinv[0] +
-			+ alpha * (abs(val_u_ct) * (val_v - val_v_r) / 2.0 - abs(val_u_ctl) * (val_v_l - val_v) / 2.0) * _hinv[0];
+	return (val_u_ct * (val_v + val_v_r) / 2.0 - val_u_ctl * (val_v_l + val_v) / 2.0) / dx +
+			+ alpha * (abs(val_u_ct) * (val_v - val_v_r) / 2.0 - abs(val_u_ctl) * (val_v_l - val_v) / 2.0) / dx;
 }
 
 /// Computes d(uv)/dy with the donor cell method
 real_t Grid::DC_duv_y(const Iterator & it, const real_t & alpha, const Grid * v) const {
 	// see script, p.22
+
+	const real_t dy = _geom->Mesh()[1];
 
 	// Value of u at iterator cell (u_{i,j})
 	const real_t val_u = Cell(it);
@@ -225,8 +229,8 @@ real_t Grid::DC_duv_y(const Iterator & it, const real_t & alpha, const Grid * v)
 	// Interpolated value of v between the iterator cell's lower and its lower right neighbor cell (v_{i+1/2,j-1})
 	const real_t val_v_cdr = (v->Cell(it.Right().Down()) + v->Cell(it.Down())) / 2.0;
 
-	return (val_v_cr * (val_u + val_u_t) / 2.0 - val_v_cdr * (val_u_d + val_u) / 2.0) * _hinv[1] 
-			+ alpha * (abs(val_v_cr) * (val_u - val_u_t) / 2.0 - abs(val_v_cdr) * (val_u_d - val_u) / 2.0) * _hinv[1];
+	return (val_v_cr * (val_u + val_u_t) / 2.0 - val_v_cdr * (val_u_d + val_u) / 2.0) / dy 
+			+ alpha * (abs(val_v_cr) * (val_u - val_u_t) / 2.0 - abs(val_v_cdr) * (val_u_d - val_u) / 2.0) / dy;
 }
 
 
@@ -264,16 +268,3 @@ real_t Grid::AbsMax() const {
 real_t * Grid::Data() {
 	return _data;
 }
-
-
-/** Get the offset value of the grid
-*/
-const multi_real_t & Grid::getOffset() const {
-	return _offset;
-}
-
-/// Return a pointer to the Geometry
-const Geometry * Grid::getGeometry() const {
-	return _geom;
-}
-

@@ -52,9 +52,6 @@ public:
   ///     Initializes the grid with a value
   void Initialize(const real_t &value);
 
-  ///     Adds a Constant to the values of the grid
-  void AddConstant(const real_t &value);
-
   /// Write access to the grid cell at position [it]
   real_t &Cell(const Iterator &it);
   /// Read access to the grid cell at position [it]
@@ -110,16 +107,15 @@ public:
 
   /** Get the offset value of the grid
   */
-  const multi_real_t & getOffset() const;
+  const multi_real_t &getOffset() const;
 
   /// Return a pointer to the Geometry
-  const Geometry * getGeometry() const;
+  const Geometry *getGeometry() const;
 
 private:
   real_t *_data;
   multi_real_t _offset;
   const Geometry *_geom;
-  multi_real_t _hinv;
 };
 //------------------------------------------------------------------------------
 #endif // __GRID_HPP
