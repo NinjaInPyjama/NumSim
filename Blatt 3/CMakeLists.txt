@@ -45,7 +45,6 @@ INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES} ${MPI_INCLUDE_PATH})
 
 # Using glob is discouraged in cmake.
 set (HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/communicator.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/compute.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/geometry.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/grid.hpp
@@ -60,7 +59,6 @@ set (HEADERS
 
 set (SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/communicator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/compute.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/geometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/grid.cpp
