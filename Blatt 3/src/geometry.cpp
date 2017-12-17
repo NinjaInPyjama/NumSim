@@ -17,7 +17,7 @@ Geometry::Geometry() {
     Load("default.geom");
 	_value = new real_t[_size[1] * _size[0]];
 
-	_h = multi_real_t(_length[0] / (_size[0] - 2), _length[1] / (_size[1] - 2));
+	_h = multi_real_t(_length[0] / _size[0], _length[1] / _size[1]);
 }
 
 
@@ -34,8 +34,8 @@ void Geometry::Load(const char * file) {
         
         if (strcmp(name,"size") == 0) {
             if (fscanf(handle," %i %i\n",&inval_index[0],&inval_index[1])) {
-                _size[0] = inval_index[0]+2;
-                _size[1] = inval_index[1]+2;
+                _size[0] = inval_index[0];
+                _size[1] = inval_index[1];
             }
             continue;
         }
@@ -62,15 +62,11 @@ void Geometry::Load(const char * file) {
         if (strcmp(name, "geometry") == 0) {
 			if (fscanf(handle, " %s\n", name)) {
 				if (strcmp(name, "free") == 0) {
-
-					//char* _allflag = new char[_bsize[1]*_bsize[0]];
 					_flag = new char[_size[1] * _size[0]];
 
 					char* line = new char[_size[0]];
 					for (int i = _size[1] - 1; i >= 0; i--) {
-
 						fscanf(handle, "%[-HV| #IO]\n", line);
-						//std::cout << line << std::endl;
 						for (int j = 0; j < _size[0]; j++) {
 							_flag[i*_size[0] + j] = line[j];
 						}
@@ -86,6 +82,7 @@ void Geometry::Load(const char * file) {
 void Geometry::InitializeValues() {
 	for (int i = 0; i < 4; i++) {
 		index_t start_idx = -1;
+		index_t end_idx = -1;
 		index_t firstID = _size[0] * (_size[1] - 1);
 		index_t lastID = _size[0] * _size[1] - 1;
 		index_t stepID = 1;
@@ -113,14 +110,12 @@ void Geometry::InitializeValues() {
 				start_idx = j;
 			}
 			else if (start_idx != -1 && (_flag[j] != 'H' && _flag[j] != 'V')) {
-				index_t end_idx = j - stepID;
+				end_idx = j - stepID;
 
 				//-4.0/(end_idx-start_idx+1.0)/(end_idx-start_idx+1.0)*velocity[1]*(y-start_idx+1.0/2.0)*(y-end_idx-1.0/2.0)
 				
-				for (int k = firstID; k <= lastID; k += stepID) {
-					if (k <= end_idx && k >= start_idx) {
-						_value[k] = -4.0 / ((end_idx - start_idx + 1.0)*(end_idx - start_idx + 1.0))*_velocity[(i + 1) % 2] * (real_t(k) - real_t(start_idx) + 1.0 / 2.0)*(real_t(k) - real_t(end_idx) - 1.0 / 2.0);
-					}
+				for (int k = start_idx; k <= end_idx; k += stepID) {
+					_value[k] = -4.0 / ((end_idx - start_idx + 1.0)*(end_idx - start_idx + 1.0))*_velocity[(i + 1) % 2] * (real_t(k) - real_t(start_idx) + 1.0 / 2.0)*(real_t(k) - real_t(end_idx) - 1.0 / 2.0);
 				}
 				start_idx = -1;
 				end_idx = -1;

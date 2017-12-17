@@ -55,11 +55,11 @@ const real_t & Grid::Cell(const Iterator & it) const {
 
 /// Interpolate the value at an arbitrary position by bilinear interpolation
 real_t Grid::Interpolate(const multi_real_t & pos) const {
-    multi_real_t newpos = multi_real_t(pos[0],pos[1]);
+    multi_real_t newpos = multi_real_t(pos[0], pos[1]);
     if(pos[0] > _geom->Length()[0]) newpos[0] = _geom->Length()[0];
-    if(pos[0] < 0) newpos[0] = 0.0;
+    if(pos[0] < 0.0) newpos[0] = 0.0;
     if(pos[1] > _geom->Length()[1]) newpos[1] = _geom->Length()[1];
-    if(pos[1] < 0) newpos[1] = 0.0;
+    if(pos[1] < 0.0) newpos[1] = 0.0;
     
     real_t pos_x = newpos[0] * (_geom->Size()[0] - 2) / _geom->Length()[0] + 1 - _offset[0];
     real_t pos_y = newpos[1] * (_geom->Size()[1] - 2) / _geom->Length()[1] + 1 - _offset[1];
