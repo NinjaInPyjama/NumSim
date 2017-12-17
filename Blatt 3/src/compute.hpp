@@ -107,6 +107,9 @@ private:
   
   PathLine *_pathline;
   StreakLine *_streakline;
+  
+  // returns true if anywhere in streamset a -1 exists
+  bool nonsetstreamset(const int * streamset) ;
 
   /// Compute the new velocites u,v
   void NewVelocities(const real_t &dt);

@@ -34,7 +34,7 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     _t = 0.0;
     _dtlimit = _param->Dt();
     _epslimit = _param->Eps();
-    _pathline = new PathLine(multi_real_t( 0.2, 0.9));
+    _pathline = new PathLine(multi_real_t( 0.2, 0.2));
     _streakline = new StreakLine(multi_real_t( 0.2, 0.8));
 }
 
@@ -247,8 +247,76 @@ const Grid * Compute::GetVorticity() {
 
 /// Computes and returns the stream line values
 const Grid * Compute::GetStream() {
-    // whatever
-	return nullptr;
+    Grid * psi = new Grid(_geom, multi_real_t(1.0, 1.0));
+    psi->Initialize(0.0);
+    
+    int * streamset = new int[_geom->Size()[0]*_geom->Size()[1]];
+    for (int i = 0;i<_geom->Size()[0]*_geom->Size()[1];i++){
+        streamset[i] = 0;
+    }
+    bool firstvalue = false;
+    Iterator it = Iterator(_geom);
+    BackwardsIterator backit = BackwardsIterator(_geom);
+    do {
+        
+    for(it.First(); it.Valid(); it.Next()){
+        if(_geom->Flag()[it.Value()] == ' ' || _geom->Flag()[it.Right().Top().Value()] == ' ' || _geom->Flag()[it.Right().Value()] == ' ' || _geom->Flag()[it.Top().Value()] == ' ') {
+            if(firstvalue==false){
+                firstvalue = true;
+                streamset[it.Value()]=1;
+            }
+            else if(streamset[it.Left().Value()]==1 && streamset[it.Value()]!=1){
+                psi->Cell(it) = - _geom->Mesh()[0]*_v->Cell(it) + psi->Cell(it.Left());
+                streamset[it.Value()]=1;
+            }
+            else if(streamset[it.Down().Value()]==1 && streamset[it.Value()]!=1){
+                psi->Cell(it) = _geom->Mesh()[1]*_u->Cell(it) + psi->Cell(it.Down());
+                streamset[it.Value()]=1;
+            }
+            else if(streamset[it.Right().Value()]==1 && streamset[it.Value()]!=1) {
+                psi->Cell(it) = _geom->Mesh()[0]*_v->Cell(it.Right()) + psi->Cell(it.Right()) ;
+                streamset[it.Value()]=1;
+            }
+            else if(streamset[it.Top().Value()]==1 && streamset[it.Value()]!=1){
+                psi->Cell(it) = - _geom->Mesh()[1]*_u->Cell(it.Top()) + psi->Cell(it.Top()) ;
+                streamset[it.Value()]=1;
+            }
+            else if (streamset[it.Value()]==0){
+                streamset[it.Value()]=-1;
+            }
+        }
+    }
+    for(backit.First(); backit.Valid(); backit.Next()){
+        if(_geom->Flag()[backit.Value()] == ' ' || _geom->Flag()[backit.Right().Top().Value()] == ' ' || _geom->Flag()[backit.Right().Value()] == ' ' || _geom->Flag()[backit.Top().Value()] == ' ') {
+            if(streamset[backit.Right().Value()]==1 && streamset[backit.Value()]!=1) {
+                psi->Cell(backit) = _geom->Mesh()[0]*_v->Cell(backit.Right()) + psi->Cell(backit.Right()) ;
+                streamset[backit.Value()]=1;
+            }
+            else if(streamset[backit.Down().Value()]==1 && streamset[backit.Value()]!=1){
+                psi->Cell(backit) = _geom->Mesh()[1]*_u->Cell(backit) + psi->Cell(backit.Down());
+                streamset[backit.Value()]=1;
+            }
+            else if(streamset[backit.Left().Value()]==1 && streamset[backit.Value()]!=1){
+                psi->Cell(backit) = - _geom->Mesh()[0]*_v->Cell(backit) + psi->Cell(backit.Left());
+                streamset[backit.Value()]=1;
+            }
+            else if(streamset[backit.Top().Value()]==1 && streamset[backit.Value()]!=1){
+                psi->Cell(backit) = - _geom->Mesh()[1]*_u->Cell(backit.Top()) + psi->Cell(backit.Top()) ;
+                streamset[backit.Value()]=1;
+            }
+        }
+    } std::cout << nonsetstreamset(streamset) << std::endl;
+    } while (nonsetstreamset(streamset));
+    
+    return psi;
+}
+
+bool Compute::nonsetstreamset(const int * streamset) {
+    Iterator it = Iterator(_geom);
+    for(it.First(); it.Valid(); it.Next()){
+        if (streamset[it.Value()]==-1) return true;
+    }
+    return false;
 }
 
 

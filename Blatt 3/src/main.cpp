@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   Renderer visu(geom.Length(), geom.Mesh());
   real_t quotient = geom.Length()[1]/geom.Length()[0];
   
-  visu.Init(800, 800*quotient);
+  visu.Init(1600, 1600*quotient);
 #endif // USE_DEBUG_VISU
 
   // Create a VTK generator
@@ -49,40 +49,52 @@ int main(int argc, char **argv) {
   visugrid = comp.GetVelocity();
   line = comp.GetPathLine();
   bool showlines = true;
+  int showstream = -1; //number of streamlines (-1 if not shown)
 
   // Run the time steps until the end is reached
   while (comp.GetTime() < param.Tend() && run) {
 #ifdef USE_DEBUG_VISU
     // Render and check if window is closed
-    switch (visu.Render(visugrid,line,showlines)) {
+    switch (visu.Render(visugrid,line,showlines,showstream)) {
     case -1:
       run = false;
       break;
     case 0:
       visugrid = comp.GetVelocity();
       showlines = false;
+      showstream = -1;
       break;
     case 1:
       visugrid = comp.GetU();
       showlines = false;
+      showstream = -1;
       break;
     case 2:
       visugrid = comp.GetV();
       showlines = false;
+      showstream = -1;
       break;
     case 3:
       visugrid = comp.GetP();
       showlines = false;
+      showstream = -1;
       break;
     case 4:
-      visugrid = comp.GetVelocity();
-      line = comp.GetPathLine();
-      showlines = true;
+      visugrid = comp.GetStream();
+      showlines = false;
+      showstream = 20;
       break;
     case 5:
       visugrid = comp.GetVelocity();
+      line = comp.GetPathLine();
+      showlines = true;
+      showstream = -1;
+      break;
+    case 6:
+      visugrid = comp.GetVelocity();
       line = comp.GetStreakLine();
       showlines = true;
+      showstream = -1;
       break;
       
     default:

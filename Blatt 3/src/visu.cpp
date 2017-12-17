@@ -193,11 +193,11 @@ int Renderer::Check () {
 	return _state;
 }
 //------------------------------------------------------------------------------
-int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines) {
-	return Render(grid, line, showlines, _min, _max);
+int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines, int showstream) {
+	return Render(grid, line, showlines, showstream, _min, _max);
 }
 //------------------------------------------------------------------------------
-int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines, const real_t& min, const real_t& max) {
+int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines,int showstream,const real_t& min, const real_t& max) {
 	if (Check() < 0) return -1;
 	real_t treshold[2] = {0,0};
 	real_t value;
@@ -243,16 +243,62 @@ int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines
 	}
 	if(showlines){
 	for (Particle p : line->GetVec()){
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_width - int(p.Pos()[1]*_width/_length[1])-1,0,0,0); 
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_width - int(p.Pos()[1]*_width/_length[1]),0,0,0); 
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_width - int(p.Pos()[1]*_width/_length[1])+1,0,0,0); 
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_width - int(p.Pos()[1]*_width/_length[1])-1,0,0,0); 
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_width - int(p.Pos()[1]*_width/_length[1]),0,0,0);
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_width - int(p.Pos()[1]*_width/_length[1])+1,0,0,0); 
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_width - int(p.Pos()[1]*_width/_length[1])-1,0,0,0); 
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_width - int(p.Pos()[1]*_width/_length[1]),0,0,0); 
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_width - int(p.Pos()[1]*_width/_length[1])+1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1])-1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1]),0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1])+1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_height - int(p.Pos()[1]*_height/_length[1])-1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_height - int(p.Pos()[1]*_height/_length[1]),0,0,0);
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_height - int(p.Pos()[1]*_height/_length[1])+1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_height - int(p.Pos()[1]*_height/_length[1])-1,0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_height - int(p.Pos()[1]*_height/_length[1]),0,0,0); 
+        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_height - int(p.Pos()[1]*_height/_length[1])+1,0,0,0); 
     }
+    }
+    if (showstream != -1){
+        real_t * bounds = new real_t[showstream+2];
+        bool beginline = true;
+        int nowbound = 0;
+        for (int i=0;i<=showstream+1;i++){
+            bounds[i] = _min + i*(_max-_min)/(showstream+1);
+        }
+        for (uint32_t x=0;x<_width;++x) {
+            treshold[1] = _length[_y];
+            _orig[_x] = _length[_x]*x/_width;
+            for (uint32_t y=0;y<_height;++y) {
+                _orig[_y] = _length[_y]*(_height-y-1)/_height;
+                if(beginline) {
+                    nowbound = int((grid->Interpolate(_orig) - _min)/(_max-_min)*(showstream+1));
+                    beginline = false;
+                }
+                if (x == _click_x || y == _click_y) {
+                    setpixelrgb(_screen,x,y,255,255,255);
+                    continue;
+                }
+                if (_grid && _orig[_x] >= treshold[0]) {
+                    setpixelrgb(_screen,x,y,20,20,20);
+                } else if (_grid && _orig[_y] < treshold[1]) {
+                    setpixelrgb(_screen,x,y,20,20,20);
+                    treshold[1] -= _h[_y];
+                } else {
+                    value = grid->Interpolate(_orig);
+                    if(int((value - _min)/(_max-_min)*(showstream+1)) < nowbound ) {
+                        nowbound = int((value - _min)/(_max-_min)*(showstream+1));
+                        setpixelrgb(_screen,x,y,0,0,0);
+                        setpixelrgb(_screen,x,y-1,255,255,255);
+                    } else if (int((value - _min)/(_max-_min)*(showstream+1)) > nowbound ) {
+                        nowbound = int((value - _min)/(_max-_min)*(showstream+1));
+                        setpixelrgb(_screen,x,y,255,255,255);
+                    } else {
+                        setpixelrgb(_screen,x,y,0,0,0);
+                    }
+                }
+            }
+            beginline = true;
+            if (_grid && _orig[_x] >= treshold[0]) {
+                treshold[0] += _h[_x];
+            }
+        }
+        
     }
 	
 	if(SDL_MUSTLOCK(_screen)) SDL_UnlockSurface(_screen);
