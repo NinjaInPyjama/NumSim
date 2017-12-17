@@ -84,6 +84,38 @@ Iterator Iterator::Down() const {
 
 
 //------------------------------------------------------------------------------
+/** Iterator for all cells running backwards linewise
+*/
+
+/// Construct a new BackwardsIterator
+BackwardsIterator::BackwardsIterator(const Geometry * geom) {
+	_geom = geom;
+	_valid = true;
+	First();
+}
+
+
+/// Sets the iterator to the last element of the first line
+void BackwardsIterator::First() {
+	_value = _geom->Size()[0]-1;
+}
+
+/// Goes to the next element of the iterator, disables it if position is end
+// Iterating over inner cells
+void BackwardsIterator::Next() {
+	
+    if(_value % _geom->Size()[0] == 0) {
+        _value += 2*_geom->Size()[0] - 1;
+    }
+    else {
+        _value--;
+    }
+    if(_value > _geom->Size()[0]*_geom->Size()[1]-1) _valid = false;
+}
+
+
+
+//------------------------------------------------------------------------------
 /** Iterator for interior cells
 */
 
