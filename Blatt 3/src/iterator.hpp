@@ -89,6 +89,20 @@ public:
 };
 
 //------------------------------------------------------------------------------
+/** Iterator for all cells linewise backwards
+*/
+class BackwardsIterator : public Iterator {
+public:
+  /// Construct a new BackwardsIterator
+  BackwardsIterator(const Geometry *geom);
+
+  /// Sets the iterator to the last element of the first line
+  void First();
+  /// Goes to the next element of the iterator, disables it if position is end
+  void Next();
+};
+
+//------------------------------------------------------------------------------
 /** Iterator for domain boundary cells.
 */
 class BoundaryIterator : public Iterator {
