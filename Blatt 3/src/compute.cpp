@@ -223,24 +223,16 @@ const Grid * Compute::GetVelocity() {
 
 /// Computes and returns the vorticity
 const Grid * Compute::GetVorticity() {
-    InteriorIterator iit = InteriorIterator(_geom);
-    Grid * vort = new Grid(_geom);
-	vort->Initialize(0.0);
-    multi_real_t cell_center = multi_real_t(0.5, 0.5);
-
-    // Creating grids of derivatives of u (in y-dim) and v (in x-dim) (for interpolation reasons)
-    Grid * du_dy = new Grid(_geom);
-    Grid * dv_dx = new Grid(_geom);
-    for(iit.First();iit.Valid();iit.Next()){
-        du_dy->Cell(iit) = _u->dy_central(iit);
-        dv_dx->Cell(iit) = _v->dx_central(iit);
-    }
+    Iterator it(_geom);
+    Grid * vort = new Grid(_geom, multi_real_t(1.0, 1.0));
     
-    for(iit.First();iit.Valid();iit.Next()){ 
-        // Calculating vorticity by dv/dx - du/dy
-        multi_index_t cell_pos = iit.Pos();
-		vort->Cell(iit) = 0.0; //  dv_dx->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1] + cell_center[1]))
-                                - du_dy->Interpolate(multi_real_t((real_t)cell_pos[0] + cell_center[0], (real_t)cell_pos[1]  + cell_center[1]));
+    vort->Initialize(0.0);
+    
+    for(it.First(); it.Valid(); it.Next()){ 
+        // Calculating vorticity by du/dy - dv/dx
+		if( _geom->Flag()[it.Value()] == ' ' ) {
+            vort->Cell(it) = _u->dy_r(it) - _v->dx_r(it);
+        }
     }
     return vort;
 }
@@ -305,7 +297,7 @@ const Grid * Compute::GetStream() {
                 streamset[backit.Value()]=1;
             }
         }
-    } std::cout << nonsetstreamset(streamset) << std::endl;
+    } 
     } while (nonsetstreamset(streamset));
     
     return psi;

@@ -14,10 +14,11 @@
 //    -------------
 //      u=0, v=0
 Geometry::Geometry() {
-    Load("default.geom");
+    Load("default.geom_step");
 	_value = new real_t[_size[1] * _size[0]];
 
 	_h = multi_real_t(_length[0] / _size[0], _length[1] / _size[1]);
+    
 }
 
 
@@ -70,6 +71,7 @@ void Geometry::Load(const char * file) {
 						for (int j = 0; j < _size[0]; j++) {
 							_flag[i*_size[0] + j] = line[j];
 						}
+						
 					}
 				}
 			}
@@ -81,26 +83,26 @@ void Geometry::Load(const char * file) {
 
 void Geometry::InitializeValues() {
 	for (int i = 0; i < 4; i++) {
-		index_t start_idx = -1;
-		index_t end_idx = -1;
-		index_t firstID = _size[0] * (_size[1] - 1);
-		index_t lastID = _size[0] * _size[1] - 1;
-		index_t stepID = 1;
+		int start_idx = -1;
+		int end_idx = -1;
+		int firstID = _size[0] * (_size[1] - 1);
+		int lastID = _size[0] * _size[1] - 1;
+		int stepID = 1;
 		switch (i) {
 		case 1: 
-			firstID = _size[0] * (_size[1] - 1);
+			firstID = _size[0] - 1;
 			lastID = _size[0] * _size[1] - 1;
-			stepID = 1;
+			stepID = _size[0];
 			break;
 		case 2:
-			firstID = _size[0] * (_size[1] - 1);
-			lastID = _size[0] * _size[1] - 1;
+			firstID = 0;
+			lastID = _size[0] - 1;
 			stepID = 1;
 			break;
 		case 3:
-			firstID = _size[0] * (_size[1] - 1);
-			lastID = _size[0] * _size[1] - 1;
-			stepID = 1;
+			firstID = 0;
+			lastID = _size[0] * (_size[1] -1);
+			stepID = _size[0];
 			break;
 		default:
 			break;
@@ -121,7 +123,8 @@ void Geometry::InitializeValues() {
 				end_idx = -1;
 			}
 		}
-	}
+        
+    }
 }
 
 /// Returns the number of cells in each dimension

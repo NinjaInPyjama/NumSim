@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     case 4:
       visugrid = comp.GetStream();
       showlines = false;
-      showstream = 20;
+      showstream = 100;
       break;
     case 5:
       visugrid = comp.GetVelocity();
@@ -94,6 +94,11 @@ int main(int argc, char **argv) {
       visugrid = comp.GetVelocity();
       line = comp.GetStreakLine();
       showlines = true;
+      showstream = -1;
+      break;
+    case 7: 
+      visugrid = comp.GetVorticity();
+      showlines = false;
       showstream = -1;
       break;
       
