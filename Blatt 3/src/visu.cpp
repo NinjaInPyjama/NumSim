@@ -243,7 +243,8 @@ int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines
 	}
 	if(showlines){
 	for (Particle p : line->GetVec()){
-        setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1])-1,0,0,0); 
+        if( int(p.Pos()[0]*_width/_length[0])+1 < _width && int(p.Pos()[0]*_width/_length[0])-1 > 0 && _height - int(p.Pos()[1]*_height/_length[1])-1 > 0 && _height - int(p.Pos()[1]*_height/_length[1])+1 < _height)
+	setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1])-1,0,0,0); 
         setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1]),0,0,0); 
         setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1])+1,0,0,0); 
         setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0]),_height - int(p.Pos()[1]*_height/_length[1])-1,0,0,0); 
@@ -252,7 +253,8 @@ int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines
         setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_height - int(p.Pos()[1]*_height/_length[1])-1,0,0,0); 
         setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_height - int(p.Pos()[1]*_height/_length[1]),0,0,0); 
         setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])-1,_height - int(p.Pos()[1]*_height/_length[1])+1,0,0,0); 
-    }
+	}
+	}
     }
     if (showstream != -1){
         real_t * bounds = new real_t[showstream+2];
