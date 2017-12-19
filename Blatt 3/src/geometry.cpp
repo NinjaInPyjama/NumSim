@@ -14,7 +14,7 @@
 //    -------------
 //      u=0, v=0
 Geometry::Geometry() {
-    Load("default.geom_step");
+    Load("default.geom");
 	_value = new real_t[_size[1] * _size[0]];
 
 	_h = multi_real_t(_length[0] / _size[0], _length[1] / _size[1]);

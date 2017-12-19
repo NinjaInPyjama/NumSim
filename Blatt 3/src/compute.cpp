@@ -34,7 +34,7 @@ Compute::Compute(const Geometry * geom, const Parameter * param) {
     _t = 0.0;
     _dtlimit = _param->Dt();
     _epslimit = _param->Eps();
-    _pathline = new PathLine(multi_real_t( 0.2, 0.2));
+    _pathline = new PathLine(multi_real_t( 0.2, 0.8));
     _streakline = new StreakLine(multi_real_t( 0.2, 0.8));
 }
 
@@ -84,13 +84,13 @@ void Compute::TimeStep(bool printInfo) {
     // solver iterations
     index_t itermax = _param->IterMax();
     index_t it = 0;
-    real_t res = 0.0;
+    real_t res2 = 0.0;
     do {
         it++;
-        res = _solver->Cycle(_p, _rhs);
+        res2 = _solver->Cycle(_p, _rhs);
 		//if(printInfo) std::cout << "Residual at iteration " << it << ": " << res << std::endl;
-    } while(it<itermax && res>_epslimit);
-    if(printInfo) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << " with dt conv x: " << dtlimit_conv_x << " with dt diff: " << dtlimit_diff << " t: " << _t << std::endl;
+    } while(it<itermax && res2>_epslimit*_epslimit);
+    if(printInfo) std::cout << "Solver stopped at iteration " << it << " with residual**2: " << res2 << " with dt conv x: " << dtlimit_conv_x << " with dt diff: " << dtlimit_diff << " t: " << _t << std::endl;
 	
     // compute new velocities
     NewVelocities(dt);

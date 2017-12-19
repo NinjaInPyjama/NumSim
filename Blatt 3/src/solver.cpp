@@ -26,8 +26,6 @@ SOR::SOR(const Geometry * geom, const real_t & omega) {
 /// Constructs an actual SOR solver
 SOR::SOR(const Geometry * geom) {
     _omega = std::min(real_t(2.0/(1.0 + sin(M_PI*geom->Mesh()[0]))), real_t(2.0/(1.0 + sin(M_PI*geom->Mesh()[1])))); // optimal omega, see script p. 26
-    
-    std::cout << _omega << std::endl;
     _geom = geom;
 }
 
@@ -41,24 +39,23 @@ real_t SOR::Cycle(Grid * grid, const Grid * rhs) const {
     InteriorIterator it = InteriorIterator(_geom);
     real_t dx = _geom->Mesh()[0];
     real_t dy = _geom->Mesh()[1];
+    real_t factor = 1.0/(2.0/(dx*dx) + 2.0/(dy*dy));
+    real_t total_res = 0.0;
+	real_t local_res = 0.0;
+    index_t fluidcells = 0;
 
     for(it.First(); it.Valid(); it.Next()){
 		// see script, p. 26, formular (4.1)
-        grid->Cell(it) = grid->Cell(it) + _omega*( rhs->Cell(it) -grid->dxx(it) - grid->dyy(it))/(-2.0/(dx*dx) - 2.0/(dy*dy));
+        
+        fluidcells++;
+        local_res = localRes(it, grid, rhs);
+        total_res += local_res*local_res;
+        grid->Cell(it) = grid->Cell(it) + _omega*local_res*factor;
     }
     
 	//Updating boundary values to reduce artifactial values in calculation of residual
 	_geom->Update_P(grid);
 
-    real_t total_res = 0.0;
-	real_t local_res = 0.0;
-
-    for(it.First(); it.Valid(); it.Next()){
-		local_res = localRes(it, grid, rhs);
-		total_res += local_res*local_res;
-    }
-
-    total_res = total_res/(_geom->Size()[0] * _geom->Size()[1]);
-    total_res = sqrt(total_res);
+    total_res = total_res/real_t(fluidcells);
     return total_res;
 }
