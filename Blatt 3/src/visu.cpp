@@ -243,7 +243,7 @@ int Renderer::Render (const Grid *grid, const ParticleLine *line, bool showlines
 	}
 	if(showlines){
 	for (Particle p : line->GetVec()){
-        if( int(p.Pos()[0]*_width/_length[0])+1 < _width && int(p.Pos()[0]*_width/_length[0])-1 > 0 && _height - int(p.Pos()[1]*_height/_length[1])-1 > 0 && _height - int(p.Pos()[1]*_height/_length[1])+1 < _height)
+        if( int(p.Pos()[0]*_width/_length[0])+1 < _width && int(p.Pos()[0]*_width/_length[0])-1 > 0 && _height - int(p.Pos()[1]*_height/_length[1])-1 > 0 && _height - int(p.Pos()[1]*_height/_length[1])+1 < _height) {
 	setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1])-1,0,0,0); 
         setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1]),0,0,0); 
         setpixelrgb(_screen,int(p.Pos()[0]*_width/_length[0])+1,_height - int(p.Pos()[1]*_height/_length[1])+1,0,0,0); 
