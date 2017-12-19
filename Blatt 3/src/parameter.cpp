@@ -7,7 +7,6 @@ Parameter::Parameter() {
         
     // load parameters from file
     Load("default.param");
-    // Load("actual.param");
    
     
 }

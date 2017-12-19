@@ -55,14 +55,20 @@ const real_t & Grid::Cell(const Iterator & it) const {
 
 /// Interpolate the value at an arbitrary position by bilinear interpolation
 real_t Grid::Interpolate(const multi_real_t & pos) const {
-    multi_real_t newpos = multi_real_t(pos[0], pos[1]);
-    if(pos[0] > _geom->Length()[0]) newpos[0] = _geom->Length()[0];
-    if(pos[0] < 0.0) newpos[0] = 0.0;
-    if(pos[1] > _geom->Length()[1]) newpos[1] = _geom->Length()[1];
-    if(pos[1] < 0.0) newpos[1] = 0.0;
+//     multi_real_t newpos = multi_real_t(pos[0], pos[1]);
+//     if(pos[0] > _geom->Length()[0]) newpos[0] = _geom->Length()[0];
+//     if(pos[0] < 0.0) newpos[0] = 0.0;
+//     if(pos[1] > _geom->Length()[1]) newpos[1] = _geom->Length()[1];
+//     if(pos[1] < 0.0) newpos[1] = 0.0;
     
-    real_t pos_x = newpos[0] * (_geom->Size()[0] - 2) / _geom->Length()[0] + 1 - _offset[0];
-    real_t pos_y = newpos[1] * (_geom->Size()[1] - 2) / _geom->Length()[1] + 1 - _offset[1];
+    real_t pos_x = pos[0] * (_geom->Size()[0] - 2) / _geom->Length()[0] + 1 - _offset[0];
+    real_t pos_y = pos[1] * (_geom->Size()[1] - 2) / _geom->Length()[1] + 1 - _offset[1];
+    
+    if(pos_x >= _geom->Size()[0]-1) pos_x = _geom->Size()[0] - 1 - 0.00000001;
+    if(pos_x < 0.0) pos_x = 0;
+    if(pos_y >= _geom->Size()[1]-1) pos_y = _geom->Size()[1] - 1 - 0.00000001;
+    if(pos_y < 0.0) pos_y = 0;
+    
 	index_t index_x = (index_t)pos_x;
 	index_t index_y = (index_t)pos_y;
 

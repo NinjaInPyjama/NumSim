@@ -28,10 +28,10 @@ const char States[][42] = {
     "U",        // 1
     "V",        // 2
     "P",        // 3
-    "",         // 4
-    "",         // 5
-    "",         // 6
-    "",         // 7
+    "Streamline",         // 4
+    "Pathline",         // 5
+    "Streakline",         // 6
+    "Vorticity",         // 7
     "",         // 8
     ""          // 9
 };
