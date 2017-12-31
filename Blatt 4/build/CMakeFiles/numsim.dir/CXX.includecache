@@ -1,0 +1,176 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/compute.cpp
+compute.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/compute.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/compute.hpp
+cmath
+-
+iostream
+-
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+grid.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.hpp
+iterator.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/iterator.hpp
+parameter.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/parameter.hpp
+solver.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/solver.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/geometry.cpp
+geometry.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/geometry.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/geometry.hpp
+cstdio
+-
+cstring
+-
+cstdlib
+-
+cstdio
+-
+iostream
+-
+string
+-
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+grid.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.cpp
+grid.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.hpp
+cmath
+-
+iostream
+-
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+geometry.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/geometry.hpp
+iterator.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/iterator.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/iterator.cpp
+iterator.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/iterator.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/iterator.hpp
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+geometry.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/geometry.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/main.cpp
+iostream
+-
+fstream
+-
+time.h
+-
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+geometry.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/geometry.hpp
+parameter.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/parameter.hpp
+iterator.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/iterator.hpp
+grid.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.hpp
+compute.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/compute.hpp
+visu.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/visu.hpp
+vtk.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/vtk.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/parameter.cpp
+parameter.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/parameter.hpp
+iostream
+-
+random
+-
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/parameter.hpp
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+cstdio
+-
+cstring
+-
+cstdlib
+-
+fstream
+-
+iostream
+-
+string
+-
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/solver.cpp
+solver.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/solver.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/solver.hpp
+cmath
+-
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+geometry.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/geometry.hpp
+iterator.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/iterator.hpp
+grid.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.hpp
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+stdint.h
+-
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/visu.cpp
+visu.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/visu.hpp
+cmath
+-
+limits
+-
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/visu.hpp
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+grid.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.hpp
+SDL2/SDL.h
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/SDL2/SDL.h
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/vtk.cpp
+vtk.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/vtk.hpp
+cstring
+-
+cstdio
+-
+
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/vtk.hpp
+typedef.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/typedef.hpp
+grid.hpp
+/home/silvia/Documents/NumSim-Smirnie/Blatt 4/src/grid.hpp
+cstdio
+-
+
