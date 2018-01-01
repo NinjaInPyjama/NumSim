@@ -1,6 +1,7 @@
 #include "parameter.hpp"
 #include <iostream>
 #include <random>
+#include <chrono>
 
 using namespace std;
 /// Constructs a new Parameter set with default values
@@ -11,7 +12,8 @@ Parameter::Parameter() {
     Load("default.param");
     // Load("actual.param");
     
-    std::default_random_engine generator;
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator (seed);
     std::normal_distribution<double> distribution(1500.0,1000.0/6.0);
     
     _re = distribution(generator);
