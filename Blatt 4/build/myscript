@@ -33,7 +33,7 @@ ncores=1
 
 
 
-for ((i=0; i<$nexecutions; i++))
+for ((i=0; i<$nexecutions/$ncores; i++))
 do
     for ((j=0; j<$ncores; j++))
     do  
