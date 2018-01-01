@@ -1,0 +1,46 @@
+#!/bin/bash
+#only for pre Bash v4
+
+nexecutions=3
+ncores=3
+
+#should be devideable else to les executions
+
+# bring folder NumSim onto cluster:
+#   scp -r NumSim gramlisa@ipvslogin.informatik.uni-stuttgart.de:
+
+# log into cluster
+#   ssh gramlisa@ipvslogin.informatik.uni-stuttgart.de
+
+# log into sgs cluster
+#   ssh sgscl1
+
+# log required number of cores for calculations
+#   srun -n 32 --pty bash
+
+# compile code at build folder: use DEBUG_VISU "Enable debugging visualization" OFF in CMakeLists.txt: //without VTK, without printinfo
+#   cmake ../
+
+# build code
+#   make
+
+# specify parameters in myscript
+
+# execute bash script such that runs in background:
+#   bash myscript &
+
+
+
+
+for ((i=0; i<$nexecutions/$ncores; i++))
+do
+    for ((i=0; i<$ncores; i++))
+    do  
+        #zufall =  #random number remains to be generated
+        #sed -i -e 's/'"re = [0-9]*.[0-9]*"'/'"re = ${zufall}"'/g' default.param #place random number in default.param
+        ./numsim &
+        sleep 2 #wait five seconds such that default.param is read correctly and can be manipulated again
+    done
+    wait
+done
+
