@@ -47,16 +47,16 @@ int main(int argc, char **argv) {
 #endif // USE_DEBUG_VISU
 
   // Create a VTK generator
-  VTK vtk(geom.Mesh(), geom.Length());
+ // VTK vtk(geom.Mesh(), geom.Length());
 
   int32_t start = 0.0;
   
   // Create a VTK File in the folder VTK (must exist)
   
-  vtk.Init("VTK/field");
-  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
-  vtk.AddScalar("Pressure", comp.GetP());
-  vtk.Finish();
+  //vtk.Init("VTK/field");
+  //vtk.AddField("Velocity", comp.GetU(), comp.GetV());
+  //vtk.AddScalar("Pressure", comp.GetP());
+  //vtk.Finish();
 
   #ifdef USE_DEBUG_VISU
   const Grid *visugrid;
@@ -99,23 +99,29 @@ int main(int argc, char **argv) {
 	  comp.TimeStep(false);
 
 	  
-	  vtk.Init("VTK/field");
-	  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
-	  vtk.AddScalar("Pressure", comp.GetP());
-	  vtk.Finish();
+	 // vtk.Init("VTK/field");
+	 // vtk.AddField("Velocity", comp.GetU(), comp.GetV());
+	 // vtk.AddScalar("Pressure", comp.GetP());
+	 // vtk.Finish();
 	  
   }
   
+    ofstream myfile;
+    do
+    {
+      myfile.open("output.txt", std::ios_base::app);
+    }
+    while(!myfile.is_open());
+    myfile << "This is a line.\n";
+    myfile.close();  
+	
   cout << "Run Time: " << (float)(clock() - start)/1000.0 << " s" << endl;
 
   
-  vtk.Init("VTK/field");
-  vtk.AddField("Velocity", comp.GetU(), comp.GetV());
-  vtk.AddScalar("Pressure", comp.GetP());
-  vtk.Finish();
+ // vtk.Init("VTK/field");
+ // vtk.AddField("Velocity", comp.GetU(), comp.GetV());
+ // vtk.AddScalar("Pressure", comp.GetP());
+ // vtk.Finish();
   
-
-  int a = 0;
-  cin >> a;
   return 0;
 }
