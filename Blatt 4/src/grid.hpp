@@ -54,8 +54,12 @@ public:
 
   /// Write access to the grid cell at position [it]
   real_t &Cell(const Iterator &it);
+  
   /// Read access to the grid cell at position [it]
   const real_t &Cell(const Iterator &it) const;
+  
+  /// Read access to the grid cell at position x, y
+  const real_t &Cell(const index_t x, const index_t y) const;
 
   /// Interpolate the value at a arbitrary position
   real_t Interpolate(const multi_real_t &pos) const;
@@ -114,6 +118,7 @@ public:
 
 private:
   real_t *_data;
+  real_t _hinv;
   multi_real_t _offset;
   const Geometry *_geom;
 };

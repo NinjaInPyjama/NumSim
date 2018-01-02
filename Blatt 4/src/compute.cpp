@@ -67,7 +67,7 @@ void Compute::TimeStep(bool printInfo) {
         it++;
         res = _solver->Cycle(_p, _rhs);
 		if(printInfo) std::cout << "Residual at iteration " << it << ": " << res << std::endl;
-    } while(it<itermax && res>_epslimit);
+    } while(it<itermax && res>_epslimit*_epslimit);
     if(printInfo) std::cout << "Solver stopped at iteration " << it << " with residual: " << res << std::endl;
 	
     // compute new velocities

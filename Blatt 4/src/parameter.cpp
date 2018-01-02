@@ -16,7 +16,11 @@ Parameter::Parameter() {
     std::default_random_engine generator (seed);
     std::normal_distribution<double> distribution(1500.0,1000.0/6.0);
     
+    
+    _re = 0;
+    do{
     _re = distribution(generator);
+    }while(_re < 500 || _re > 2500);
     
     std::cout << "Re= " << _re << std::endl;
 

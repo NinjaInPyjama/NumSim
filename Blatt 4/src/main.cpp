@@ -18,6 +18,7 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <string>
 
 #include "typedef.hpp"
 #include "geometry.hpp"
@@ -43,7 +44,7 @@ int main(int argc, char **argv) {
   Renderer visu(geom.Length(), geom.Mesh());
   real_t quotient = geom.Length()[1]/geom.Length()[0];
   
-  visu.Init(1600, 1600*quotient);
+  visu.Init(800, 800*quotient);
 #endif // USE_DEBUG_VISU
 
   // Create a VTK generator
@@ -67,6 +68,17 @@ int main(int argc, char **argv) {
   // Steps
   int i = 0;
   start = clock();
+  
+  string str(argv[1]);
+  
+  ofstream myfile;
+  do
+  {
+    myfile.open("output_" + str + ".txt", std::ios_base::app);
+  }
+  while(!myfile.is_open());
+  myfile << param.Re() << " 0 0 0\n";
+  
   while (comp.GetTime() <= param.Tend()) {
       
       #ifdef USE_DEBUG_VISU
@@ -95,9 +107,10 @@ int main(int argc, char **argv) {
  #endif // USE_DEBUG_VISU
     
 	  i++;
-	  cout << "TimeStep: " << i << ", Simulated Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
+	  //cout << "TimeStep: " << i << ", Simulated Time: " << comp.GetTime() << "s / " << param.Tend() << "s" << endl;
 	  comp.TimeStep(false);
-
+        
+          myfile << comp.GetTime() << " " << comp.GetU()->Cell(120,5) << " " << comp.GetU()->Cell(64,64) << " " << comp.GetU()->Cell(5,120) <<"\n";
 	  
 	 // vtk.Init("VTK/field");
 	 // vtk.AddField("Velocity", comp.GetU(), comp.GetV());
@@ -106,16 +119,11 @@ int main(int argc, char **argv) {
 	  
   }
   
-    ofstream myfile;
-    do
-    {
-      myfile.open("output.txt", std::ios_base::app);
-    }
-    while(!myfile.is_open());
-    myfile << "This is a line.\n";
-    myfile.close();  
+    
+ 
+  myfile.close();  
 	
-  cout << "Run Time: " << (float)(clock() - start)/1000.0 << " s" << endl;
+  cout << "Simulation " << str << " terminated with run time: " << (float)(clock() - start)/1000 << " s" << endl;
 
   
  // vtk.Init("VTK/field");
