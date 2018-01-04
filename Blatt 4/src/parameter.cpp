@@ -22,7 +22,7 @@ Parameter::Parameter() {
     _re = distribution(generator);
     }while(_re < 500 || _re > 2500);
     
-    std::cout << "Re= " << _re << std::endl;
+    //std::cout << "Re= " << _re << std::endl;
 
     
 }

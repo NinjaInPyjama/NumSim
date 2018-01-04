@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
  
   myfile.close();  
 	
-  cout << "Simulation " << str << " terminated with run time: " << (float)(clock() - start)/1000 << " s" << endl;
+  cout << "Simulation " << str << " terminated with run time: " << (float)(clock() - start)/1000000 << " s" << endl;
 
   
  // vtk.Init("VTK/field");
