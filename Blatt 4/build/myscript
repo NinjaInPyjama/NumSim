@@ -1,9 +1,9 @@
 #!/bin/bash
 #only for pre Bash v4
 
-nexecutions=1
+nexecutions=2016
 
-ncores=1
+ncores=32
 
 # nexecutions should be devideable by ncores. otherwise there are not enough executions
 
