@@ -1,7 +1,5 @@
 #include "parameter.hpp"
 #include <iostream>
-#include <random>
-#include <chrono>
 
 using namespace std;
 /// Constructs a new Parameter set with default values
@@ -10,22 +8,18 @@ Parameter::Parameter() {
         
     // load parameters from file
     Load("default.param");
-    // Load("actual.param");
-    
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator (seed);
-    std::normal_distribution<double> distribution(1500.0,1000.0/6.0);
-    
-    
-    _re = 0;
-    do{
-    _re = distribution(generator);
-    }while(_re < 500 || _re > 2500);
-    
-    //std::cout << "Re= " << _re << std::endl;
 
-    
 }
+
+/// Constructs a new Parameter set with default parameters and given re
+Parameter::Parameter(const real_t re){
+    
+    // load parameters from file
+    Load("default.param");
+    
+    _re = re;
+    
+}    
 
 /// Loads the parameter values from a file
 void Parameter::Load(const char * file) {

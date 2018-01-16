@@ -36,6 +36,9 @@ public:
   /// Constructs a new Parameter set with default values
   // Driven Cavity parameters; see exercise sheet 1
   Parameter();
+  
+  /// Constructs a new Parameter set with default parameters and given re
+  Parameter(const real_t re);
 
   /// Loads the parameter values from a file
   void Load(const char *file);

@@ -19,6 +19,9 @@
 #include <fstream>
 #include <time.h>
 #include <string>
+#include <chrono>
+#include <random>
+#include <stdlib.h>
 
 #include "typedef.hpp"
 #include "geometry.hpp"
@@ -33,7 +36,25 @@ using namespace std;
 
 int main(int argc, char **argv) {
   // Create parameter and geometry instances with default values
-  Parameter param;
+  
+  // Draw random re for Monte Carlo
+  /*  
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine generator (seed);
+  std::normal_distribution<double> distribution(1500.0,1000.0/6.0);
+    
+  real_t re = 0;
+  do{
+  re = distribution(generator);
+  }while(re < 500 || re > 2500);  
+  */
+  
+  //Use euqidistant distributed reynolds numbers for the trapezoidal rule
+  real_t re = 1000.0 + 1000.0/199 * atof(argv[1]);
+  
+  //cout << "Re: " << re << endl;
+  
+  Parameter param(re);
   Geometry geom;
 
   // Create the fluid solver
