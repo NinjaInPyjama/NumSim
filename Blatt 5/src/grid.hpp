@@ -112,10 +112,41 @@ public:
   /// Return a pointer to the Geometry
   const Geometry *getGeometry() const;
 
-private:
+protected:
   real_t *_data;
   multi_real_t _offset;
   const Geometry *_geom;
 };
+
+/** multigrid
+*/
+class MultiGrid : public Grid {
+public:
+    /// Constructs a grid based on a geometry
+  MultiGrid(const Geometry *geom);
+
+  MultiGrid(const Geometry *geom, const Grid *valueGrid );
+  
+  MultiGrid(const Geometry *geom, const index_t* cellSize, const Grid *valueGrid );
+
+  /// Deletes the multigrid
+  ~MultiGrid();
+  
+  const index_t &CellSize(const index_t index) const;
+  
+  /// Write access to the grid cell at position [it]
+  real_t &Cell(const Iterator &it);
+  /// Read access to the grid cell at position [it]
+  const real_t &Cell(const Iterator &it) const;
+
+  Restrict
+  
+  Interpolate
+  
+private:
+    Grid _grid;
+    
+};
+
 //------------------------------------------------------------------------------
 #endif // __GRID_HPP
