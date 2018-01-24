@@ -119,39 +119,38 @@ private:
   index_t _boundary;
 };
 
-/------------------------------------------------------------------------------
-/** Iterator for interior cells in multigrid algorithm
+//------------------------------------------------------------------------------
+/** Iterator for multigrid algorithm
 */
-class MGInteriorIterator : public Iterator {
+
+class MGIterator : public Iterator {
 public:
   /// Construct a new InteriorIterator
-  MGInteriorIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize);
+  MGIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize);
   /// Constructs a new BoundaryIterator to start iterating from chosen value
-  MGInteriorIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize, index_t value);
+  MGIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize, const index_t &value);
 
   /// Sets the iterator to the first element
   void First();
-  /// Goes to the next element of the iterator, disables it if position is end
-  void Next();
   /// Returns an Iterator that is located left from this one.
   // if we are at the left boundary, the cell sees itself
   // if there is more than one cell left, we choose the lower one
-  MGInteriorIterator Left() const;
+  MGIterator Left() const;
 
   /// Returns an Iterator that is located right from this one
   // If we are at the right boundary, the cell sees itself
   // if there is more than one cell right, we choose the lower one
-  MGInteriorIterator Right() const;
+  MGIterator Right() const;
 
   /// Returns an Iterator that is located above this one
   // If we are at the upper domain boundary, the cell sees itself
   // if there is more than one cell at the top, we choose the left one
-  MGInteriorIterator Top() const;
+  MGIterator Top() const;
 
   /// Returns an Iterator that is located below this one
   // If we are at the lower domain boundary, the cell sees itself
   // if there is more than one cell below, we choose the left one
-  MGInteriorIterator Down() const;
+  MGIterator Down() const;
   
 private:
     MultiGrid _multigrid;
@@ -159,44 +158,27 @@ private:
 };
 
 //------------------------------------------------------------------------------
+/** Iterator for interior cells in multigrid algorithm
+*/
+class MGInteriorIterator : public MGIterator {
+public:
+  /// Construct a new InteriorIterator
+  MGInteriorIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize);// : MGIterator(geom, multigrid, cellsize);
+  
+  /// Goes to the next element of the iterator, disables it if position is end
+  void Next();
+};
+
+//------------------------------------------------------------------------------
 /** Iterator for domain boundary cells in multigrid algorithm
 */
-class MGBoundaryIterator : public Iterator {
+class MGBoundaryIterator : public MGIterator {
 public:
   /// Constructs a new BoundaryIterator
-  MGBoundaryIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize);
-  /// Constructs a new BoundaryIterator to start iterating from chosen value
-  MGBoundaryIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize, index_t value);
+  MGBoundaryIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize);// : MGIterator(geom, multigrid, cellsize);
 
-  
-  /// Sets the iterator to the first element
-  void First();
   /// Goes to the next element of the iterator, disables it if position is end
-  void Next();  
-  /// Returns an Iterator that is located left from this one.
-  // if we are at the left boundary, the cell sees itself
-  // if there is more than one cell left, we choose the lower one
-  MGBoundaryIterator Left() const;
-
-  /// Returns an Iterator that is located right from this one
-  // If we are at the right boundary, the cell sees itself
-  // if there is more than one cell right, we choose the lower one
-  MGBoundaryIterator Right() const;
-
-  /// Returns an Iterator that is located above this one
-  // If we are at the upper domain boundary, the cell sees itself
-  // if there is more than one cell at the top, we choose the left one
-  MGBoundaryIterator Top() const;
-
-  /// Returns an Iterator that is located below this one
-  // If we are at the lower domain boundary, the cell sees itself
-  // if there is more than one cell below, we choose the left one
-  MGBoundaryIterator Down() const;
-
-private:
-  index_t _boundary;
-  MultiGrid _multigrid;
-  index_t _cellsize;
+  void Next();
 };
 
 //------------------------------------------------------------------------------

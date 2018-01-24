@@ -171,6 +171,83 @@ void BoundaryIterator::Next() {
 }
 
 //------------------------------------------------------------------------------
+/** Iterator for multigrid algorithm
+*/
+/// Construct a new InteriorIterator
+MGIterator::MGIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize){
+ 	_geom = geom;
+	_valid = true;
+    _multigrid = multigrid;
+    _cellsize = cellsize;
+	First();   
+}
+
+/// Constructs a new BoundaryIterator to start iterating from chosen value
+MGIterator::MGIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize, const index_t &value){
+    _geom = geom;
+	_valid = true;
+    _multigrid = multigrid;
+    _cellsize = cellsize;
+    _value = value;
+}
+
+/// Sets the iterator to the first element
+void MGInteriorIterator::First(){
+ 	_value = -1;
+	Next();   
+}
+
+/// Returns an Iterator that is located left from this one.
+// if we are at the left boundary, the cell sees itself
+// if there is more than one cell left, we choose the lower one
+MGIterator MGIterator::Left() const{
+    index_t current_size = _multigrid->CellSize(value);
+    if (_value % _geom->Size()[0] == 0) return *this;
+    else if (_multigrid->CellSize(value-1) != 0) return MGIterator(_geom, _multigrid, _multigrid-CellSize(value-1), value-1);
+    else if (current_size!=1 && _multigrid->CellSize(value-current_size/2) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size/2), value-current_size/2);
+    else if (_multigrid->CellSize(value-current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size), value-current_size);
+    else if (_multigrid->CellSize(value-2*current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value-2*current_size), value-2*current_size);
+    else if (_multigrid->CellSize(value-2*current_size-current_size*_geom->Size()[0]) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value-2*current_size-current_size*_geom->Size()[0]), value-2*current_size-current_size*_geom->Size()[0]);
+    else return *this;
+}
+
+/// Returns an Iterator that is located right from this one
+// If we are at the right boundary, the cell sees itself
+// if there is more than one cell right, we choose the lower one
+MGIterator MGIterator::Right() const{
+    index_t current_size = _multigrid->CellSize(value);
+    if ((_value + 1)% _geom->Size()[0] == 0) return *this;
+    else if (_multigrid->CellSize(value + current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid-CellSize(value+current_size), value+current_size);
+    else if (_multigrid->CellSize(value + current_size - current_size*_geom->Size()[0]) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size - current_size*_geom->Size()[0]), value + current_size - current_size*_geom->Size()[0]);
+    else return *this;
+}
+
+/// Returns an Iterator that is located above this one
+// If we are at the upper domain boundary, the cell sees itself
+// if there is more than one cell at the top, we choose the left one
+MGIterator MGIterator::Top() const{
+    index_t current_size = _multigrid->CellSize(value);
+    if (_value >= _geom->Size()[0]*(_geom->Size()[1]-1)) return *this;
+    else if (_multigrid->CellSize(value + current_size*_geom->Size()[0]) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size*_geom->Size()[0]), value + current_size*_geom->Size()[0]);
+    else if (_multigrid->CellSize(value + current_size*_geom->Size()[0] - current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size*_geom->Size()[0] - current_size), value + current_size*_geom->Size()[0] - current_size);
+    else return *this;
+}
+
+/// Returns an Iterator that is located below this one
+// If we are at the lower domain boundary, the cell sees itself
+// if there is more than one cell below, we choose the left one
+MGIterator MGIterator::Down() const{
+    index_t current_size = _multigrid->CellSize(value);
+    if (_value < _geom->Size()[0]) return *this;
+    else if (_multigrid->CellSize(value-_geom->Size()[0]) != 0) return MGIterator(_geom, _multigrid, _multigrid-CellSize(value-_geom->Size()[0])), value-_geom->Size()[0]));
+    else if (current_size!=1 && _multigrid->CellSize(value-_geom->Size()[0]*current_size/2) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value-_geom->Size()[0]*current_size/2), value-_geom->Size()[0]*current_size/2);
+    else if (_multigrid->CellSize(value-_geom->Size()[0]*current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value-_geom->Size()[0]*current_size), value-_geom->Size()[0]*current_size);
+    else if (_multigrid->CellSize(value-2*_geom->Size()[0]*current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value-2*_geom->Size()[0]*current_size), value-2*_geom->Size()[0]*current_size);
+    else if (_multigrid->CellSize(value-current_size-2*current_size*_geom->Size()[0]) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size-2*current_size*_geom->Size()[0]), value-current_size-2*current_size*_geom->Size()[0]);
+    else return *this;
+}
+
+//------------------------------------------------------------------------------
 /** Iterator for interior cells in multigrid algorithm
 */
 /// Construct a new InteriorIterator
@@ -181,22 +258,6 @@ MGInteriorIterator::MGInteriorIterator(const Geometry *geom, const MultiGrid *mu
     _cellsize = cellsize;
 	First();   
 }
-
-/// Constructs a new BoundaryIterator to start iterating from chosen value
-MGInteriorIterator::MGInteriorIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize, index_t value){
-    _geom = geom;
-	_valid = true;
-    _multigrid = multigrid;
-    _cellsize = cellsize;
-    _value = value;
-	First();   
-}
-
-/// Sets the iterator to the first element
-void MGInteriorIterator::First(){
- 	_value = -1;
-	Next();   
-}
 /// Goes to the next element of the iterator, disables it if position is end
 void MGInteriorIterator::Next(){
  	do {
@@ -204,55 +265,6 @@ void MGInteriorIterator::Next(){
 	} while (((_cellsize == -1 && _multigrid->CellSize(this) != 0) || _multigrid->CellSize(this) != _cellsize) && _geom->Flag()[_value] != ' ' && _value < _geom->Size()[0] * _geom->Size()[1]);
 	if (_value < _geom->Size()[0] * _geom->Size()[1]) _valid = true;
 	else _valid = false;   
-}
-/// Returns an Iterator that is located left from this one.
-// if we are at the left boundary, the cell sees itself
-// if there is more than one cell left, we choose the lower one
-MGInteriorIterator MGInteriorIterator::Left() const{
-    index_t current_size = _multigrid->CellSize(value);
-    if (_value % _geom->Size()[0] == 0) return *this;
-    else if (_multigrid->CellSize(value-1) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid-CellSize(value-1), value-1);
-    else if (current_size!=1 && _multigrid->CellSize(value-current_size/2) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size/2), value-current_size/2);
-    else if (_multigrid->CellSize(value-current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size), value-current_size);
-    else if (_multigrid->CellSize(value-2*current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-2*current_size), value-2*current_size);
-    else if (_multigrid->CellSize(value-2*current_size-current_size*_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-2*current_size-current_size*_geom->Size()[0]), value-2*current_size-current_size*_geom->Size()[0]);
-    else return *this;
-}
-
-/// Returns an Iterator that is located right from this one
-// If we are at the right boundary, the cell sees itself
-// if there is more than one cell right, we choose the lower one
-MGInteriorIterator MGInteriorIterator::Right() const{
-    index_t current_size = _multigrid->CellSize(value);
-    if ((_value + 1)% _geom->Size()[0] == 0) return *this;
-    else if (_multigrid->CellSize(value + current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid-CellSize(value+current_size), value+current_size);
-    else if (_multigrid->CellSize(value + current_size - current_size*_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size - current_size*_geom->Size()[0]), value + current_size - current_size*_geom->Size()[0]);
-    else return *this;
-}
-
-/// Returns an Iterator that is located above this one
-// If we are at the upper domain boundary, the cell sees itself
-// if there is more than one cell at the top, we choose the left one
-MGInteriorIterator MGInteriorIterator::Top() const{
-    index_t current_size = _multigrid->CellSize(value);
-    if (_value >= _geom->Size()[0]*(_geom->Size()[1]-1)) return *this;
-    else if (_multigrid->CellSize(value + current_size*_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size*_geom->Size()[0]), value + current_size*_geom->Size()[0]);
-    else if (_multigrid->CellSize(value + current_size*_geom->Size()[0] - current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size*_geom->Size()[0] - current_size), value + current_size*_geom->Size()[0] - current_size);
-    else return *this;
-}
-
-/// Returns an Iterator that is located below this one
-// If we are at the lower domain boundary, the cell sees itself
-// if there is more than one cell below, we choose the left one
-MGInteriorIterator MGInteriorIterator::Down() const{
-    index_t current_size = _multigrid->CellSize(value);
-    if (_value < _geom->Size()[0]) return *this;
-    else if (_multigrid->CellSize(value-_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid-CellSize(value-_geom->Size()[0])), value-_geom->Size()[0]));
-    else if (current_size!=1 && _multigrid->CellSize(value-_geom->Size()[0]*current_size/2) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-_geom->Size()[0]*current_size/2), value-_geom->Size()[0]*current_size/2);
-    else if (_multigrid->CellSize(value-_geom->Size()[0]*current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-_geom->Size()[0]*current_size), value-_geom->Size()[0]*current_size);
-    else if (_multigrid->CellSize(value-2*_geom->Size()[0]*current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-2*_geom->Size()[0]*current_size), value-2*_geom->Size()[0]*current_size);
-    else if (_multigrid->CellSize(value-current_size-2*current_size*_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size-2*current_size*_geom->Size()[0]), value-current_size-2*current_size*_geom->Size()[0]);
-    else return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -267,22 +279,6 @@ MGBoundaryIterator::MGBoundaryIterator(const Geometry *geom, const MultiGrid *mu
 	First();
 }
 
-/// Constructs a new BoundaryIterator to start iterating from chosen value
-MGBoundaryIterator::MGBoundaryIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize, index_t value){
-    _geom = geom;
-	_valid = true;
-    _multigrid = multigrid;
-    _cellsize = cellsize;
-    _value = value;
-	First();
-}
-
-/// Sets the iterator to the first element
-void MGBoundaryIterator::First(){
-    	_value = -1;
-	Next();
-}
-
 /// Goes to the next element of the iterator, disables it if position is end
 void MGBoundaryIterator::Next(){
     	do {
@@ -290,54 +286,4 @@ void MGBoundaryIterator::Next(){
 	} while (((_cellsize == -1 && _multigrid->CellSize(this) != 0) || _multigrid->CellSize(this) != _cellsize) && _geom->Flag()[_value] == ' ' && _value < _geom->Size()[0] * _geom->Size()[1]);
 	if (_value < _geom->Size()[0] * _geom->Size()[1]) _valid = true;
 	else _valid = false;
-}
-
-/// Returns an Iterator that is located left from this one.
-// if we are at the left boundary, the cell sees itself
-// if there is more than one cell left, we choose the lower one
-MGInteriorIterator MGInteriorIterator::Left() const{
-    index_t current_size = _multigrid->CellSize(value);
-    if (_value % _geom->Size()[0] == 0) return *this;
-    else if (_multigrid->CellSize(value-1) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid-CellSize(value-1), value-1);
-    else if (current_size!=1 && _multigrid->CellSize(value-current_size/2) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size/2), value-current_size/2);
-    else if (_multigrid->CellSize(value-current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size), value-current_size);
-    else if (_multigrid->CellSize(value-2*current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-2*current_size), value-2*current_size);
-    else if (_multigrid->CellSize(value-2*current_size-current_size*_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-2*current_size-current_size*_geom->Size()[0]), value-2*current_size-current_size*_geom->Size()[0]);
-    else return *this;
-}
-
-/// Returns an Iterator that is located right from this one
-// If we are at the right boundary, the cell sees itself
-// if there is more than one cell right, we choose the lower one
-MGInteriorIterator MGInteriorIterator::Right() const{
-    index_t current_size = _multigrid->CellSize(value);
-    if ((_value + 1)% _geom->Size()[0] == 0) return *this;
-    else if (_multigrid->CellSize(value + current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid-CellSize(value+current_size), value+current_size);
-    else if (_multigrid->CellSize(value + current_size - current_size*_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size - current_size*_geom->Size()[0]), value + current_size - current_size*_geom->Size()[0]);
-    else return *this;
-}
-
-/// Returns an Iterator that is located above this one
-// If we are at the upper domain boundary, the cell sees itself
-// if there is more than one cell at the top, we choose the left one
-MGInteriorIterator MGInteriorIterator::Top() const{
-    index_t current_size = _multigrid->CellSize(value);
-    if (_value >= _geom->Size()[0]*(_geom->Size()[1]-1)) return *this;
-    else if (_multigrid->CellSize(value + current_size*_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size*_geom->Size()[0]), value + current_size*_geom->Size()[0]);
-    else if (_multigrid->CellSize(value + current_size*_geom->Size()[0] - current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size*_geom->Size()[0] - current_size), value + current_size*_geom->Size()[0] - current_size);
-    else return *this;
-}
-
-/// Returns an Iterator that is located below this one
-// If we are at the lower domain boundary, the cell sees itself
-// if there is more than one cell below, we choose the left one
-MGInteriorIterator MGInteriorIterator::Down() const{
-    index_t current_size = _multigrid->CellSize(value);
-    if (_value < _geom->Size()[0]) return *this;
-    else if (_multigrid->CellSize(value-_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid-CellSize(value-_geom->Size()[0])), value-_geom->Size()[0]));
-    else if (current_size!=1 && _multigrid->CellSize(value-_geom->Size()[0]*current_size/2) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-_geom->Size()[0]*current_size/2), value-_geom->Size()[0]*current_size/2);
-    else if (_multigrid->CellSize(value-_geom->Size()[0]*current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-_geom->Size()[0]*current_size), value-_geom->Size()[0]*current_size);
-    else if (_multigrid->CellSize(value-2*_geom->Size()[0]*current_size) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-2*_geom->Size()[0]*current_size), value-2*_geom->Size()[0]*current_size);
-    else if (_multigrid->CellSize(value-current_size-2*current_size*_geom->Size()[0]) != 0) return MGInteriorIterator(_geom, _multigrid, _multigrid->CellSize(value-current_size-2*current_size*_geom->Size()[0]), value-current_size-2*current_size*_geom->Size()[0]);
-    else return *this;
 }
