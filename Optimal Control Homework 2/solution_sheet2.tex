@@ -103,9 +103,9 @@
     \item The given discrete-time system can be formulated in the MPC scheme as follows:
     \begin{equation} 
     \begin{array}{rcl} 
-    u_{MPC} (\cdot , x(t_j)) = &\argmin\limits_u& \sum\limits_{k=0}^2 x_j^T x_j + u_j^2 +x_3^T P x_3 \\ 
+    u_{MPC} (\cdot , x(t_j)) = &\argmin\limits_u& \sum\limits_{k=0}^2 x_j^\top x_j + u_j^2 +x_3^\top P x_3 \\ 
     &\mathrm{s.t.}& x_{j+1} = A x_j + B u_j \\ 
-    && |u_j| \leq 1, x_j \in \mathbb{R}^2, x_3 \in \mathcal{X}_f
+    && |u_j| \leq 1, x_j \in \mathbb{R}^2, x_3 \in \mathcal{X}_f%, x_0 = \bar{x}
     \end{array}      
     \end{equation}
     with $P$, $A$, $B$ and $\mathcal{X}_f$ as defined on the exercise sheet.
@@ -114,11 +114,11 @@
    \begin{compactenum}[1.]
    \item The eigenvalue of $P$ is used as a lower limit in the following equation to show the feasibility of the controller:
       \begin{equation*}         
-         \lambda_{min}(P) |x|^2 \leq x^T P x.
+         \lambda_{min}(P) |x|^2 \leq x^\top P x.
       \end{equation*}
    For all $x \in \mathcal{X}_f$ the relation
       \begin{equation*}         
-         x^T P x \leq c = \frac{\lambda_{min}(P)}{|K|^2}
+         x^\top P x \leq c = \frac{\lambda_{min}(P)}{|K|^2}
       \end{equation*}
    holds by definition. After deviding by $\lambda_{min}(P)$ we obtain the input constraint
       \begin{equation*}         
@@ -127,9 +127,9 @@
       That means that $|u| \leq 1$, so the controller is feasible.
    \item By inserting the given definitions we gain
       \begin{align*}         
-         \phi(x_{j+1})-\phi(x_j) &= x_{j+1}^T P x_{j+1} - x_j^T P x_j \\
-         &= ((A-BK)x_j)^T P (A-BK)x_j -  x_j^T P x_j \\
-         &= x_j^T \underbrace{[(A-BK)^T P (A-BK)-P]}_{\substack{L}} x_j \\
+         \phi(x_{j+1})-\phi(x_j) &= x_{j+1}^\top P x_{j+1} - x_j^\top P x_j \\
+         &= ((A-BK)x_j)^\top P (A-BK)x_j -  x_j^\top P x_j \\
+         &= x_j^\top \underbrace{[(A-BK)^\top P (A-BK)-P]}_{\substack{L}} x_j \\
          & \leq \lambda_{max}(L) |x|^2.
       \end{align*}
    The eigenvalues of $L$ were computed via \textsc{Matlab}. Both of them are smaller than -7. Besides, we use that 
@@ -146,64 +146,95 @@
    which was to be proven.
    \item For showing that the terminal region $\mathcal{X}_f$ is invariant, we need to demonstrate that $x_{k+1} \in \mathcal{X}_f$ if $x_{k} \in \mathcal{X}_f$. From the previous task we know that
    \begin{equation*}
-       \phi(x_{j+1})-\phi(x_j) = x_{j+1}^T P x_{j+1} - x_j^T P x_j \leq -f_0(x_j,u_j).
+       \phi(x_{j+1})-\phi(x_j) = x_{j+1}^\top P x_{j+1} - x_j^\top P x_j \leq -f_0(x_j,u_j).
    \end{equation*}
    It follows from the definition of the terminal region ($x_j^T P x_j \leq c$) that 
    \begin{equation*}
-       x_{j+1}^T P x_{j+1} - c \leq -(|x_j|^2 + |u_j|^2).
+       x_{j+1}^\top P x_{j+1} - c \leq -(|x_j|^2 + |u_j|^2).
    \end{equation*}
    This is equivalent to 
    \begin{equation*}
-       x_{j+1}^T P x_{j+1} \leq c - \underbrace{(|x_j|^2 + |u_j|^2)}_{\substack{\geq 0}} \leq c.
+       x_{j+1}^\top P x_{j+1} \leq c - \underbrace{(|x_j|^2 + |u_j|^2)}_{\substack{\geq 0}} \leq c.
    \end{equation*}
    Consequently, $x_{k+1} \in \mathcal{X}$ and the terminal region $\mathcal{X}_f$ is invariant.
    \end{compactenum}
 
-   \item TODO
+   \item The optimal control problem from b) can be written as a quadratically constrained quadratic program with the following variables
    \begin{align*}
-		y &=
+		z &=
 		\begin{bmatrix}
-			x_1^\top & \cdots & x_N^\top & u_0 &  \cdots & u_{N-1} 
+			x_0^\top & x_1^\top & x_2^\top & x_3^\top & u_0 &  u_1 & u_2 
 		\end{bmatrix}^\top
-		\in \set{R}^{3N} \\
-		H &= 2h
+		\in \set{R}^{11} \\
+		H &=
 		\begin{bmatrix}
-			\mat{I}_{2N} & 0 \\
-			0 & \alpha\mat{I}_{N}\\
+			\mat{I}_{2} & 0 & & \cdots&  & & 0 \\
+			0 & \mat{I}_{2} & & & & & \\
+			&  & \mat{I}_{2} & \ddots & & & \\
+			\vdots & & \ddots & P & & & \vdots \\
+			& & & & 1 & & \\
+			& & & &  & 1 & 0 \\
+			0 & & & \cdots & & 0 & 1 \\
 		\end{bmatrix}
-		\in \set{R}^{3N \times 3N} \\
-		A_{ineq} &= 0 \\
-		b_{ineq} &= 0 \\		
+		\in \set{R}^{11 \times 11} \\
 		A_{eq} &= 
 		\begin{bmatrix}
-			\mat{I}_2 & 0 & \cdots & 0 & -B_D & 0 & \cdots & 0 \\
-			-A_D & \mat{I}_2 & 0 & \cdots & 0 & -B_D & \ddots &\vdots\\
-			& \ddots & \ddots & 0 & \cdots & 0 & \ddots & 0\\
-			0 & & -A_D & \mat{I}_2 & 0 & \cdots & 0 & -B_D
+			\mat{I}_2 & 0 & 0 & 0 & 0 & 0 & 0 \\
+			-A & \mat{I}_2 & 0 & 0 & -B & 0 & 0 \\
+			0 & -A & \mat{I}_2 & 0 & 0 & -B & 0\\
+			0 & 0 & -A & \mat{I}_2 & 0 & 0 & -B
 		\end{bmatrix}
-		\in \set{R}^{2N \times 3N} \\	
+		\in \set{R}^{8 \times 11} \\	
 		b_{eq} &= 
 		\begin{bmatrix}
-			(A_D x_0)^\top & 0 & \cdots & 0
+			\bar{x}^\top & 0 & \cdots & 0
 		\end{bmatrix}^\top
-		\in \set{R}^{2N}
+		\in \set{R}^{11} \\
+		A_{ineq} &=
+		\begin{bmatrix}
+			0 & & \cdots & 0 & 1 & 0 & 0 \\
+			& & & & 0 & 1 & 0 \\
+			\vdots & & & \vdots & 0 & 0 & 1 \\
+			& & & & -1 & 0 & 0 \\
+			& & & & 0 & -1 & 0 \\
+			0 & & \cdots & 0 & 0 & 0 & -1 \\
+		\end{bmatrix}
+		\in \set{R}^{6 \times 11} \\
+		b_{ineq} &=
+		\begin{bmatrix}
+			1 & \cdots & 1
+		\end{bmatrix}^\top
+		\in \set{R}^{6}	\\
+		T &=
+		\begin{bmatrix}
+			0 & & & \cdots & & & 0 \\
+			& 0 & & & & & \\
+			& & 0 & & & & \\
+			\vdots & & & P & & & \vdots \\
+			& & & & 0 & & \\
+			& & & & & 0 & \\
+			0 & & & \cdots & & & 0 \\
+		\end{bmatrix}
+		\in \set{R}^{11 \times 11}.
 	\end{align*}
+    The problem is convex, because 
+    \begin{itemize}
+    \item the matrizes $H$ and $T$ are positive definite ($P$ has only positive eigenvalues) and
+    \item linear equations are always convex.
+    \end{itemize}        
     
+    \item Solving the optimization problem from d) in \textsc{Matlab}, we obtain the results shown in Fig. ???. One can see that the calculated input signal is large at first to move the state quickly to the equilibrium. The input constraint prevents higher magnitudes of the input than one. After approximately 10 timesteps both components of the state are moved to the origin and the input signal also equals zero.
+    \item If we insert the other initial condition, we observe that that qualitative evolution of the state and the determined input (Fig. ???) is similar compared to the previous plot. That makes sense because both initial condition do not differ much from each other. The higher absolute value of the new initial condition would request a higher input signal in the unconstrained, optimal case, but we consider a limited input signal.
+    \item In contrast to the MPC algorithm, the \textsc{Matlab} solver for linear-quadratic problems does not include an input constraint. That is why the absolute value of the input signal is not restricted in contrast to the input in the previous tasks. In the LQ solution, we observe that the input is higher than one at first (Fig. ???), because that leads to a smaller value of the cost functional. Another difference is that the MPC scheme only minimizes the cost functional till the prediction horizon which is $N=3$ in our case. However, the prediction horizon does not have a huge impact on the trajectories and the qualitative evolution of the results stays the same.
 \end{enumerate}
 
 
-	\begin{figure}[H]
-		\centering
-		\includegraphics[scale=0.22]{pics/pic_g.jpg}
-		\caption{Trajectories of the solutions for various $\alpha$}		
-		\label{fig:pic_g}
-	\end{figure}
+%	\begin{figure}[H]
+%		\centering
+%		\includegraphics[scale=0.22]{pics/pic_e.jpg}
+%		\caption{State and input plotted over time calculated with the MPC algoritm}		
+%		\label{fig:pic_e}
+%	\end{figure}
 
-	\begin{figure}[H]
-		\centering
-		\includegraphics[scale=0.22]{pics/pic_h.jpg}
-		\caption{Difference between the two solutions}		
-		\label{fig:pic_h}
-	\end{figure}
 
 \end{document}
