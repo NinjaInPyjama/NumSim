@@ -1,0 +1,10 @@
+{
+  "sizeX": 32,
+  "sizeY": 32,
+  "lengthY": 1.0,
+  "velocityX": 1.0,
+  "velocityY": 0.0,
+  "lengthX": 1.0,
+  "pressure": 0.1,
+  "domain": "#################################                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              ##                              #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"
+}
