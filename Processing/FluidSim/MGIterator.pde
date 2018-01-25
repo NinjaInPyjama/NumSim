@@ -12,7 +12,7 @@ class MGIterator extends Iterator {
     first();
   }
   
-    public MGIterator(Geometry geom, MultiGrid grid, int cellSize, int value) {
+  public MGIterator(Geometry geom, MultiGrid grid, int cellSize, int value) {
     _geom = geom;
     _grid = grid;
     _searchSize = cellSize;

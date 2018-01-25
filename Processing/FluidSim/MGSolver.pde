@@ -1,12 +1,12 @@
-class MultiGridSolver extends Solver {
+class MGSolver extends Solver {
   int _smoothCycles;
   
-  public MultiGridSolver(Geometry geom) {
+  public MGSolver(Geometry geom) {
     _geom = geom;
     _smoothCycles = 3;
   }
   
-  public MultiGridSolver(Geometry geom, int smoothCycles) {
+  public MGSolver(Geometry geom, int smoothCycles) {
     _geom = geom;
     _smoothCycles = smoothCycles;
   }

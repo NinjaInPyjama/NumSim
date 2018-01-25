@@ -1,5 +1,4 @@
 class MGBoundaryIterator extends MGIterator {
-  
   private int _boundary;
 
   public MGBoundaryIterator(Geometry geom, MultiGrid grid, int cellSize) {

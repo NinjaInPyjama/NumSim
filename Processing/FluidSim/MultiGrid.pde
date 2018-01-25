@@ -1,4 +1,4 @@
-class MultiGrid extends Grid{
+class MultiGrid extends Grid {
   private int[] _cellSize;
   
   public MultiGrid(Geometry geom) {
@@ -18,7 +18,7 @@ class MultiGrid extends Grid{
   
   public MultiGrid(Grid grid) {
     _geom = grid._geom;
-    _data = grid._data;
+    _data = grid.getData();
     _cellSize = new int[_geom.getSize()[0] * _geom.getSize()[1]];
     for(int i=0; i<_cellSize.length; i++) _cellSize[i] = 1;
   }
@@ -26,10 +26,10 @@ class MultiGrid extends Grid{
   public MultiGrid(Geometry geom, int[] cellSize, float[] data) {
     _geom = geom;
     _cellSize = cellSize;
-    _data = data;   
+    _data = data;
   }
   
-   public void printCellSize() {
+  public void printCellSize() {
     for (int i = _geom.getSize()[1] - 1; i >= 0; i--) {
       for (int j = 0; j < _geom.getSize()[0]; j++) {
         print(" " + _cellSize[i*_geom.getSize()[0] + j] + " ");
@@ -39,6 +39,10 @@ class MultiGrid extends Grid{
     println();
   }
   
+  //public int getCellSize(Iterator it) {
+  //  return _cellSize[it.getValue()];
+  //}
+  
   public int getCellSize(int index) {
     return _cellSize[index];
   }
@@ -46,40 +50,25 @@ class MultiGrid extends Grid{
   public float dxx(MGIterator it) {
     if(_cellSize[it.getValue()] != 0) {
       float h = float(_cellSize[it.getValue()]);
-      if(_cellSize[it.left().getValue()] == h/2) {
-        if(_cellSize[it.right().getValue()] == h/2) {
+      if(_cellSize[it.left().getValue()] == 0.5*h) {
+        if(_cellSize[it.right().getValue()] == 0.5*h) {
+          // Left and right finer
           return 16/9 * (0.5 * (getCell(it.left()) + getCell(it.left().top())) - 2.0 * getCell(it) + 0.5 * (getCell(it.right()) + getCell(it.right().top()))) / (h*h);
         }
-        else if(_cellSize[it.right().getValue()] == h) {
+        else {
+          // Left finer, right same or coarser
           // from matlab dxx = 2 * (4*(4*vl - 7*vc + 3*vr))/(21*h^2)
           return 8/21 * (4.0 * 0.5 * (getCell(it.left()) + getCell(it.left().top())) - 7.0 * getCell(it) + 3.0 * getCell(it.right())) / (h*h);
         }
-        else {
-          // from matlab dxx = 2 * (8*(2*vl - 3*vc + vr))/(27*h^2)
-          return 16/27 * (2.0 * 0.5 * (getCell(it.left()) + getCell(it.left().top())) - 3.0 * getCell(it) + getCell(it.right())) / (h*h);
-        }
-      }
-      else if(_cellSize[it.left().getValue()] == h) {
-        if(_cellSize[it.right().getValue()] == h/2) {
-          return 8/21 * (3.0 * getCell(it.left()) - 7.0 * getCell(it) + 4.0 * 0.5 * (getCell(it.right()) + getCell(it.right().top()))) / (h*h);
-        }
-        else if(_cellSize[it.right().getValue()] == h) {
-          return (getCell(it.right()) - 2.0 * getCell(it) + getCell(it.left())) / h / h;
-        }
-        else {
-          // from matlab dxx = 2 * (2*(3*vl - 5*vc + 2*vr))/(15*h^2)
-          return 4/15 * (3.0 * getCell(it.left()) - 5.0 * getCell(it) + 2.0 * getCell(it.right())) / (h*h);
-        }
       }
       else {
-        if(_cellSize[it.right().getValue()] == h/2) {
-          return 16/27 * (getCell(it.left()) - 3.0 * getCell(it) + 2.0 * 0.5 * (getCell(it.right()) + getCell(it.right().top()))) / (h*h);
-        }
-        else if(_cellSize[it.right().getValue()] == h) {
-          return 4/15 * (2.0 * getCell(it.left()) - 5.0 * getCell(it) + 3.0 * getCell(it.right())) / (h*h);
+        if(_cellSize[it.right().getValue()] == 0.5*h) {
+          // Right same or coarser, left finer
+          return 8/21 * (3.0 * getCell(it.left()) - 7.0 * getCell(it) + 4.0 * 0.5 * (getCell(it.right()) + getCell(it.right().top()))) / (h*h);
         }
         else {
-          return 4/9 * (0.5 * (getCell(it.left()) + getCell(it.left().top())) - 2.0 * getCell(it) + 0.5 * (getCell(it.right()) + getCell(it.right().top()))) / (h*h);
+          // Left and right same or coarser
+          return (getCell(it.right()) - 2.0 * getCell(it) + getCell(it.left())) / (h*h);
         }
       }
     }
@@ -89,40 +78,25 @@ class MultiGrid extends Grid{
   public float dyy(MGIterator it) {
     if(_cellSize[it.getValue()] != 0) {
       float h = float(_cellSize[it.getValue()]);
-      if(_cellSize[it.top().getValue()] == h/2) {
-        if(_cellSize[it.down().getValue()] == h/2) {
-          return 16/9 * (0.5 * (getCell(it.top()) + getCell(it.top().top())) - 2.0 * getCell(it) + 0.5 * (getCell(it.down()) + getCell(it.down().top()))) / (h*h);
-        }
-        else if(_cellSize[it.down().getValue()] == h) {
-          // from matlab dxx = 2 * (4*(4*vl - 7*vc + 3*vr))/(21*h^2)
-          return 8/21 * (4.0 * 0.5 * (getCell(it.top()) + getCell(it.top().top())) - 7.0 * getCell(it) + 3.0 * getCell(it.down())) / (h*h);
+      if(_cellSize[it.top().getValue()] == 0.5*h) {
+        if(_cellSize[it.down().getValue()] == 0.5*h) {
+          // Top and bottom finer
+          return 16/9 * (0.5 * (getCell(it.top()) + getCell(it.top().right())) - 2.0 * getCell(it) + 0.5 * (getCell(it.down()) + getCell(it.down().right()))) / (h*h);
         }
         else {
-          // from matlab dxx = 2 * (8*(2*vl - 3*vc + vr))/(27*h^2)
-          return 16/27 * (2.0 * 0.5 * (getCell(it.top()) + getCell(it.top().top())) - 3.0 * getCell(it) + getCell(it.down())) / (h*h);
-        }
-      }
-      else if(_cellSize[it.top().getValue()] == h) {
-        if(_cellSize[it.down().getValue()] == h/2) {
-          return 8/21 * (3.0 * getCell(it.top()) - 7.0 * getCell(it) + 4.0 * 0.5 * (getCell(it.down()) + getCell(it.down().top()))) / (h*h);
-        }
-        else if(_cellSize[it.down().getValue()] == h) {
-          return (getCell(it.down()) - 2.0 * getCell(it) + getCell(it.top())) / h / h;
-        }
-        else {
-          // from matlab dxx = 2 * (2*(3*vl - 5*vc + 2*vr))/(15*h^2)
-          return 4/15 * (3.0 * getCell(it.top()) - 5.0 * getCell(it) + 2.0 * getCell(it.down())) / (h*h);
+          // Top finer, bottom same or coarser
+          // from matlab dxx = 2 * (4*(4*vt - 7*vc + 3*vb))/(21*h^2)
+          return 8/21 * (4.0 * 0.5 * (getCell(it.top()) + getCell(it.top().right())) - 7.0 * getCell(it) + 3.0 * getCell(it.down())) / (h*h);
         }
       }
       else {
-        if(_cellSize[it.down().getValue()] == h/2) {
-          return 16/27 * (getCell(it.top()) - 3.0 * getCell(it) + 2.0 * 0.5 * (getCell(it.down()) + getCell(it.down().top()))) / (h*h);
-        }
-        else if(_cellSize[it.down().getValue()] == h) {
-          return 4/15 * (2.0 * getCell(it.top()) - 5.0 * getCell(it) + 3.0 * getCell(it.down())) / (h*h);
+        if(_cellSize[it.down().getValue()] == 0.5*h) {
+          // Top same or coarser, bottom finer
+          return 8/21 * (3.0 * getCell(it.top()) - 7.0 * getCell(it) + 4.0 * 0.5 * (getCell(it.down()) + getCell(it.down().right()))) / (h*h);
         }
         else {
-          return 4/9 * (0.5 * (getCell(it.top()) + getCell(it.top().top())) - 2.0 * getCell(it) + 0.5 * (getCell(it.down()) + getCell(it.down().top()))) / (h*h);
+          // Top and bottom same or coarser
+          return (getCell(it.top()) - 2.0 * getCell(it) + getCell(it.down())) / (h*h);
         }
       }
     }
