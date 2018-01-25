@@ -176,9 +176,18 @@ class MGBoundaryIterator : public MGIterator {
 public:
   /// Constructs a new BoundaryIterator
   MGBoundaryIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize);// : MGIterator(geom, multigrid, cellsize);
+  
+  /// Sets boundary
+  void Boundary();
+  
+  /// Sets the iterator to the first element
+  void First();
 
   /// Goes to the next element of the iterator, disables it if position is end
   void Next();
+  
+private:
+    index_t _boundary;
 };
 
 //------------------------------------------------------------------------------

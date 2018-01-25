@@ -175,17 +175,17 @@ void BoundaryIterator::Next() {
 */
 /// Construct a new InteriorIterator
 MGIterator::MGIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize){
- 	_geom = geom;
-	_valid = true;
+    _geom = geom;
+    _valid = true;
     _multigrid = multigrid;
     _cellsize = cellsize;
-	First();   
+    First();   
 }
 
 /// Constructs a new BoundaryIterator to start iterating from chosen value
 MGIterator::MGIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize, const index_t &value){
     _geom = geom;
-	_valid = true;
+    _valid = true;
     _multigrid = multigrid;
     _cellsize = cellsize;
     _value = value;
@@ -252,17 +252,17 @@ MGIterator MGIterator::Down() const{
 */
 /// Construct a new InteriorIterator
 MGInteriorIterator::MGInteriorIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize){
- 	_geom = geom;
-	_valid = true;
+    _geom = geom;
+    _valid = true;
     _multigrid = multigrid;
     _cellsize = cellsize;
-	First();   
+    First();   
 }
 /// Goes to the next element of the iterator, disables it if position is end
 void MGInteriorIterator::Next(){
  	do {
 		_value++;
-	} while (((_cellsize == -1 && _multigrid->CellSize(this) != 0) || _multigrid->CellSize(this) != _cellsize) && _geom->Flag()[_value] != ' ' && _value < _geom->Size()[0] * _geom->Size()[1]);
+	} while (_value < _geom->Size()[0] * _geom->Size()[1] && (_geom->Flag()[_value] != ' ' || ((_cellsize == -1 && _multigrid->CellSize(this) != 0) || _multigrid->CellSize(this) != _cellsize)));
 	if (_value < _geom->Size()[0] * _geom->Size()[1]) _valid = true;
 	else _valid = false;   
 }
@@ -273,17 +273,81 @@ void MGInteriorIterator::Next(){
 /// Constructs a new BoundaryIterator
 MGBoundaryIterator::MGBoundaryIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize){
     _geom = geom;
-	_valid = true;
+    _valid = true;
     _multigrid = multigrid;
     _cellsize = cellsize;
-	First();
+    _boundary = 0;
+    First();
+}
+
+/// Sets boundary
+void MGBoundaryIterator::Boundary(index_t boundary){
+    _boundary = boundary;
+}
+
+/// Sets the iterator to the first element
+void MGBoundaryIterator::First(){
+    switch(_boundary) {
+      case 0: // Right Boundary
+        _value = 2*_geom->Size()[0] - 1;
+        break;
+      case 1: // Bottom Boundary
+        _value = 1;
+        break;
+      case 2: // Left Boundary
+      _value = _geom->Size()[0];
+        break;
+      case 3: // Top Boundary
+        _value = _geom->Size()[0]*(_geom->Size()[1] - 1) + 1;
+        break; 
+      case 4: // Inner Boundaries
+        _value = _geom->Size()[0] + 1;
+        break;
+      default:
+        break;
+    }
+    _valid = true;
 }
 
 /// Goes to the next element of the iterator, disables it if position is end
 void MGBoundaryIterator::Next(){
-    	do {
-		_value++;
-	} while (((_cellsize == -1 && _multigrid->CellSize(this) != 0) || _multigrid->CellSize(this) != _cellsize) && _geom->Flag()[_value] == ' ' && _value < _geom->Size()[0] * _geom->Size()[1]);
-	if (_value < _geom->Size()[0] * _geom->Size()[1]) _valid = true;
-	else _valid = false;
+    	switch(_boundary) {
+      case 0: // Right Boundary
+        do {
+          _value += _geom->Size()[0];
+        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) && ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize));
+        if (_value < _geom->Size()[0] * (_geom->Size()[1]-1)) _valid = true;
+        else _valid = false;
+        break;
+      case 1: // Bottom Boundary
+        do {
+          _value++;
+        } while (_value < _geom->Size()[0] - 1 && ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize));
+        if (_value < _geom->Size()[0] - 1) _valid = true;
+        else _valid = false;
+        break;
+      case 2: // Left Boundary
+        do {
+          _value += _geom->Size()[0];
+        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) && (_geom->Flag()[_value] == ' ' || ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize)));
+        if (_value < _geom->Size()[0] * (_geom->Size()[1]-1)) _valid = true;
+        else _valid = false;
+        break;
+      case 3: // Top Boundary
+        do {
+          _value++;
+        } while (_value < _geom->Size()[0] * _geom->Size()[1] - 1 && (_geom->Flag()[_value] == ' ' || ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize)));
+        if (_value < _geom->Size()[0] * _geom->Size()[1] - 1) _valid = true;
+        else _valid = false;
+        break; 
+      case 4: // Inner Boundaries
+        do {
+          _value++;
+        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) - 1 && (_value%_geom->Size()[0] == 0 || (_value-1)%_geom->Size()[0] == 0 || _geom->Flag()[_value] == ' ' || ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize)));
+        if (_value < _geom->Size()[0] * (_geom->Size()[1]-1) - 1) _valid = true;
+        else _valid = false;
+        break;
+      default:
+        break;
+    }
 }
