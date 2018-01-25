@@ -34,7 +34,7 @@ class MGSolver extends Solver {
   
   private void MGCycle(MultiGrid grid, MultiGrid rhs, int cellSize) {
     for(int i=0; i<_smoothCycles; i++) smooth(grid, rhs); // pre-smoothing
-    if(cellSize < 0.5*min(_geom.getSize()[0], _geom.getSize()[1])) {
+    if(cellSize < min(_geom.getSize()[0], _geom.getSize()[1])) {
       // TODO: solver Cycle
     }
     for(int i=0; i<_smoothCycles; i++) smooth(grid, rhs); // post-smoothing
