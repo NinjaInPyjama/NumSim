@@ -178,7 +178,7 @@ MGIterator::MGIterator(const Geometry *geom, const MultiGrid *multigrid, const i
     _geom = geom;
     _valid = true;
     _multigrid = multigrid;
-    _cellsize = cellsize;
+    _searchsize = cellsize;
     First();   
 }
 
@@ -187,7 +187,7 @@ MGIterator::MGIterator(const Geometry *geom, const MultiGrid *multigrid, const i
     _geom = geom;
     _valid = true;
     _multigrid = multigrid;
-    _cellsize = cellsize;
+    _searchsize = cellsize;
     _value = value;
 }
 
@@ -217,7 +217,8 @@ MGIterator MGIterator::Left() const{
 MGIterator MGIterator::Right() const{
     index_t current_size = _multigrid->CellSize(value);
     if ((_value + 1)% _geom->Size()[0] == 0) return *this;
-    else if (_multigrid->CellSize(value + current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid-CellSize(value+current_size), value+current_size);
+    else if(_multigrid->CellSize(_value+1) != 0) return  MGIterator(_geom, _multigrid, _multigrid->CellSize(_value+1), _value+1);
+    else if (_multigrid->CellSize(value + current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value+current_size), value+current_size);
     else if (_multigrid->CellSize(value + current_size - current_size*_geom->Size()[0]) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size - current_size*_geom->Size()[0]), value + current_size - current_size*_geom->Size()[0]);
     else return *this;
 }
@@ -228,6 +229,7 @@ MGIterator MGIterator::Right() const{
 MGIterator MGIterator::Top() const{
     index_t current_size = _multigrid->CellSize(value);
     if (_value >= _geom->Size()[0]*(_geom->Size()[1]-1)) return *this;
+    else if(_multigrid->CellSize(_value+_geom->Size()[0]) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(_value+_geom->Size()[0]), _value+_geom->Size()[0]);
     else if (_multigrid->CellSize(value + current_size*_geom->Size()[0]) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size*_geom->Size()[0]), value + current_size*_geom->Size()[0]);
     else if (_multigrid->CellSize(value + current_size*_geom->Size()[0] - current_size) != 0) return MGIterator(_geom, _multigrid, _multigrid->CellSize(value + current_size*_geom->Size()[0] - current_size), value + current_size*_geom->Size()[0] - current_size);
     else return *this;
@@ -255,14 +257,14 @@ MGInteriorIterator::MGInteriorIterator(const Geometry *geom, const MultiGrid *mu
     _geom = geom;
     _valid = true;
     _multigrid = multigrid;
-    _cellsize = cellsize;
+    _searchsize = cellsize;
     First();   
 }
 /// Goes to the next element of the iterator, disables it if position is end
 void MGInteriorIterator::Next(){
  	do {
 		_value++;
-	} while (_value < _geom->Size()[0] * _geom->Size()[1] && (_geom->Flag()[_value] != ' ' || ((_cellsize == -1 && _multigrid->CellSize(this) != 0) || _multigrid->CellSize(this) != _cellsize)));
+	} while (_value < _geom->Size()[0] * _geom->Size()[1] && (_geom->Flag()[_value] != ' ' || ((_searchsize == -1 && _multigrid->CellSize(_value) != 0) || _multigrid->CellSize(_value) != _searchsize)));
 	if (_value < _geom->Size()[0] * _geom->Size()[1]) _valid = true;
 	else _valid = false;   
 }
@@ -275,13 +277,13 @@ MGBoundaryIterator::MGBoundaryIterator(const Geometry *geom, const MultiGrid *mu
     _geom = geom;
     _valid = true;
     _multigrid = multigrid;
-    _cellsize = cellsize;
+    _searchsize = cellsize;
     _boundary = 0;
     First();
 }
 
 /// Sets boundary
-void MGBoundaryIterator::Boundary(index_t boundary){
+void MGBoundaryIterator::SetBoundary(index_t boundary){
     _boundary = boundary;
 }
 
@@ -315,35 +317,35 @@ void MGBoundaryIterator::Next(){
       case 0: // Right Boundary
         do {
           _value += _geom->Size()[0];
-        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) && ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize));
+        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) && ((_searchsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _searchsize));
         if (_value < _geom->Size()[0] * (_geom->Size()[1]-1)) _valid = true;
         else _valid = false;
         break;
       case 1: // Bottom Boundary
         do {
           _value++;
-        } while (_value < _geom->Size()[0] - 1 && ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize));
+        } while (_value < _geom->Size()[0] - 1 && ((_searchsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _searchsize));
         if (_value < _geom->Size()[0] - 1) _valid = true;
         else _valid = false;
         break;
       case 2: // Left Boundary
         do {
           _value += _geom->Size()[0];
-        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) && (_geom->Flag()[_value] == ' ' || ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize)));
+        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) && (_geom->Flag()[_value] == ' ' || ((_searchsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _searchsize)));
         if (_value < _geom->Size()[0] * (_geom->Size()[1]-1)) _valid = true;
         else _valid = false;
         break;
       case 3: // Top Boundary
         do {
           _value++;
-        } while (_value < _geom->Size()[0] * _geom->Size()[1] - 1 && (_geom->Flag()[_value] == ' ' || ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize)));
+        } while (_value < _geom->Size()[0] * _geom->Size()[1] - 1 && (_geom->Flag()[_value] == ' ' || ((_searchsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _searchsize)));
         if (_value < _geom->Size()[0] * _geom->Size()[1] - 1) _valid = true;
         else _valid = false;
         break; 
       case 4: // Inner Boundaries
         do {
           _value++;
-        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) - 1 && (_value%_geom->Size()[0] == 0 || (_value-1)%_geom->Size()[0] == 0 || _geom->Flag()[_value] == ' ' || ((_cellsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _cellsize)));
+        } while (_value < _geom->Size()[0] * (_geom->Size()[1]-1) - 1 && (_value%_geom->Size()[0] == 0 || (_value-1)%_geom->Size()[0] == 0 || _geom->Flag()[_value] == ' ' || ((_searchsize == -1 && _grid->CellSize(_value) != 0) || _grid->CellSize(_value) != _searchsize)));
         if (_value < _geom->Size()[0] * (_geom->Size()[1]-1) - 1) _valid = true;
         else _valid = false;
         break;

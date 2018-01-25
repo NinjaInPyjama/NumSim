@@ -152,9 +152,9 @@ public:
   // if there is more than one cell below, we choose the left one
   MGIterator Down() const;
   
-private:
+protected:
     MultiGrid _multigrid;
-    index_t _cellsize;
+    index_t _searchsize;
 };
 
 //------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ public:
   MGBoundaryIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize);// : MGIterator(geom, multigrid, cellsize);
   
   /// Sets boundary
-  void Boundary();
+  void SetBoundary();
   
   /// Sets the iterator to the first element
   void First();

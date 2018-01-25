@@ -124,27 +124,36 @@ class MultiGrid : public Grid {
 public:
     /// Constructs a grid based on a geometry
   MultiGrid(const Geometry *geom);
-
-  MultiGrid(const Geometry *geom, const Grid *valueGrid );
   
-  MultiGrid(const Geometry *geom, const index_t* cellSize, const Grid *valueGrid );
+  MultiGrid(const Geometry *geom, const index_t* cellSize, const real_t* data );
+  
+  MultiGrid(const Grid *grid);
+
 
   /// Deletes the multigrid
   ~MultiGrid();
   
+  void printCellSize() const;
+  
   const index_t &CellSize(const index_t index) const;
   
   /// Write access to the grid cell at position [it]
-  real_t &Cell(const Iterator &it);
-  /// Read access to the grid cell at position [it]
-  const real_t &Cell(const Iterator &it) const;
+real_t &Cell(const index_t index);
 
-  Restrict
+  /// Read access to the grid cell at position [it]
+//  const real_t &Cell(const Iterator &it) const;
+
+  real_t dxx(const MGIterator &it) const;
   
-  Interpolate
+  real_t dyy(const MGIterator &it) const;
+  
+  MultiGrid * restrict(const index_t resSize) const; 
+  
+  MultiGrid * prolong(const index_t intSize) const; 
   
 private:
-    Grid _grid;
+    index_t* _cellSize;
+    
     
 };
 

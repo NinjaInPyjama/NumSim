@@ -10,7 +10,7 @@ Grid::Grid(const Geometry * geom) {
 /// Constructs a grid based on a geometry with an offset
 // @param geom   Geometry information
 // @param offset distance of staggered grid point to cell's anchor point;
-//               (anchor point = lower left corner)
+//               (anchor point = lower Left corner)
 Grid::Grid(const Geometry * geom, const multi_real_t & offset) {
 	_data = new real_t[geom->Size()[0] * geom->Size()[1]];
 	_offset = offset;
@@ -74,11 +74,11 @@ real_t Grid::Interpolate(const multi_real_t & pos) const {
 
 	// Lower left data point
     real_t val_ll = _data[index_x + index_y*_geom->Size()[0]];
-	// Lower right data point
+	// Lower Right data point
 	real_t val_lr = _data[index_x + 1 + index_y*_geom->Size()[0]];
 	// Upper left data point
     real_t val_ul = _data[index_x + (index_y + 1)*_geom->Size()[0]];
-	// Upper right data point
+	// Upper Right data point
     real_t val_ur = _data[index_x + 1 + (index_y + 1)*_geom->Size()[0]];
     
 	// Proportion in x-dim
@@ -97,7 +97,7 @@ real_t Grid::dx_l(const Iterator & it) const {
 	return (Cell(it) - Cell(it.Left()))/_geom->Mesh()[0];
 }
 
-/// Computes the right-sided difference quatient in x-dim at [it]
+/// Computes the Right-sided difference quatient in x-dim at [it]
 real_t Grid::dx_r(const Iterator & it) const {
 	return (Cell(it.Right()) - Cell(it)) / _geom->Mesh()[0];
 }
@@ -107,7 +107,7 @@ real_t Grid::dy_l(const Iterator & it) const {
 	return (Cell(it) - Cell(it.Down())) / _geom->Mesh()[1];
 }
 
-/// Computes the right-sided difference quatient in x-dim at [it]
+/// Computes the Right-sided difference quatient in x-dim at [it]
 real_t Grid::dy_r(const Iterator & it) const {
 	return (Cell(it.Top()) - Cell(it)) / _geom->Mesh()[1];
 }
@@ -163,7 +163,7 @@ real_t Grid::DC_du2_x(const Iterator & it, const real_t & alpha) const {
 
 	// Value of u at iterator cell (u_{i,j})
 	const real_t val_u = Cell(it);
-	// Value of u at the right neighbor of the iterator cell (u_{i+1,j})
+	// Value of u at the Right neighbor of the iterator cell (u_{i+1,j})
 	const real_t val_u_r = Cell(it.Right());
 	// Value of u at the left neighbor of the iterator cell (u_{i-1,j})
 	const real_t val_u_l = Cell(it.Left());
@@ -183,9 +183,9 @@ real_t Grid::DC_dv2_y(const Iterator & it, const real_t & alpha) const {
 
 	// Value of v at iterator cell (v_{i,j})
 	const real_t val_v = Cell(it);
-	// Value of v at the upper neighbor (top) of the iterator cell (v_{i,j+1})
+	// Value of v at the upper neighbor (Top) of the iterator cell (v_{i,j+1})
 	const real_t val_v_t = Cell(it.Top());
-	// Value of v at the lower neighbor (down) of the iterator cell (v_{i,j-1})
+	// Value of v at the lower neighbor (Down) of the iterator cell (v_{i,j-1})
 	const real_t val_v_d = Cell(it.Down());
 	// Interpolated value of v between this and its upper neighbor cell (v_{i,j+1/2})
 	const real_t val_v_ct = (val_v_t + val_v) / 2.0;
@@ -276,3 +276,312 @@ real_t * Grid::Data() {
 }
 
 
+
+
+
+MultiGrid::MultiGrid(const Geometry *geom) {
+    _geom = geom;
+    _data = new real_t[geom->Size()[0] * geom->Size()[1]];
+    _cellSize = new index_t[geom->Size()[0] * geom->Size()[1]];
+    Initialize(0.0);
+    for(int i=0; i<geom->Size()[0] * geom->Size()[1]; i++) _cellSize[i] = 1;
+    
+}
+
+  
+MultiGrid::MultiGrid(const Geometry *geom, const index_t* cellSize, const real_t* data ){
+    _geom = geom;
+    _data = data;
+    _cellSize = cellSize;
+}
+  
+MultiGrid::MultiGrid(const Grid *grid) {
+    _geom = grid->_geom;
+    _data = new real_t[geom->Size()[0] * geom->Size()[1]];
+    _cellSize = new index_t[geom->Size()[0] * geom->Size()[1]];
+    for(int i=0; i<geom->Size()[0] * geom->Size()[1]; i++) {
+        _cellSize[i] = 1;
+        _data[i] = grid->_data[i];
+    }
+}
+
+  /// Deletes the multigrid
+MultiGrid::~MultiGrid() {}
+
+real_t &Cell(const index_t index) {
+    return _data[index];
+}
+
+void MultiGrid::printCellSize() const{
+    for (int i = _geom->Size()[1] - 1; i >= 0; i--) {
+        for (int j = 0; j < _geom->Size()[0]; j++) {
+            std::cout << " " << _cellSize[i*_geom->Size()[0] + j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+const index_t &MultiGrid::CellSize(const index_t index) const{
+    return _cellSize[index];
+}
+  
+  /// Write access to the grid cell at position [it]
+//real_t &MultiGrid::Cell(const Iterator &it) {
+    
+//}
+  /// Read access to the grid cell at position [it]
+//const real_t &MultiGrid::Cell(const Iterator &it) const{
+    
+//}
+
+real_t MultiGrid::dxx(const MGIterator &it) const{
+    if(_cellSize[it.Value()] != 0) {
+      real_t h = _cellSize[it.Value()]*_geom->Mesh()[0];
+      if(_cellSize[it.Left().Value()] == 0.5*h) {
+        if(_cellSize[it.Right().Value()] == 0.5*h) {
+          // Left and right finer
+          return 16/9 * (0.5 * (Cell(it.Left()) + Cell(it.Left().Top())) - 2.0 * Cell(it) + 0.5 * (Cell(it.Right()) + Cell(it.Right().Top()))) / (h*h);
+        }
+        else {
+          // Left finer, right same or coarser
+          // from matlab dxx = 2 * (4*(4*vl - 7*vc + 3*vr))/(21*h^2)
+          return 8/21 * (4.0 * 0.5 * (Cell(it.Left()) + Cell(it.Left().Top())) - 7.0 * Cell(it) + 3.0 * Cell(it.Right())) / (h*h);
+        }
+      }
+      else {
+        if(_cellSize[it.Right().Value()] == 0.5*h) {
+          // Right same or coarser, left finer
+          return 8/21 * (3.0 * Cell(it.Left()) - 7.0 * Cell(it) + 4.0 * 0.5 * (Cell(it.Right()) + Cell(it.Right().Top()))) / (h*h);
+        }
+        else {
+          // Left and right same or coarser
+          return (Cell(it.Right()) - 2.0 * Cell(it) + Cell(it.Left())) / (h*h);
+        }
+      }
+    }
+    else {
+        
+        std::cout << "access to zero field" << std::endl;
+        return 0.0;
+    }
+}
+  
+real_t MultiGrid::dyy(const MGIterator &it) const{
+    if(_cellSize[it.Value()] != 0) {
+      real_t h = _cellSize[it.Value()]*_geom->Mesh()[1];
+      if(_cellSize[it.Top().Value()] == 0.5*h) {
+        if(_cellSize[it.Down().Value()] == 0.5*h) {
+          // Top and bottom finer
+          return 16/9 * (0.5 * (Cell(it.Top()) + Cell(it.Top().Right())) - 2.0 * Cell(it) + 0.5 * (Cell(it.Down()) + Cell(it.Down().Right()))) / (h*h);
+        }
+        else {
+          // Top finer, bottom same or coarser
+          // from matlab dxx = 2 * (4*(4*vt - 7*vc + 3*vb))/(21*h^2)
+          return 8/21 * (4.0 * 0.5 * (Cell(it.Top()) + Cell(it.Top().Right())) - 7.0 * Cell(it) + 3.0 * Cell(it.Down())) / (h*h);
+        }
+      }
+      else {
+        if(_cellSize[it.Down().Value()] == 0.5*h) {
+          // Top same or coarser, bottom finer
+          return 8/21 * (3.0 * Cell(it.Top()) - 7.0 * Cell(it) + 4.0 * 0.5 * (Cell(it.Down()) + Cell(it.Down().Right()))) / (h*h);
+        }
+        else {
+          // Top and bottom same or coarser
+          return (Cell(it.Top()) - 2.0 * Cell(it) + Cell(it.Down())) / (h*h);
+        }
+      }
+    }
+    else {
+        
+        std::cout << "access to zero field" << std::endl;
+        return 0.0;
+    }
+}
+  
+MultiGrid * MultiGrid::restrict(const index_t resSize) const {
+    index_t* newCellSize = new int[_geom->Size()[0]*_geom->Size()[1]];
+    real_t* newData = new real_t[_geom->Size()[0]*_geom->Size()[1]];
+    for(int i=0; i<geom->Size()[0] * geom->Size()[1]; i++) {
+        newCellSize[i] = _cellSize[i];
+        newData[i] = _data[i];
+    }
+    
+    
+    it = MGInteriorIterator(_geom, new MultiGrid(_geom, newCellSize, newData), resSize);
+    
+    for(it.First(); it.Valid(); it.Next()) {
+      if(_cellSize[it.Top().Value()] == resSize && _geom->Flag()[it.Top().Value()] == ' ' 
+         && _cellSize[it.Right().Value()] == resSize & _geom->Flag()[it.Right().Value()] == ' ' 
+         && _cellSize[it.Top().Right().Value()] == resSize && _geom->Flag()[it.Top().Right().Value()] == ' '
+         && _cellSize[it.Left().Value()] == resSize
+         && _cellSize[it.Left().Top().Value()] == resSize
+         && _cellSize[it.Down().Value()] == resSize
+         && _cellSize[it.Down().Right().Value()] == resSize
+         && _cellSize[it.Top().Top().Value()] == resSize
+         && _cellSize[it.Top().Top().Right().Value()] == resSize
+         && _cellSize[it.Right().Right().Value()] == resSize
+         && _cellSize[it.Right().Right().Top().Value()] == resSize) {
+        
+         Cell(it) =  0.25*(Cell(it) + Cell(it.Top()) + Cell(it.Right()) + Cell(it.Top().Right()));
+         Cell(it.Value()+2*resSize-1) =  0.25*(Cell(it) + Cell(it.Top()) + Cell(it.Right()) + Cell(it.Top().Right()));
+         Cell(it.Value()+2*resSize*(_geom->Size()[0]-1)) =  0.25*(Cell(it) + Cell(it.Top()) + Cell(it.Right()) + Cell(it.Top().Right()));
+         // add here the other 4 points
+         
+         int index = it.Value();
+         int indexTop = it.Top().Value();
+         int indexRight = it.Right().Value();
+         int indexTopRight = it.Top().Right().Value();
+        
+         newCellSize[index] = 2*resSize;
+         newCellSize[indexTop] = 0;
+         newCellSize[indexRight] = 0;
+         newCellSize[indexTopRight] = 0;
+      }
+    }
+    
+    bit = MGBoundaryIterator(_geom, new MultiGrid(_geom, newCellSize, newData), resSize);
+
+    bit.setBoundary(0);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+      if(_cellSize[bit.Top().Value()] == resSize & _geom->Flag()[bit.Top().Value()] == _geom->Flag()[bit.Value()]
+         && _cellSize[bit.Left().Value()] == resSize
+         && _cellSize[bit.Left().Top().Value()] == resSize) {
+         
+         //write2Cell(bit, 0.5*(Cell(bit) + Cell(bit.Top())));
+        
+         int index = bit.Value();
+         int indexRight = bit.Top().Value();
+        
+         newCellSize[index] = 2*resSize;
+         newCellSize[indexRight] = 0;
+       }
+    }
+    
+    bit.setBoundary(1);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+      if(_cellSize[bit.Right().Value()] == resSize & _geom->Flag()[bit.Right().Value()] == _geom->Flag()[bit.Value()]
+         && _cellSize[bit.Top().Value()] == resSize
+         && _cellSize[bit.Top().Right().Value()] == resSize) {
+         
+         //write2Cell(bit, 0.5*(Cell(bit) + Cell(bit.Right())));
+         
+         int index = bit.Value();
+         int indexRight = bit.Right().Value();
+        
+         newCellSize[index] = 2*resSize;
+         newCellSize[indexRight] = 0;
+       }
+    }
+    
+    bit.setBoundary(2);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+      if(_cellSize[bit.Top().Value()] == resSize & _geom->Flag()[bit.Top().Value()] == _geom->Flag()[bit.Value()]
+         && _cellSize[bit.Right().Value()] == resSize
+         && _cellSize[bit.Right().Top().Value()] == resSize) {
+         
+         //write2Cell(bit, 0.5*(Cell(bit) + Cell(bit.Top())));
+        
+         int index = bit.Value();
+         int indexRight = bit.Top().Value();
+        
+         newCellSize[index] = 2*resSize;
+         newCellSize[indexRight] = 0;
+       }
+    }
+    
+    bit.setBoundary(3);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+      if(_cellSize[bit.Right().Value()] == resSize & _geom->Flag()[bit.Right().Value()] == _geom->Flag()[bit.Value()]
+         && _cellSize[bit.Down().Value()] == resSize
+         && _cellSize[bit.Down().Right().Value()] == resSize) {
+         
+         //write2Cell(bit, 0.5*(Cell(bit) + Cell(bit.Right())));
+        
+         int index = bit.Value();
+         int indexRight = bit.Right().Value();
+        
+         newCellSize[index] = 2*resSize;
+         newCellSize[indexRight] = 0;
+       }
+    }
+    _geom->updateP(new MultiGrid(_geom, newCellSize, newData));
+    
+    return new MultiGrid(_geom, newCellSize, newData);
+}
+  
+MultiGrid * MultiGrid::prolong(const index_t intSize) const {
+    index_t* newCellSize = new int[_geom->Size()[0]*_geom->Size()[1]];
+    real_t* newData = new real_t[_geom->Size()[0]*_geom->Size()[1]];
+    for(int i=0; i<geom->Size()[0] * geom->Size()[1]; i++) {
+        newCellSize[i] = _cellSize[i];
+        newData[i] = _data[i];
+    }
+    
+    
+    it = MGInteriorIterator(_geom, new MultiGrid(_geom, newCellSize, newData), intSize);
+    for(it.First(); it.Valid(); it.Next()) {
+       if(_cellSize[it.Value()] == intSize && _geom->Flag()[it.Value()] == ' ') {
+         
+         newCellSize[it.Value()] = intSize/2;
+         newCellSize[it.Value()+intSize/2] = intSize/2;
+         newCellSize[it.Value()+intSize/2*_geom->Size()[0]] = intSize/2;
+         newCellSize[it.Value()+intSize/2*(1+_geom->Size()[0])] = intSize/2;
+         
+         Cell(it.Top()) =  Cell(it);
+         Cell(it.Right()) = Cell(it);
+         Cell(it.Top().Right()) = Cell(it);
+         
+         Cell(it.Value()+intSize/2-1) = Cell(it);
+         Cell(it.Top().Value()+intSize/2-1) = Cell(it);
+         Cell(it.Right().Value()+intSize/2-1) = Cell(it);
+         Cell(it.Top().Right().Value()+intSize/2-1) = Cell(it);
+         
+         Cell(it.Value()+intSize/2*(_geom->Size()[0]-1)) = Cell(it);
+         Cell(it.Top().Value()+intSize/2*(_geom->Size()[0]-1)) = Cell(it);
+         Cell(it.Right().Value()+intSize/2*(_geom->Size()[0]-1)) = Cell(it);
+         Cell(it.Top().Right().Value()+intSize/2*(_geom->Size()[0]-1)) = Cell(it);
+       }
+    }
+    
+    bit = MGBoundaryIterator(_geom, new MultiGrid(_geom, newCellSize, newData), intSize);
+
+    bit.setBoundary(0);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+      if(_cellSize[bit.Value()] == intSize) {
+        
+        newCellSize[bit.Value()] = intSize/2;
+        newCellSize[bit.Value() + intSize/2*_geom->Size()[0]] = intSize/2;
+      }
+    }
+    
+    bit.setBoundary(1);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+      if(_cellSize[bit.Value()] == intSize) {
+        
+        newCellSize[bit.Value()] = intSize/2;
+        newCellSize[bit.Value() + intSize/2] = intSize/2;
+      }
+    }
+    
+    bit.setBoundary(2);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+      if(_cellSize[bit.Value()] == intSize) {
+        
+        newCellSize[bit.Value()] = intSize/2;
+        newCellSize[bit.Value() + intSize/2*_geom->Size()[0]] = intSize/2;
+      }
+    }
+    
+    bit.setBoundary(3);
+    for(bit.First(); bit.Valid(); bit.Next()) {
+      if(_cellSize[bit.Value()] == intSize) {
+        
+        newCellSize[bit.Value()] = intSize/2;
+        newCellSize[bit.Value() + intSize/2] = intSize/2;
+      }
+    }
+    
+    return new MultiGrid(_geom, newCellSize, newData);
+  }
+}
