@@ -23,6 +23,7 @@
 //------------------------------------------------------------------------------
 #include "typedef.hpp"
 #include "geometry.hpp"
+#include "grid.hpp"
 
 //------------------------------------------------------------------------------
 /** Iterator base class
@@ -126,35 +127,39 @@ private:
 class MGIterator : public Iterator {
 public:
   /// Construct a new InteriorIterator
-  MGIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize);
+  MGIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize);
   /// Constructs a new BoundaryIterator to start iterating from chosen value
-  MGIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize, const index_t &value);
-
+  MGIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize, index_t value);
+  //Default constructor
+  MGIterator();
+  
   /// Sets the iterator to the first element
   void First();
   /// Returns an Iterator that is located left from this one.
   // if we are at the left boundary, the cell sees itself
   // if there is more than one cell left, we choose the lower one
-  MGIterator Left() const;
+  MGIterator MGLeft() const;
 
   /// Returns an Iterator that is located right from this one
   // If we are at the right boundary, the cell sees itself
   // if there is more than one cell right, we choose the lower one
-  MGIterator Right() const;
+  MGIterator MGRight() const;
 
   /// Returns an Iterator that is located above this one
   // If we are at the upper domain boundary, the cell sees itself
   // if there is more than one cell at the top, we choose the left one
-  MGIterator Top() const;
+  MGIterator MGTop() const;
 
   /// Returns an Iterator that is located below this one
   // If we are at the lower domain boundary, the cell sees itself
   // if there is more than one cell below, we choose the left one
-  MGIterator Down() const;
+  MGIterator MGDown() const;
   
 protected:
-    MultiGrid _multigrid;
+    const MultiGrid *_multigrid;
     index_t _searchsize;
+    bool _watchThemAll; 
+    
 };
 
 //------------------------------------------------------------------------------
@@ -163,10 +168,17 @@ protected:
 class MGInteriorIterator : public MGIterator {
 public:
   /// Construct a new InteriorIterator
-  MGInteriorIterator(const Geometry *geom, const MultiGrid *multigrid, const index_t cellsize);// : MGIterator(geom, multigrid, cellsize);
+  MGInteriorIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize);// : MGIterator(geom, multigrid, cellsize);
+  
+  /// Construct a new InteriorIterator
+  MGInteriorIterator(const Geometry *geom, const MultiGrid *multigrid);// : MGIterator(geom, multigrid, cellsize);
+  
+  /// Sets the iterator to the first element
+  void First();
   
   /// Goes to the next element of the iterator, disables it if position is end
   void Next();
+private:
 };
 
 //------------------------------------------------------------------------------
@@ -177,8 +189,9 @@ public:
   /// Constructs a new BoundaryIterator
   MGBoundaryIterator(const Geometry *geom, const MultiGrid *multigrid, index_t cellsize);// : MGIterator(geom, multigrid, cellsize);
   
+  
   /// Sets boundary
-  void SetBoundary();
+  void SetBoundary(index_t boundary);
   
   /// Sets the iterator to the first element
   void First();

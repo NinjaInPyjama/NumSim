@@ -29,12 +29,20 @@
 
 #include "typedef.hpp"
 #include "grid.hpp"
-#include "iterator.hpp"
+//
 #include "parameter.hpp"
 #include "solver.hpp"
 #include "particle.hpp"
 
 //------------------------------------------------------------------------------
+class Iterator;
+class MGIterator;
+class InteriorIterator;
+class BackwardsIterator;
+class BoundaryIterator;
+class MGIterator;
+class MGInteriorIterator;
+class MGBoundaryIterator;
 class Compute {
 public:
   /// Creates a compute instance with given geometry and parameter
