@@ -1,4 +1,5 @@
 #include "geometry.hpp"
+#include "iterator.hpp"
 
 /// Constructs a default geometry:
 // driven cavity with 128 x 128 grid, no-slip boundary conditions

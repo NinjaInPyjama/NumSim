@@ -1,4 +1,5 @@
 #include "compute.hpp"
+#include "iterator.hpp"
 
 using namespace std;
 

@@ -27,11 +27,12 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
-
 #include "typedef.hpp"
 #include "grid.hpp"
+//
 
 //------------------------------------------------------------------------------
+
 class Geometry {
 public:
   /// Constructs a default geometry:

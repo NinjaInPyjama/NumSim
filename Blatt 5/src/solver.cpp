@@ -59,3 +59,47 @@ real_t SOR::Cycle(Grid * grid, const Grid * rhs) const {
     total_res = total_res/real_t(fluidcells);
     return total_res;
 }
+
+
+MGSolver::MGSolver(const Geometry *geom, index_t smoothCycles) {
+    _geom = geom;
+    _smoothCycles = smoothCycles;
+}
+
+
+MGSolver::MGSolver(const Geometry *geom) {
+    _geom = geom;
+    _smoothCycles = 3;
+}
+  
+/// Destructor
+MGSolver::~MGSolver() {}
+
+void MGSolver::MGCycle(Grid *grid, Grid *rhs) {
+    MGCycle(new MultiGrid(grid, _geom), new MultiGrid(rhs, _geom), 1);
+}
+  
+real_t MGSolver::localRes(const MGIterator &it, MultiGrid *grid, MultiGrid *rhs) {
+    return grid->dxx(it) + grid->dyy(it) - rhs->Cell(it);
+}
+  
+void MGSolver::smooth(MultiGrid *grid, MultiGrid *rhs) {
+    
+}
+  
+MultiGrid * MGSolver::RES( MultiGrid *grid, MultiGrid *rhs) {
+    MultiGrid * res = new MultiGrid(grid, _geom);
+    MGInteriorIterator it = MGInteriorIterator(_geom, res);
+    for(it.First(); it.Valid(); it.Next()) {
+      res->Cell(it) = -rhs->Cell(it);
+    }
+    return res;
+}
+
+void MGSolver::MGCycle(MultiGrid *grid, MultiGrid *rhs, index_t cellSize) {
+    for(int i=0; i<_smoothCycles; i++) smooth(grid, rhs); // pre-smoothing
+    if(cellSize < 0.5*std::min(_geom->Size()[0], _geom->Size()[1])) {
+      // TODO: solver Cycle
+    }
+    for(int i=0; i<_smoothCycles; i++) smooth(grid, rhs); // post-smoothing
+}

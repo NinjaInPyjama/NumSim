@@ -75,5 +75,32 @@ public:
 protected:
   real_t _omega;
 };
+
+
+
+class MGSolver : public Solver {
+public:
+  /// Constructs an actual MG solver
+  MGSolver(const Geometry *geom, index_t smoothCycles);
+  ///war ursprünglich nicht enthalten, macht aber sonst wenig sinn.
+  MGSolver(const Geometry *geom);
+  /// Destructor
+  ~MGSolver();
+
+  void MGCycle(Grid *grid, Grid *rhs);
+  
+protected:
+  index_t smoothCycles;
+  
+  real_t localRes(const MGIterator &it, MultiGrid *grid, MultiGrid *rhs);
+  
+  void smooth(MultiGrid *grid, MultiGrid *rhs);
+  
+  MultiGrid *RES(MultiGrid *grid, MultiGrid *rhs);
+  
+  void MGCycle(MultiGrid *grid, MultiGrid *rhs, index_t cellSize);
+private:
+    index_t _smoothCycles;
+};
 //------------------------------------------------------------------------------
 #endif // __SOLVER_HPP

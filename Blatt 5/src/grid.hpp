@@ -29,13 +29,25 @@
 
 #include "typedef.hpp"
 #include "geometry.hpp"
-#include "iterator.hpp"
+//
 
 //------------------------------------------------------------------------------
+class Iterator;
+class MGIterator;
+class InteriorIterator;
+class BackwardsIterator;
+class BoundaryIterator;
+class MGIterator;
+class MGInteriorIterator;
+class MGBoundaryIterator;
+
 class Grid {
 public:
   /// Constructs a grid based on a geometry
   Grid(const Geometry *geom);
+  
+  /// Default constructor
+  Grid();
 
   /// Constructs a grid based on a geometry with an offset
   // @param geom   Geometry information
@@ -124,27 +136,37 @@ class MultiGrid : public Grid {
 public:
     /// Constructs a grid based on a geometry
   MultiGrid(const Geometry *geom);
-
-  MultiGrid(const Geometry *geom, const Grid *valueGrid );
   
-  MultiGrid(const Geometry *geom, const index_t* cellSize, const Grid *valueGrid );
+  MultiGrid(const Geometry *geom, index_t* cellSize, real_t* data );
+  
+  MultiGrid( Grid *grid, const Geometry *geom);
+  //Default constructor
+  MultiGrid();
 
   /// Deletes the multigrid
   ~MultiGrid();
   
+  void printCellSize() const;
+  
   const index_t &CellSize(const index_t index) const;
   
   /// Write access to the grid cell at position [it]
-  real_t &Cell(const Iterator &it);
-  /// Read access to the grid cell at position [it]
-  const real_t &Cell(const Iterator &it) const;
+real_t &Cell(const index_t index);
 
-  Restrict
+  /// Read access to the grid cell at position [it]
+//  const real_t &Cell(const Iterator &it) const;
+
+  real_t dxx(const MGIterator &it);
   
-  Interpolate
+  real_t dyy(const MGIterator &it);
+  
+  MultiGrid * restrict(const index_t resSize); 
+  
+  MultiGrid * prolong(const index_t intSize); 
   
 private:
-    Grid _grid;
+    index_t* _cellSize;
+    
     
 };
 
