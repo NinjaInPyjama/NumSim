@@ -85,8 +85,22 @@
 			& \quad u_k \in \mathcal{U}
 		\end{split}
 	\end{equation*}
-	The function $f$ is the transition function which donates the state $x_{k+1}$ given $x_k$ and $u_k$. It can be read from the graph e.g. $f(\xi_1, u_0) = \xi_2$ (soll ich des hier alles einfügen?).\\
-	The Value function iteration
+	The function $f$ is the transition function which donates the state $x_{k+1}$ given $x_k$ and $u_k$. It can be read from the graph:
+	
+	\begin{center}
+	\begin{tabular}{ l c r }
+    $f(\xi_1, u_0) = \xi_2$, & $f(\xi_1, u_1) = \xi_2$, & $f(\xi_1, u_2) = \xi_3$, \\
+	$f(\xi_2, u_0) = \xi_7$, & $f(\xi_2, u_1) = \xi_5$, & $f(\xi_2, u_2) = \xi_4$, \\
+	$f(\xi_3, u_0) = \xi_4$, & $f(\xi_3, u_1) = \xi_6$, & $f(\xi_3, u_2) = \xi_5$, \\
+	$f(\xi_4, u_0) = \xi_7$, & $f(\xi_4, u_1) = \xi_8$, & $f(\xi_4, u_2) = \xi_6$, \\
+	$f(\xi_5, u_0) = \xi_4$, & $f(\xi_5, u_1) = \xi_4$, & $f(\xi_5, u_2) = \xi_6$, \\
+	$f(\xi_6, u_0) = \xi_1$, & $f(\xi_6, u_1) = \xi_7$, & $f(\xi_6, u_2) = \xi_8$, \\
+	$f(\xi_7, u_0) = \xi_8$, & $f(\xi_7, u_1) = \xi_8$, & $f(\xi_7, u_2) = \xi_8$, \\
+	$f(\xi_8, u_0) = \xi_8$, & $f(\xi_8, u_1) = \xi_8$, & $f(\xi_8, u_2) = \xi_8$. \\
+    \end{tabular}
+	\end{center}
+	
+	The value function iteration
 	\begin{equation*}
 		V^{new}(\xi_k) = (TV^{old})(\xi_k), \quad \xi_k \in \mathcal{X}
 	\end{equation*}
@@ -95,7 +109,7 @@
 		(TV)(\cdot ) = \min_{u\in\mathcal{U}}\{ f_0(\cdot , u) + 0.9\,V(f(\cdot , u))\}.
 	\end{equation*}
 	
-	\item Trusting the MATLAB program the Value function reads
+	\item Trusting in the MATLAB program, the value function reads
 	\begin{equation*}
 		V^\star =
 		\begin{bmatrix}
@@ -104,16 +118,13 @@
 	\end{equation*}
 	where every entry represents the optimal cost when starting at the corresponding state.	
 	The optimal control feedback is given by
-	\begin{align*}
-		v_k(\xi_1) &= 2 \\
-		v_k(\xi_2) &= 2 \\
-		v_k(\xi_3) &= 0 \\
-		v_k(\xi_4) &= 1 \\
-		v_k(\xi_5) &= 0 \\
-		v_k(\xi_6) &= 1 \\
-		v_k(\xi_7) &= 0 \; (\text{or } 1 \text{ or } 2)\\
-		v_k(\xi_8) &= 0 \; (\text{or } 1 \text{ or } 2)
-	\end{align*}
+	\begin{center}
+	\begin{tabular}{ l c r }
+    $v_k(\xi_1) = 2$, & $v_k(\xi_2) = 2$, & $v_k(\xi_3) = 0$, \\
+	$v_k(\xi_4) = 1$, & $v_k(\xi_5) = 0$, & $v_k(\xi_6) = 1$, \\
+	$v_k(\xi_7) = 0 \; (\text{or } 1 \text{ or } 2)$, & & $v_k(\xi_8) = 0 \; (\text{or } 1 \text{ or } 2)$. \\
+    \end{tabular}
+	\end{center}
 	This leads to the optimal path (starting at $\xi_1$)
 	\begin{equation*}
 		\begin{bmatrix}
@@ -127,20 +138,18 @@
 		\end{bmatrix}.
 	\end{equation*}	
 	
-	\item This proof will be split into two parts. First of all we show that $V^k \rightarrow V^\star$, afterwards $V^0(\xi_i) \le V^\star(\xi_i)$ will be proven. \\
-	By defining 
-	\begin{equation*}
-		V^1(\xi_i) := TV^0(\xi_i)
-	\end{equation*}
-	we get a series $\{V^j\}_{j\in \set{N}_0}$ with
+	\item First of all, we show that $V^k \rightarrow V^\star$ and afterwards $V^0(\xi_i) \le V^\star(\xi_i)$ will be proven. \\
+	
+	We receive the series $\{V^j\}_{j\in \set{N}_0}$ by defining 
 	\begin{equation*}
 		V^{j+1}(\xi_i) := TV^j(\xi_i).
 	\end{equation*}
-	This leads to the explicit form
+	% V^1(\xi_i) := TV^0(\xi_i) nötig?
+	The series can also be expressed in the explicit form
 	\begin{equation*}
 		V^j(\xi_i) := T^jV^0(\xi_i).
 	\end{equation*}
-	To show the first statement we claim that $T$ is a contraction on $\set{R}^\mathcal{X}$ the function space of all functions mapping an point in $\mathcal{X}$ into $\set{R}$, i.e.
+	To show the first statement, we claim that $T$ is a contraction on $\set{R}^\mathcal{X}$ which is the function space of all functions mapping from $\mathcal{X}$ to $\set{R}$, meaning that
 	\begin{equation*}
 		||TV^1 - TV^2||_\infty \le \beta\,||V^1 - V^2||_\infty, \quad 0 < \beta < 1.
 	\end{equation*}
@@ -148,46 +157,46 @@
 	\begin{align*}
 		||TV^1 - TV^2||_\infty = & \;\max_{x\in\mathcal{X}}\left\{ \min_{u\in\mathcal{U}}\{ f_0(x,u) + \alpha\,V^1(f(x,u))\} \right. \\
 		& \left. - \min_{u\in\mathcal{U}}\{ f_0(x,u) + \alpha\,V^2(f(x,u))\}\right\} \\
-		\le & \;\max_{x\in\mathcal{X}}\left\{ \min_{u\in\mathcal{U}}\{ \alpha\,V^1(f(x,u)) - \alpha\,V^2(f(x,u))\}\right\} \\
-		\le & \;\alpha \max_{x\in\mathcal{X}}\left\{ \max_{u\in\mathcal{U}}\{ \,V^1(f(x,u)) -\,V^2(f(x,u))\}\right\} \\
+		\le & \;\max_{x\in\mathcal{X}}\left\{ \max_{u\in\mathcal{U}}\{ \alpha\,V^1(f(x,u)) - \alpha\,V^2(f(x,u))\}\right\} \\
+		= & \;\alpha \max_{x\in\mathcal{X}}\left\{ \max_{u\in\mathcal{U}}\{ \,V^1(f(x,u)) -\,V^2(f(x,u))\}\right\} \\
 		\le & \,\alpha ||V^1 - V^2||_\infty
 	\end{align*}
-	Due to the fact that $\alpha = 0.9 < 1$, the requirements are satisfied. We now use the Banach Fix Point-Theorem which now yields that there is exactly one $V^\star \in \set{R}^\mathcal{X}$ s.t. $TV^\star = V^\star$ and every series $\{V^j\}_{j\in \set{N}_0}$ with $V^0 \in \set{R}^\mathcal{X}$ and $V^{j+1} = TV^j$ converges to $V^\star$ which we wanted to show.\\
-	For the second statement we use the given inequality
+	Due to the fact that $\alpha = 0.9 < 1$, the requirements for a contraction are satisfied. Now, we use the Banach fixed-point theorem which yields that there is exactly one $V^\star \in \set{R}^\mathcal{X}$ s.t. $TV^\star = V^\star$ and every series $\{V^j\}_{j\in \set{N}_0}$ with $V^0 \in \set{R}^\mathcal{X}$ and $V^{j+1} = TV^j$ converges to $V^\star$ which was to be proven.\\
+	For the second proof we use the given inequality
 	\begin{equation*}
-		V^0(\xi_i) \le TV^0(\xi_i) =: T^1(\xi_i) \quad \forall\xi_i\in\mathcal{X}
+		V^0(\xi_i) \le TV^0(\xi_i) =: T^1(\xi_i) \quad \forall\xi_i\in\mathcal{X}.
 	\end{equation*}
 	By using the monotonicity property of $T$ we derive that
 	\begin{equation*}
 		V^0(\xi_i) \le V^1(\xi_i) \Rightarrow V^1(\xi_i) = TV^0(\xi_i) \le TV^1(\xi_i) = V^2(\xi_i).
 	\end{equation*}
-	From $V^1(\xi_i) \le V^2(\xi_i)$ we arrive at $V^2(\xi_i) \le V^3(\xi_i)$ applying the same property. We can now go on and make use of it consecutively. This results in a series of inequations
+	Applying the same property again, we gain $V^2(\xi_i) \le V^3(\xi_i)$. We can now go on and make use of it consecutively. This results in a series of inequations
 	\begin{equation*}
 		V^0(\xi_i) \le V^1(\xi_i) \le V^2(\xi_i) \le \ldots \le V^\infty(\xi_i)
 	\end{equation*}
 	We already know that $V^\infty(\xi_i) = V^\star(\xi_i)$ and so we have $V^0(\xi_i) \le V^\star(\xi_i)$.\\
 	\hspace*{133mm}$\square$
 	
-	\item We consider the feasible set $F = \{V : V(\xi_i) \le TV(\xi_i), \; 1\le i \le n\}$ of the given optimization problem. Furthermore consider $\tilde{V}\in F$ with $\tilde{V} \neq V^\star$ (obviously $V^\star \in F$). From c) we immediately have $\tilde{V}(\xi_i) \le V^\star(\xi_i), \; i = 1,\ldots, n$ (with at least one $j\in\{1,2,\ldots ,n\}$ such that $\tilde{V}(\xi_j) < V^\star(\xi_j)$). This results in
+	\item We consider the feasible set $F = \{V : V(\xi_i) \le TV(\xi_i), \; 1\le i \le n\}$ of the given optimization problem. Furthermore, we assume that $\tilde{V}\in F$ with $\tilde{V} \neq V^\star$ (obviously $V^\star \in F$). From c) we conclude that $\tilde{V}(\xi_i) \le V^\star(\xi_i), \; i = 1,\ldots, n$ (with at least one $j\in\{1,2,\ldots ,n\}$ such that $\tilde{V}(\xi_j) < V^\star(\xi_j)$). This results in
 	\begin{equation*}
 		\sum_{i=1}^n \tilde{V}(\xi_i) < \sum_{i=1}^n V^\star(\xi_i)
 	\end{equation*}
 	and hence $\tilde{V}$ cannot be the optimal solution. Since this argument holds for all $\tilde{V} \in F/\{V^\star\}$ the only possible solution left is $V^\star$.\\
 	\hspace*{133mm}$\square$
 	
-	\item As the constraints in d) we got
+	\item The constraints in d) were
 	\begin{equation*}
 		V(\xi_i) \le TV(\xi_i) \quad i = 1,\ldots, n
 	\end{equation*}
 	with
 	\begin{equation*}
-		TV(x) = \min_{u\in\mathcal{U}(\xi_i)}\{ f_0(x,u) + \alpha\,V(f(x,u))\}.
+		TV(\xi_i) = \min_{u\in\mathcal{U}(\xi_i)}\{ f_0(\xi_i,u) + \alpha\,V(f(\xi_i,u))\}.
 	\end{equation*}
 	This holds true if
 	\begin{equation*}
-		V(\xi_i) \le  f_0(\xi_i,u) + \alpha\,V(f(\xi_i,u))\quad \forall u\in\mathcal{U}(\xi_i)
+		V(\xi_i) \le  f_0(\xi_i,u) + \alpha\,V(f(\xi_i,u))\quad \forall u\in\mathcal{U}(\xi_i).
 	\end{equation*}
-	In other words we can transform the $n$ constraints into $n\cdot\sum_i |\,\mathcal{U}(\xi_i)|$ linear constraints.\\
+	In other words, we can transform the $n$ constraints into $\sum_{i=1}^n = |\,\mathcal{U}(\xi_i)|$ linear constraints.\\
 	To obtain the form
 	\begin{equation*}
 		\begin{split}
@@ -195,19 +204,18 @@
 			\text{s.t.} \;& AV \le b
 		\end{split}
 	\end{equation*}
-	we need to define the matricies $c$, $A$ and $b$. You'll find them on the solution sheet.
+	we need to define the matrices $c$, $A$ and $b$. You'll find them on the solution sheet.
 	
 	\item In order to examine the \textsc{Matlab} program take a look into \emph{run1.m}, \emph{valFunIteration.m}, \emph{valFunItAsLinProg.m} and \emph{onehot.m}.\\
-	\emph{valFunItAsLinProg} already computes and returns the the optimal control feedback.
-	To compute them we use the fact that $V^\star$ is a fix point of $T$, i.e. there is at least one $u$ for every $i \in \{1,2,\ldots ,8\}$ such that
+	The file \emph{valFunItAsLinProg} already computes and returns the the optimal control feedback. We use the fact that $V^\star$ is a fix point of $T$, i.e. there is at least one $u$ for every $i \in \{1,2,\ldots ,8\}$ such that
 	\begin{equation*}
 		V^\star(\xi_i) =  f_0(\xi_i,u) + \alpha\,V(f(\xi_i,u)).
 	\end{equation*}
-	In the LQ approach this translates to: For every $i \in \{1,2,\ldots ,8\}$ there has to be at least one $k \in \{i, i+8, i+16\}$, s.t.
+	In the LQ approach this translates into the following rule: For every $i \in \{1,2,\ldots ,8\}$ there has to be at least one $k \in \{i, i+8, i+16\}$, s.t.
 	\begin{equation*}
 		a_k V^\star(\xi_i) = b_k
 	\end{equation*}
-	where $a_k$ is the $k$-th row of $A$. Due to numerical inaccuracies it is very likely that $a_k \bar{V}(\xi_i) \approx b_k$ (with $\bar{V}$ the numerical solution) so we look for $\argmin_{k \in \{i, i+8, i+16\}} |a_k \bar{V}(\xi_i) - b_k|$ from which we can derive the corresponding $u\in\{u_0,u_1,u_2\}$.
+	where $a_k$ is the $k$-th row of $A$. Due to numerical inaccuracies, it is very likely that $a_k \bar{V}(\xi_i) \approx b_k$ (with $\bar{V}$ the numerical solution), so we look for $\argmin_{k \in \{i, i+8, i+16\}} |a_k \bar{V}(\xi_i) - b_k|$ from which we can derive the corresponding $u\in\{u_0,u_1,u_2\}$.
 \end{enumerate}
 
 
@@ -378,3 +386,4 @@
 
 
 \end{document}
+
