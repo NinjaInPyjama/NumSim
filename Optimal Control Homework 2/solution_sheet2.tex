@@ -119,10 +119,10 @@
 	where every entry represents the optimal cost when starting at the corresponding state.	
 	The optimal control feedback is given by
 	\begin{center}
-	\begin{tabular}{ l c r }
+	\begin{tabular}{ l l l }
     $v_k(\xi_1) = 2$, & $v_k(\xi_2) = 2$, & $v_k(\xi_3) = 0$, \\
 	$v_k(\xi_4) = 1$, & $v_k(\xi_5) = 0$, & $v_k(\xi_6) = 1$, \\
-	$v_k(\xi_7) = 0 \; (\text{or } 1 \text{ or } 2)$, & & $v_k(\xi_8) = 0 \; (\text{or } 1 \text{ or } 2)$. \\
+	$v_k(\xi_7) = 0 \; (\text{or } 1 \text{ or } 2)$, & $v_k(\xi_8) = 0 \; (\text{or } 1 \text{ or } 2)$. & \\
     \end{tabular}
 	\end{center}
 	This leads to the optimal path (starting at $\xi_1$)
@@ -144,7 +144,6 @@
 	\begin{equation*}
 		V^{j+1}(\xi_i) := TV^j(\xi_i).
 	\end{equation*}
-	% V^1(\xi_i) := TV^0(\xi_i) nötig?
 	The series can also be expressed in the explicit form
 	\begin{equation*}
 		V^j(\xi_i) := T^jV^0(\xi_i).
@@ -155,10 +154,10 @@
 	\end{equation*}
 	This holds true since
 	\begin{align*}
-		||TV^1 - TV^2||_\infty = & \;\max_{x\in\mathcal{X}}\left\{ \min_{u\in\mathcal{U}}\{ f_0(x,u) + \alpha\,V^1(f(x,u))\} \right. \\
-		& \left. - \min_{u\in\mathcal{U}}\{ f_0(x,u) + \alpha\,V^2(f(x,u))\}\right\} \\
-		\le & \;\max_{x\in\mathcal{X}}\left\{ \max_{u\in\mathcal{U}}\{ \alpha\,V^1(f(x,u)) - \alpha\,V^2(f(x,u))\}\right\} \\
-		= & \;\alpha \max_{x\in\mathcal{X}}\left\{ \max_{u\in\mathcal{U}}\{ \,V^1(f(x,u)) -\,V^2(f(x,u))\}\right\} \\
+		||TV^1 - TV^2||_\infty = & \;\max_{x\in\mathcal{X}}\left| \min_{u\in\mathcal{U}}\{ f_0(x,u) + \alpha\,V^1(f(x,u))\} \right. \\
+		& \left. - \min_{u\in\mathcal{U}}\{ f_0(x,u) + \alpha\,V^2(f(x,u))\}\right| \\
+		\le & \;\max_{x\in\mathcal{X}}\left\{ \max_{u\in\mathcal{U}} | \alpha\,V^1(f(x,u)) - \alpha\,V^2(f(x,u)) | \right\} \\
+		= & \;\alpha \max_{x\in\mathcal{X}}\left\{ \max_{u\in\mathcal{U}} | \,V^1(f(x,u)) -\,V^2(f(x,u)) | \right\} \\
 		\le & \,\alpha ||V^1 - V^2||_\infty
 	\end{align*}
 	Due to the fact that $\alpha = 0.9 < 1$, the requirements for a contraction are satisfied. Now, we use the Banach fixed-point theorem which yields that there is exactly one $V^\star \in \set{R}^\mathcal{X}$ s.t. $TV^\star = V^\star$ and every series $\{V^j\}_{j\in \set{N}_0}$ with $V^0 \in \set{R}^\mathcal{X}$ and $V^{j+1} = TV^j$ converges to $V^\star$ which was to be proven.\\
@@ -172,7 +171,7 @@
 	\end{equation*}
 	Applying the same property again, we gain $V^2(\xi_i) \le V^3(\xi_i)$. We can now go on and make use of it consecutively. This results in a series of inequations
 	\begin{equation*}
-		V^0(\xi_i) \le V^1(\xi_i) \le V^2(\xi_i) \le \ldots \le V^\infty(\xi_i)
+		V^0(\xi_i) \le V^1(\xi_i) \le V^2(\xi_i) \le \ldots \le V^\infty(\xi_i).
 	\end{equation*}
 	We already know that $V^\infty(\xi_i) = V^\star(\xi_i)$ and so we have $V^0(\xi_i) \le V^\star(\xi_i)$.\\
 	\hspace*{133mm}$\square$
@@ -196,7 +195,7 @@
 	\begin{equation*}
 		V(\xi_i) \le  f_0(\xi_i,u) + \alpha\,V(f(\xi_i,u))\quad \forall u\in\mathcal{U}(\xi_i).
 	\end{equation*}
-	In other words, we can transform the $n$ constraints into $\sum_{i=1}^n = |\,\mathcal{U}(\xi_i)|$ linear constraints.\\
+	In other words, we can transform the $n$ constraints into $\sum_{i=1}^n |\,\mathcal{U}(\xi_i)|$ linear constraints.\\
 	To obtain the form
 	\begin{equation*}
 		\begin{split}
@@ -387,4 +386,3 @@
 
 
 \end{document}
-
