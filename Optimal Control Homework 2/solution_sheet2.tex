@@ -138,7 +138,7 @@
 		\end{bmatrix}.
 	\end{equation*}	
 	
-	\item First of all, we show that $V^k \rightarrow V^\star$ and afterwards $V^0(\xi_i) \le V^\star(\xi_i)$ will be proven. \\
+	\item First of all, we show that $V^k \rightarrow V^\star$ and afterwards $V^0(\xi_i) \le V^\star(\xi_i)$ will be proven.
 	
 	We receive the series $\{V^j\}_{j\in \set{N}_0}$ by defining 
 	\begin{equation*}
@@ -152,6 +152,8 @@
 	\begin{equation*}
 		||TV^1 - TV^2||_\infty \le \beta\,||V^1 - V^2||_\infty, \quad 0 < \beta < 1.
 	\end{equation*}
+	
+	\newpage
 	This holds true since
 	\begin{align*}
 		||TV^1 - TV^2||_\infty = & \;\max_{x\in\mathcal{X}}\left| \min_{u\in\mathcal{U}}\{ f_0(x,u) + \alpha\,V^1(f(x,u))\} \right. \\
@@ -311,7 +313,7 @@
    \begin{align*}
 		z &=
 		\begin{bmatrix}
-			x_0^\top & x_1^\top & x_2^\top & x_3^\top & u_0 &  u_1 & u_2 
+			x_k^\top & x_{k+1}^\top & x_{k+2}^\top & x_{k+3}^\top & u_k &  u_{k+1} & u_{k+2} 
 		\end{bmatrix}^\top
 		\in \set{R}^{11} \\
 		H &=
@@ -333,7 +335,7 @@
 			0 & 0 & -A & \mat{I}_2 & 0 & 0 & -B
 		\end{bmatrix}
 		\in \set{R}^{8 \times 11} \\	
-		b_{eq} &= 
+		B_{eq} &= 
 		\begin{bmatrix}
 			\bar{x}^\top & 0 & \cdots & 0
 		\end{bmatrix}^\top
@@ -348,7 +350,7 @@
 			0 & & \cdots & 0 & 0 & 0 & -1 \\
 		\end{bmatrix}
 		\in \set{R}^{6 \times 11} \\
-		b_{ineq} &=
+		B_{ineq} &=
 		\begin{bmatrix}
 			1 & \cdots & 1
 		\end{bmatrix}^\top
@@ -363,7 +365,8 @@
 			& & & & & 0 & \\
 			0 & & & \cdots & & & 0 \\
 		\end{bmatrix}
-		\in \set{R}^{11 \times 11}.
+		\in \set{R}^{11 \times 11} \\
+		d &= c \in \set{R}.
 	\end{align*}
     The problem is convex, because 
     \begin{itemize}
@@ -371,18 +374,51 @@
     \item linear equations are always convex.
     \end{itemize}        
     
-    \item Solving the optimization problem from d) in \textsc{Matlab}, we obtain the results shown in Fig. ???. One can see that the calculated input signal is large at first to move the state quickly to the equilibrium. The input constraint prevents higher magnitudes of the input than one. After approximately 10 timesteps both components of the state are moved to the origin and the input signal also equals zero.
-    \item If we insert the other initial condition, we observe that that qualitative evolution of the state and the determined input (Fig. ???) is similar compared to the previous plot. That makes sense because both initial condition do not differ much from each other. The higher absolute value of the new initial condition would request a higher input signal in the unconstrained, optimal case, but we consider a limited input signal.
-    \item In contrast to the MPC algorithm, the \textsc{Matlab} solver for linear-quadratic problems does not include an input constraint. That is why the absolute value of the input signal is not restricted in contrast to the input in the previous tasks. In the LQ solution, we observe that the input is higher than one at first (Fig. ???), because that leads to a smaller value of the cost functional. Another difference is that the MPC scheme only minimizes the cost functional till the prediction horizon which is $N=3$ in our case. However, the prediction horizon does not have a huge impact on the trajectories and the qualitative evolution of the results stays the same.
+    \item Solving the optimization problem from d) with the \textsc{Matlab} file \emph{run2.m}, we obtain the resulting trajectory shown in Fig.~\ref{fig:pic_2e_X}. Obviously, the state $x$ converges to the euilibrium point in the origin. Furthermore, we notice that the state $x_3$ lies in the terminal region. One can see in Fig.~\ref{fig:pic_2e_U} that the calculated input signal is large at first to move the state quickly to the equilibrium. The input constraints prevent higher magnitudes of the input than one. After approximately 10 timesteps both components of the state are moved to the origin and the input signal also equals zero.
+    \begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.2]{pics/prop_2e_X.jpg}
+	\caption{Trajectory of the optimal MPC solution}	
+	\label{fig:pic_2e_X}
+    \end{figure}
+
+    \begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.2]{pics/prop_2e_U.jpg}
+	\caption{Optimal input signal of the MPC problem}	
+	\label{fig:pic_2e_U}
+    \end{figure}
+    
+    \item If we insert the other initial condition, we observe that that qualitative evolution of the state (Fig.~\ref{fig:pic_2f_X}) and the determined input (Fig.~\ref{fig:pic_2f_U}) is similar compared to the previous plots. That makes sense because both initial condition do not differ much from each other. In contrast to the previous task, it is not possible to satisfy all constraints: The higher absolute value of the new initial condition requests a higher input signal so that the predicted $x_3$ is in the terminal region. The determined input signal $u_0$ is even higher than one, so the input constraint is violated.
+    \begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.2]{pics/prop_2f_X.jpg}
+	\caption{Trajectory of the optimal MPC solution for the new initial condition}	
+	\label{fig:pic_2f_X}
+    \end{figure}
+
+    \begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.2]{pics/prop_2f_U.jpg}
+	\caption{Optimal input signal of the MPC problem for the new initial condition}	
+	\label{fig:pic_2f_U}
+    \end{figure}
+    
+    \item Fig.~\ref{fig:pic_2g_X} shows the optimal state trajectory calculated via the LQ scheme. In contrast to the MPC algorithm, the \textsc{Matlab} solver for linear-quadratic problems does not include an input constraint. That is why the absolute value of the input signal is not restricted in contrast to the input in the previous tasks. In the LQ solution, we observe that the input is higher than one at first (Fig.~\ref{fig:pic_2g_U}), because that leads to a smaller value of the cost functional. Another difference is that the MPC scheme only minimizes the cost functional till the prediction horizon which is $N=3$ in our case. However, the prediction horizon does not have a huge impact on the trajectories and the qualitative evolution of the results stays the same.
+    \begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.2]{pics/prop_2g_X.jpg}
+	\caption{Trajectory of the optimal LQ solution}	
+	\label{fig:pic_2g_X}
+    \end{figure}
+
+    \begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.2]{pics/prop_2g_U.jpg}
+	\caption{Optimal input signal of the LQ problem}	
+	\label{fig:pic_2g_U}
+    \end{figure}
+    
 \end{enumerate}
-
-
-%	\begin{figure}[H]
-%		\centering
-%		\includegraphics[scale=0.22]{pics/pic_e.jpg}
-%		\caption{State and input plotted over time calculated with the MPC algoritm}		
-%		\label{fig:pic_e}
-%	\end{figure}
-
 
 \end{document}
