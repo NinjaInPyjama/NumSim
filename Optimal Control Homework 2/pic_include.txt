@@ -1,6 +1,0 @@
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.22]{pics/prop_2e_X.jpg}
-	\caption{Trajectories of solutions}	
-	\label{fig:pic_f}
-\end{figure}
