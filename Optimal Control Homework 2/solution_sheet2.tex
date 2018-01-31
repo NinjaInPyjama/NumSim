@@ -80,7 +80,7 @@
 	\begin{equation*}
 		\begin{split}
 			\min_{u_k} \,& \sum_{k=0}^\infty 0.9^k\,f_0(x_k,u_k) \\
-			\text{s.t.} & \quad x_{k+1} = f(x_k,u_k) \\
+			\text{s.t.} & \quad x_{k+1} = f(x_k,u_k), \quad k=0,...,\infty \\
 			& \quad x_k \in \mathcal{X} \\
 			& \quad u_k \in \mathcal{U}
 		\end{split}
@@ -243,9 +243,10 @@
     \item The given discrete-time system can be formulated in the MPC scheme as follows:
     \begin{equation} 
     \begin{array}{rcl} 
-    u_{MPC} (\cdot , x(t_j)) = &\argmin\limits_u& \sum\limits_{j=0}^2 x_j^\top x_j + u_j^2 +x_3^\top P x_3 \\ 
+    u_{MPC} (\cdot , x(t_j)) = &\argmin\limits_u& \sum\limits_{j=k}^{k+2} x_j^\top x_j + u_j^2 +x_{k+3}^\top P x_{k+3} \\ 
     &\mathrm{s.t.}& x_{j+1} = A x_j + B u_j \\ 
-    && |u_j| \leq 1, x_j \in \mathbb{R}^2, x_3 \in \mathcal{X}_f%, x_0 = \bar{x}
+    & & |u_j| \leq 1,\, x_j \in \mathbb{R}^2,\, x_{k+3} \in \mathcal{X}_f \\
+    & & x_k = \bar{x}
     \end{array}      
     \end{equation}
     with $P$, $A$, $B$ and $\mathcal{X}_f$ as defined on the exercise sheet.
@@ -296,7 +297,8 @@
    \begin{equation*}
        x_{j+1}^\top P x_{j+1} \leq c - \underbrace{(|x_j|^2 + |u_j|^2)}_{\substack{\geq 0}} \leq c.
    \end{equation*}
-   Consequently, $x_{k+1} \in \mathcal{X}$ and the terminal region $\mathcal{X}_f$ is invariant.
+   Consequently, $x_{k+1} \in \mathcal{X}$ and the terminal region $\mathcal{X}_f$ is invariant.\\
+   \hspace*{133mm}$\square$
    \end{compactenum}
 
    \item The optimal control problem from b) can be written as a quadratically constrained quadratic program with the following variables
