@@ -193,7 +193,7 @@
 	\begin{equation*}
 		TV(\xi_i) = \min_{u\in\mathcal{U}(\xi_i)}\{ f_0(\xi_i,u) + \alpha\,V(f(\xi_i,u))\}.
 	\end{equation*}
-	This holds true if
+	This holds true if and only if
 	\begin{equation*}
 		V(\xi_i) \le  f_0(\xi_i,u) + \alpha\,V(f(\xi_i,u))\quad \forall u\in\mathcal{U}(\xi_i).
 	\end{equation*}
@@ -201,7 +201,7 @@
 	To obtain the form
 	\begin{equation*}
 		\begin{split}
-			\min_V \;& c^\top V\\
+			V^\star = \argmin_V \;& c^\top V\\
 			\text{s.t.} \;& AV \le b
 		\end{split}
 	\end{equation*}
@@ -259,7 +259,7 @@
     \end{equation*}
     with $P$, $A$, $B$ and $\mathcal{X}_f$ as defined on the exercise sheet.
     
-    \item Now, we show that the MPC scheme in b) gives a stabilizing controller that is defined by $u_j = K x_j$.
+    \item Now, we show that the controller $u_j = K x_j$ is feasible.
    \begin{compactenum}[1.]
    \item The minimal eigenvalue of $P$ is used as a lower limit in the following equation to show the feasibility of the controller:
       \begin{equation*}         
