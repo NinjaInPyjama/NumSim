@@ -1,15 +1,10 @@
 function [V,U] = valFunItAsLinProg(F,F0,alpha)
     % VALFUNITASLINPROG Value function iteration. 
     %   [V,U] = VALFUNITASLINPROG(F,F0,alpha) returns solution and
-    %   optimal feedback for a discrete-time (and iteration count of the
-    %   fix point iteration, infinite horizon DP via  a linear program
-    %   interpretation. F is the transition matrix (considering state and
-    %   control), F0 the cost matrix and alpha dicounted cost factor. (Sets
-    %   epsi = 1e-16 and V = 0).
-    %
-    %   [V,U] = VALFUNITASLINPROG(F,F0,alpha,epsi,V0) sets the
-    %   realtiv error tolerance and V0 sets the inital state for the fix
-    %   point iteration.
+    %   optimal feedback for a discrete-time, infinite horizon DP via a
+    %   linear program interpretation. F is the transition matrix
+    %   (considering state and control), F0 the cost matrix and alpha the
+    %   dicounted cost factor.
     
     [m, n] = size(F);
     

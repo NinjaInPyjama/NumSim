@@ -1,11 +1,11 @@
 function [V,U,count] = valFunIteration(F,F0,alpha,epsi,V0)
     % VALFUNITERATION Value function iteration. 
     %   [V,U,count] = VALFUNITERATION(F,F0,alpha) returns solution and
-    %   optimal feedback for a discrete-time (and iteration count of the
-    %   fix point iteration, infinite horizon DP via value function
-    %   iteration. F is the transition matrix (considering state and
-    %   control), F0 the cost matrix and alpha dicounted cost factor. (Sets
-    %   epsi = 1e-16 and V = 0).
+    %   optimal feedback for a discrete-time , infinite horizon DP via
+    %   value function iteration (and iteration count of the fix point
+    %   iteration). F is the transition matrix (considering state and
+    %   control), F0 the cost matrix and alpha the dicounted cost factor.
+    %   (Sets epsi = 1e-16 and V = 0).
     %
     %   [V,U,count] = VALFUNITERATION(F,F0,alpha,epsi,V0) sets the
     %   error tolerance and V0 sets the inital state for the fix point
