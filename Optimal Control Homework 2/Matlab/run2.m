@@ -5,7 +5,8 @@ clc
 
 %% Variables
 
-x0 = [0.6; -0.7]; %[1; -0.9]; %
+x0 = [0.6; -0.7]; % initial condition in e) and g)
+%x0 = [1; -0.9]; % initial condition in f)
 A = [1 3; -0.5 1];
 P = [4.2 7; 7 36.1];
 B = [0; 1];
@@ -32,7 +33,7 @@ T(7:8,7:8) = P;
 
 d = c;
 
-% MPC
+%% MPC
 
 X_MPC = zeros(2,31);
 X_MPC(:,1) = x0;
